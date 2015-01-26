@@ -27,7 +27,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Jim Barker, Finally figured it out! :)"
+        android:text="Jim Barker, Finally figured it out! SECOND ATTEMPT"
         android:id="@+id/textView4"
         android:layout_below="@+id/textView2"
         android:layout_alignParentLeft="true"
