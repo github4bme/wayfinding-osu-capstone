@@ -6,8 +6,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.osucse.wayfinding_api.Location;
 import com.osucse.wayfinding_api.LocationCollection;
@@ -16,18 +19,36 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
 public class LocationList extends ActionBarActivity {
+
+    public static ArrayAdapter<String> adapter;
+    public static ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location_list);
 
-        LocationCollection lc = new LocationCollection();
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new ArrayList<String>());
+        adapter.clear();
 
+        listView = (ListView) findViewById(R.id.listView);
+        listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position,
+                                    long id) {
+
+                String item = ((TextView)view).getText().toString();
+                TextView tv = (TextView)findViewById(R.id.textView8);
+                tv.setText(item);
+            }
+        });
     }
 
 
@@ -41,7 +62,7 @@ public class LocationList extends ActionBarActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        new HttpRequestTask().execute();
+        //new HttpRequestTask().execute();
     }
 
     @Override
@@ -49,10 +70,11 @@ public class LocationList extends ActionBarActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        int id = item.getItemId();
+        if (id == R.id.action_refresh) {
+            new HttpRequestTask().execute();
             return true;
         }
 
@@ -77,14 +99,27 @@ public class LocationList extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(LocationCollection locations) {
-            ListView locationListView = (ListView) findViewById(R.id.listView);
+            final List<String> locationNames = new ArrayList<String>();
 
-            List<String> locationNames = new ArrayList<String>();
+            for(Location l : locations.getLocations())
+            {
+                if(l.getName() != null) {
+                    locationNames.add(l.getName());
+                }
+            }
 
+            Collections.sort(locationNames);
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.abc_screen_simple, locationNames);
+            TextView tv = (TextView) findViewById(R.id.textView8);
+            tv.setText("Select One:");
 
-        locationListView.setAdapter(adapter);
+            /*ArrayAdapter<String> adapter = new ArrayAdapter<String>(LocationList.this, R.layout.abc_list_menu_item_layout, locationNames);
+
+            locationListView.setAdapter(adapter);*/
+
+                    adapter.clear();
+                    adapter.addAll(locationNames);
+
         }
 
     }
