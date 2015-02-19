@@ -4,6 +4,13 @@ android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
 
+
+    signingConfigs {
+        debug {
+            storeFile file("AriDebug.keystore")
+        }
+    }
+
     defaultConfig {
         applicationId "com.osucse.wayfinding_osu_capstone"
         minSdkVersion 16
