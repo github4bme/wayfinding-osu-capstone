@@ -19,6 +19,7 @@ public class DisplayMapActivity extends ActionBarActivity {
         TextView textView = new TextView(this);
         textView.setTextSize(20);
         textView.setText(startLocation);
+        setContentView(textView);
     }
 
 
