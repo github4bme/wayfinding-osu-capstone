@@ -97,6 +97,7 @@ public class MainActivity extends FragmentActivity {
                     .findFragmentById(R.id.map)).getMap();
             if (googleMap != null) {
                 addLines(path);
+                googleMap.setMyLocationEnabled(true);
             }
         }
     }
