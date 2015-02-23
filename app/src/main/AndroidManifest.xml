@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.osucse.wayfinding_osu_capstone" >
 
-
     <permission
         android:name="com.javapapers.android.permission.MAPS_RECEIVE"
         android:protectionLevel="signature" />
@@ -37,9 +36,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-
-
     </application>
 
 </manifest>

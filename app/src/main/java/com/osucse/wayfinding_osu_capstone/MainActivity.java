@@ -39,14 +39,25 @@ public class MainActivity extends ActionBarActivity {
 }
 */
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.osucse.wayfinding_api.Location;
+import com.osucse.wayfinding_api.LocationCollection;
+import com.osucse.wayfinding_api.SegmentCollection;
+import com.osucse.wayfinding_api.Segment;
+
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
+
 import java.util.*;
 public class MainActivity extends FragmentActivity {
     private static final LatLng LOWER_MANHATTAN = new LatLng(40.722543,
@@ -77,6 +88,7 @@ public class MainActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        new HttpRequestTask().execute();
         setUpMapIfNeeded();
     }
 
@@ -92,13 +104,13 @@ public class MainActivity extends FragmentActivity {
         path.add(NEXT2);
         path.add(NEXT3);
         // check if we have got the googleMap already
-        if (googleMap == null) {
-            googleMap = ((SupportMapFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.map)).getMap();
-            if (googleMap != null) {
-                addLines(path);
-            }
-        }
+//        if (googleMap == null) {
+//            googleMap = ((SupportMapFragment) getSupportFragmentManager()
+//                    .findFragmentById(R.id.map)).getMap();
+//            if (googleMap != null) {
+//                addLines(path);
+//            }
+//        }
     }
 
     private void addLines(List<LatLng> path) {
@@ -123,4 +135,48 @@ public class MainActivity extends FragmentActivity {
                     18));
         }
     }
+
+    private class HttpRequestTask extends AsyncTask<Void, Void, SegmentCollection> {
+        @Override
+        protected SegmentCollection doInBackground(Void... params) {
+            try {
+                final String url = "http://cseosuwintest.cloudapp.net:9000/segments";
+                RestTemplate restTemplate = new RestTemplate();
+                restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+                SegmentCollection collections= restTemplate.getForObject(url, SegmentCollection.class);
+                return collections;
+            } catch (Exception e) {
+                Log.e("SegmentCollection", e.getMessage(), e);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(SegmentCollection locations) {
+            final List<String> segmentNames = new ArrayList<String>();
+
+//            for(Location l : locations.getLocations())
+//            {
+//                if(l.getName() != null) {
+//                    locationNames.add(l.getName());
+//                }
+//            }
+//
+//            Collections.sort(locationNames);
+
+            TextView tv = (TextView) findViewById(R.id.textView8);
+            tv.setText("Select One:");
+
+            /*ArrayAdapter<String> adapter = new ArrayAdapter<String>(LocationList.this, R.layout.abc_list_menu_item_layout, locationNames);
+            locationListView.setAdapter(adapter);*/
+
+            //adapter.clear();
+            //adapter.addAll(locationNames);
+
+        }
+
+    }
+
+
 }

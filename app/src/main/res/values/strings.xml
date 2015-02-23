@@ -4,5 +4,6 @@
     <string name="app_name">wayfinding-osu-capstone</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_location_list">LocationList</string>
 
 </resources>
