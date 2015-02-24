@@ -1,12 +1,16 @@
 package com.osucse.wayfinding_osu_capstone;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 
 
 public class MainActivity extends ActionBarActivity {
+    public final static String START_LOCATION = "com.osucse.wayfinding_osu_capstone.StartLocation";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -14,13 +18,12 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.menu_main, menu);
+//        return true;
+//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -35,5 +38,14 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /** Called when the user clicks the "Go To Map" button */
+    public void getMap(View view) {
+        Intent intent = new Intent(this, DisplayMapActivity.class);
+        EditText inputStartLocation = (EditText) findViewById(R.id.start_location_input);
+        String startLocation = inputStartLocation.getText().toString();
+        intent.putExtra(START_LOCATION, startLocation);
+        startActivity(intent);
     }
 }
