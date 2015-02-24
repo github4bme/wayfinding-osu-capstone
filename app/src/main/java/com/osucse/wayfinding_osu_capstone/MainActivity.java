@@ -104,13 +104,14 @@ public class MainActivity extends FragmentActivity {
         path.add(NEXT2);
         path.add(NEXT3);
         // check if we have got the googleMap already
-//        if (googleMap == null) {
-//            googleMap = ((SupportMapFragment) getSupportFragmentManager()
-//                    .findFragmentById(R.id.map)).getMap();
-//            if (googleMap != null) {
-//                addLines(path);
-//            }
-//        }
+        if (googleMap == null) {
+            googleMap = ((SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.map)).getMap();
+            if (googleMap != null) {
+                addLines(path);
+                googleMap.setMyLocationEnabled(true);
+            }
+        }
     }
 
     private void addLines(List<LatLng> path) {
