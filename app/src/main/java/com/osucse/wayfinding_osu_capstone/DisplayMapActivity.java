@@ -5,14 +5,21 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.widget.TextView;
+import android.os.AsyncTask;
+import android.util.*;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
+
+import com.osucse.wayfinding_api.*;
 import java.util.*;
 
+
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
 
 public class DisplayMapActivity extends FragmentActivity {
     private static final LatLng LOWER_MANHATTAN = new LatLng(40.722543,
@@ -51,7 +58,7 @@ public class DisplayMapActivity extends FragmentActivity {
         startLocationDisplay.setTextSize(20);
         startLocationDisplay.setText(startLocation);
         //setContentView(textView);
-
+        new HttpRequestTask().execute();
         setUpMapIfNeeded();
     }
 
@@ -79,13 +86,13 @@ public class DisplayMapActivity extends FragmentActivity {
 
     private void addLines(List<LatLng> path) {
         int pathSize = path.size();
-        int current =0;
+        int current = 0;
         LatLng start = null;
         LatLng end = null;
-        for (int i =1; i < pathSize; i++){
+        for (int i = 1; i < pathSize; i++) {
             if (start == null) {
                 start = path.get(current);
-            }else{
+            } else {
                 start = end;
             }
             current++;
@@ -98,5 +105,47 @@ public class DisplayMapActivity extends FragmentActivity {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(start,
                     18));
         }
+    }
+
+    private class HttpRequestTask extends AsyncTask<Void, Void, LocationCollection> {
+        @Override
+        protected LocationCollection doInBackground(Void... params) {
+            try {
+                final String url = "http://cseosuwintest.cloudapp.net:9000/locations";
+                RestTemplate restTemplate = new RestTemplate();
+                restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+                LocationCollection collections = restTemplate.getForObject(url, LocationCollection.class);
+                return collections;
+            } catch (Exception e) {
+                Log.e("SegmentCollection", e.getMessage(), e);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(LocationCollection locations) {
+            final List<String> segmentNames = new ArrayList<String>();
+
+//            for(Location l : locations.getLocations())
+//            {
+//                if(l.getName() != null) {
+//                    locationNames.add(l.getName());
+//                }
+//            }
+//
+//            Collections.sort(locationNames);
+
+            //  TextView tv = (TextView) findViewById(R.id.textView8);
+            // tv.setText("Select One:");
+
+            /*ArrayAdapter<String> adapter = new ArrayAdapter<String>(LocationList.this, R.layout.abc_list_menu_item_layout, locationNames);
+            locationListView.setAdapter(adapter);*/
+
+            //adapter.clear();
+            //adapter.addAll(locationNames);
+
+        }
+
     }
 }
