@@ -84,6 +84,42 @@ public class DisplayMapActivity extends FragmentActivity {
         }
     }
 
+    private void plotSegments(List<LatLng> segList){
+//        for (Map.Entry<LatLng, LatLng> entry : segMap.entrySet() ){
+//            LatLng start = entry.getKey();
+//            LatLng end = entry.getValue();
+//            googleMap
+//                    .addPolyline((new PolylineOptions())
+//                            .add(start, end).width(5).color(Color.BLUE)
+//                            .geodesic(true));
+//        }
+          int left = 0;
+          int right = 1;
+          int size = segList.size();
+          LatLng start = null;
+          LatLng end = null;
+          for (int i =right ; i < segList.size(); i+=2){
+              start = segList.get(left);
+              end = segList.get(right);
+              left+=2;
+              right+=2;
+              googleMap
+                      .addPolyline((new PolylineOptions())
+                              .add(start, end).width(5).color(Color.BLUE)
+                              .geodesic(true));
+              System.out.println(right);
+          }
+
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(NEXT3,
+                17));
+    }
+
+
+    /**
+     * Adds the path to the maps fragment.
+     *
+     * @param path - list of coordinate points that make up the lines in a path
+     */
     private void addLines(List<LatLng> path) {
         int pathSize = path.size();
         int current = 0;
@@ -103,19 +139,19 @@ public class DisplayMapActivity extends FragmentActivity {
                             .geodesic(true));
             // move camera to zoom on map
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(start,
-                    18));
+                    17));
         }
     }
 
-    private class HttpRequestTask extends AsyncTask<Void, Void, LocationCollection> {
+    private class HttpRequestTask extends AsyncTask<Void, Void, SegmentCollection> {
         @Override
-        protected LocationCollection doInBackground(Void... params) {
+        protected SegmentCollection doInBackground(Void... params) {
             try {
-                final String url = "http://cseosuwintest.cloudapp.net:9000/locations";
+                final String url = "http://cseosuwintest.cloudapp.net:9000/segments";
                 RestTemplate restTemplate = new RestTemplate();
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-                LocationCollection collections = restTemplate.getForObject(url, LocationCollection.class);
-                return collections;
+                SegmentCollection collection = restTemplate.getForObject(url, SegmentCollection.class);
+                return collection;
             } catch (Exception e) {
                 Log.e("SegmentCollection", e.getMessage(), e);
             }
@@ -124,17 +160,30 @@ public class DisplayMapActivity extends FragmentActivity {
         }
 
         @Override
-        protected void onPostExecute(LocationCollection locations) {
-            final List<String> segmentNames = new ArrayList<String>();
+        protected void onPostExecute(SegmentCollection collection) {
+            final List<LatLng> segmentPoints = new ArrayList<LatLng>();
+            final Map<LatLng, LatLng> segMap = new HashMap<>();
+            for(Segment s : collection.getSegments() )
+            {
+                Location node1 = s.getToNode();
+                Location node2 = s.getFromNode();
+                if((node1 != null) && (node2 != null)) {
+                    double lat1 = node1.getLatitude();
+                    double lng1 = node1.getLongitude();
+                    LatLng point1 = new LatLng(lng1, lat1);
+                    double lat2 = node2.getLatitude();
+                    double lng2 = node2.getLongitude();
+                    LatLng point2 = new LatLng(lng2, lat2);
+                    segmentPoints.add(point1);
+                    segmentPoints.add(point2);
+                    //segMap.put(point1, point2);
 
-//            for(Location l : locations.getLocations())
-//            {
-//                if(l.getName() != null) {
-//                    locationNames.add(l.getName());
-//                }
-//            }
-//
-//            Collections.sort(locationNames);
+                }
+            }
+            //addLines(segmentPoints);
+            //System.out.println(segMap.size());
+            plotSegments(segmentPoints);
+
 
             //  TextView tv = (TextView) findViewById(R.id.textView8);
             // tv.setText("Select One:");
@@ -148,4 +197,5 @@ public class DisplayMapActivity extends FragmentActivity {
         }
 
     }
+
 }

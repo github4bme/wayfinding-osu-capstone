@@ -1,24 +1,62 @@
 package com.osucse.wayfinding_api;
 
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
 
+/**
+ * Created by Jim on 2/13/2015.
+ */
 public class Segment {
     private int id;
-    private double distance;
-    private Location node1;
-    private Location node2;
+    private int weight;
+    private int accessible;
+    private String streetCrossing;
+    private String description;
+    private String hazard;
+    private Location toNode;
+    private Location fromNode;
+    private List<Location> intermediateNodes;
 
 
-    public int getId() { return id; }
-
-    public Location getNode1()
-    {
-        return node1;
+    public int getId(){
+        return id;
     }
 
-    public Location getNode2()
+    public String getStreetCrossing()
     {
-        return node2;
+        return streetCrossing;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public String getHazard()
+    {
+        return hazard;
+    }
+
+    public int getWeight() {return weight;}
+
+    public int getAccessible() {return accessible;}
+
+    public Location getToNode()
+    {
+        return toNode;
+    }
+
+    public Location getFromNode()
+    {
+        return fromNode;
+    }
+
+    public int getNeighbourIndex(int nodeIndex) {
+        if (this.toNode.getId() == nodeIndex) {
+            return this.toNode.getId();
+        } else {
+            return this.fromNode.getId();
+        }
     }
 
 }
