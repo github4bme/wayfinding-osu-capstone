@@ -50,4 +50,9 @@ public class MainActivity extends ActionBarActivity {
         intent.putExtra(START_LOCATION, startLocation);
         startActivity(intent);
     }
+
+    public void showLocationList(View view) {
+        Intent intent = new Intent(this, LocationList.class);
+        startActivity(intent);
+    }
 }

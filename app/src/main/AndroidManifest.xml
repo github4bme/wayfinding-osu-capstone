@@ -31,16 +31,18 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" >
-
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".LocationList"
-            android:label="@string/title_activity_location_list" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:label="@string/title_activity_location_list"
+            android:parentActivityName="com.osucse.wayfinding_osu_capstone.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.osucse.wayfinding_osu_capstone.MainActivity" />
         </activity>
         <activity
             android:name=".DisplayMapActivity"
