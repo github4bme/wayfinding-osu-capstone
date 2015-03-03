@@ -23,34 +23,66 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyA1Cq5QWgCawgGDfBxge-eIz2-2Uei037U" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".Selection"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
+            android:name=".MainActivity"
+            android:label="@string/hello_world"
+            android:parentActivityName=".Selection" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVIY"
+                android:value="com.osu.cse.wayfinding_osu_capstone.Selection" />
+        </activity>
+        <activity
             android:name=".LocationList"
             android:label="@string/title_activity_location_list"
-            android:parentActivityName="com.osucse.wayfinding_osu_capstone.MainActivity" >
+            android:parentActivityName=".Selection" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.osucse.wayfinding_osu_capstone.MainActivity" />
+                android:value="com.osucse.wayfinding_osu_capstone.Selection" />
         </activity>
         <activity
             android:name=".DisplayMapActivity"
             android:label="@string/title_activity_display_map"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName=".Selection" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.osucse.wayfinding_osu_capstone.MainActivity" />
+                android:value="com.osucse.wayfinding_osu_capstone.Selection" />
+        </activity>
+        <activity
+            android:name=".SelectSourceLocation"
+            android:label="@string/title_activity_select_source_location"
+            android:parentActivityName=".Selection" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.osucse.wayfinding_osu_capstone.Selection" />
+        </activity>
+        <activity
+            android:name=".SelectTour"
+            android:label="@string/title_activity_select_tour"
+            android:parentActivityName=".Selection" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.osucse.wayfinding_osu_capstone.Selection" />
+        </activity>
+        <activity
+            android:name=".Settings"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".Selection" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.osucse.wayfinding_osu_capstone.Selection" />
         </activity>
     </application>
 

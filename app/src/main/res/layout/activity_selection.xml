@@ -1,0 +1,44 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="0dip"
+        android:layout_height="fill_parent"
+        android:layout_weight=".15"></RelativeLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="0dip"
+        android:layout_height="fill_parent"
+        android:layout_weight=".7"
+        android:gravity="center_horizontal">
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/selection_button_directions"
+            android:id="@+id/directions_button"
+            android:onClick="directionsButtonPressed" />
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/selection_button_tours"
+            android:id="@+id/tour_button"
+            android:onClick="tourButtonPressed" />
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/selection_button_settings"
+            android:id="@+id/settings_button"
+            android:onClick="settingsButtonPressed" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="0dip"
+        android:layout_height="fill_parent"
+        android:layout_weight=".15"></RelativeLayout>
+</LinearLayout>
