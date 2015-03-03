@@ -4,6 +4,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 
 public class Selection extends ActionBarActivity {
@@ -38,5 +39,16 @@ public class Selection extends ActionBarActivity {
     }
 
 
-    
+    // button handlers
+    public void directionsButtonPressed (View view) {
+        //
+    }
+
+    public void tourButtonPressed (View view) {
+        //
+    }
+
+    public void settingsButtonPressed (View view) {
+        //
+    }
 }

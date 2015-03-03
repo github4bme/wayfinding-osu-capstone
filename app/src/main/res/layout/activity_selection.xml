@@ -19,19 +19,22 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/selection_button_directions"
-            android:id="@+id/directions_button" />
+            android:id="@+id/directions_button"
+            android:onClick="directionsButtonPressed" />
 
         <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/selection_button_tours"
-            android:id="@+id/tour_button" />
+            android:id="@+id/tour_button"
+            android:onClick="tourButtonPressed" />
 
         <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/selection_button_settings"
-            android:id="@+id/settings_button" />
+            android:id="@+id/settings_button"
+            android:onClick="settingsButtonPressed" />
 
     </LinearLayout>
 
