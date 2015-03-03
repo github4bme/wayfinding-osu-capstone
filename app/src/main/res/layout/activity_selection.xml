@@ -18,20 +18,21 @@
         <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/selection_button_settings"
-            android:id="@+id/button3" />
-
-        <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
             android:text="@string/selection_button_directions"
-            android:id="@+id/button" />
+            android:id="@+id/directions_button" />
 
         <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/selection_button_tours"
-            android:id="@+id/button2" />
+            android:id="@+id/tour_button" />
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/selection_button_settings"
+            android:id="@+id/settings_button" />
+
     </LinearLayout>
 
     <RelativeLayout
