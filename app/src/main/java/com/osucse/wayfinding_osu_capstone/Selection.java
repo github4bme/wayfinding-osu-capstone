@@ -32,23 +32,48 @@ public class Selection extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            // action bar settings button pressed
+            goToSettings();
             return true;
+
+        } else if (id == R.id.action_directions) {
+            // action bar directions pressed
+            goToDirections();
+            return true;
+
+        } else if (id == R.id.action_tours) {
+            // action bar tours pressed
+            goToTours();
+            return true;
+
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-
-    // button handlers
+    // button handler methods
     public void directionsButtonPressed (View view) {
-        //
+        goToDirections();
     }
 
     public void tourButtonPressed (View view) {
-        //
+        goToTours();
     }
 
     public void settingsButtonPressed (View view) {
-        //
+        goToSettings();
+    }
+
+    // intent switching methods
+    private void goToDirections () {
+
+    }
+
+    private void goToTours () {
+
+    }
+
+    private void goToSettings () {
+
     }
 }
