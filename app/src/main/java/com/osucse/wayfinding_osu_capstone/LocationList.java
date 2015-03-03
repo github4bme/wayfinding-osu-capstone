@@ -85,7 +85,7 @@ public class LocationList extends ActionBarActivity {
         @Override
         protected LocationCollection doInBackground(Void... params) {
             try {
-                final String url = "http://cseosuwintest.cloudapp.net:9000/locations";
+                final String url = "http://54.200.238.22:9000/locations";
                 RestTemplate restTemplate = new RestTemplate();
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
                 LocationCollection locations = restTemplate.getForObject(url, LocationCollection.class);
