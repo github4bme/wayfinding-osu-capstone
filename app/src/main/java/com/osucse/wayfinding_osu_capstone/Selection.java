@@ -31,21 +31,39 @@ public class Selection extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            // action bar settings button pressed
-            goToSettings();
-            return true;
+        // temp
+        Intent intent;
 
-        } else if (id == R.id.action_directions) {
-            // action bar directions pressed
-            goToDirections();
-            return true;
+        switch (id) {
+            case R.id.action_directions:
+                goToDirections();
+                return true;
 
-        } else if (id == R.id.action_tours) {
-            // action bar tours pressed
-            goToTours();
-            return true;
+            case R.id.action_tours:
+                goToTours();
+                return true;
+
+            case R.id.action_settings:
+                goToSettings();
+                return true;
+
+            // for programming/debugging to get access to activies
+            // to add an activity"
+            //  1. add an entry to /res/menu/menu_selection.xml
+            //  2. add a case here with an intent
+            //  3. all activity parents should be selection unless a they are a subprocess
+            //  4. ask tommy if you are confused.
+
+            case R.id.action_main_activity:
+                intent = new Intent(this, DisplayMapActivity.class);
+                startActivity(intent);
+                return true;
+
+            case R.id.action_activity_display_map_activity :
+                intent = new Intent(this, DisplayMapActivity.class);
+                startActivity(intent);
+                return true;
+
 
         }
 

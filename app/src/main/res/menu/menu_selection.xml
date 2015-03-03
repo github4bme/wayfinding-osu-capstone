@@ -6,18 +6,32 @@
     <item
         android:id="@+id/action_directions"
         android:title="@string/action_bar_directions"
-        android:orderInCategory="3"
+        android:orderInCategory="1"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_tours"
         android:title="@string/action_bar_tours"
-        android:orderInCategory="3"
+        android:orderInCategory="2"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_settings"
         android:title="@string/action_bar_settings"
+        android:orderInCategory="3"
+        app:showAsAction="never" />
+
+    <!--where to add your activity -->
+    <item
+        android:id="@+id/action_main_activity"
+        android:title="MainActivity"
+        android:orderInCategory="3"
+        app:showAsAction="never" />
+
+
+    <item
+        android:id="@+id/action_activity_display_map_activity"
+        android:title="DisplayMapActivity"
         android:orderInCategory="3"
         app:showAsAction="never" />
 </menu>
