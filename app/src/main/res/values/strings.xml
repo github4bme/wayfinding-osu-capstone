@@ -9,4 +9,13 @@
     <string name="get_map_button">Go To Map</string>
     <string name="title_activity_display_map">My Map</string>
 
+
+
+    <!-- activity_selection_screen -->
+    <string name="selection_button_directions">Get directions</string>
+    <string name="selection_button_tours">Take a tour</string>
+    <string name="selection_button_settings">Settings</string>
+    <string name="title_activity_selection">Selection</string>
+    <!-- end activity selection_screen -->
+
 </resources>
