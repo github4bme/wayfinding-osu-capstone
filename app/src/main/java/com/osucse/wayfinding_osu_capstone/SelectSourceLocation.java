@@ -22,20 +22,21 @@ public class SelectSourceLocation extends ActionBarActivity {
     public static ListView listView;
     public static EditText editText;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_source_location);
 
-
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, StartUpTasks.getLocationList());
-
+        // connect activity to layout items
         listView = (ListView) findViewById(R.id.source_list);
-        listView.setAdapter(adapter);
-
         editText = (EditText) findViewById(R.id.source_list_search);
 
-        // set listeners
+        // creates adapter and attaches it to the listview
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, StartUpTasks.getLocationList());
+        listView.setAdapter(adapter);
+
+        // create listeners for the edittext and listview items
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -69,7 +70,6 @@ public class SelectSourceLocation extends ActionBarActivity {
         getMenuInflater().inflate(R.menu.menu_select_source_location, menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
