@@ -27,16 +27,6 @@ public class Coordinate {
     private double longitude;
 
     /**
-     * The default constructor
-     */
-    public Coordinate() {
-        this.eastling = 0.0;
-        this.northling = 0.0;
-        this.latitude = 0.0;
-        this.longitude = 0.0;
-    }
-
-    /**
      * @return the eastling value
      */
     public double getEastling(){
