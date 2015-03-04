@@ -2,9 +2,12 @@ package com.osucse.wayfinding_osu_capstone;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -14,6 +17,7 @@ public class SelectSourceLocation extends ActionBarActivity {
 
     public static ArrayAdapter<String> adapter;
     public static ListView listView;
+    public static EditText editText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +30,24 @@ public class SelectSourceLocation extends ActionBarActivity {
         listView = (ListView) findViewById(R.id.source_list);
         listView.setAdapter(adapter);
 
+        editText = (EditText) findViewById(R.id.source_list_search);
+
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                SelectSourceLocation.this.adapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
 
 
@@ -50,4 +72,6 @@ public class SelectSourceLocation extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
 }

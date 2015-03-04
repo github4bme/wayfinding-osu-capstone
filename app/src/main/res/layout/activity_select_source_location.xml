@@ -7,6 +7,11 @@
     android:orientation="vertical">
 
 
+    <EditText android:id="@+id/source_list_search"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="Search products.." />
+
     <ListView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
