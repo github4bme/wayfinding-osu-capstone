@@ -20,7 +20,7 @@ import java.util.List;
 public class StartUpTasks {
 
     // server url
-    private static final String URL = "http://cseosuwintest.cloudapp.net:9000/";
+    private static final String URL = "http://54.200.238.22:9000/";
 
 
     // location data

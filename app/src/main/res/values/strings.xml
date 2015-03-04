@@ -25,12 +25,14 @@
     <string name="selection_button_directions">Get directions</string>
     <string name="selection_button_tours">Take a tour</string>
     <string name="selection_button_settings">Settings</string>
-    <string name="title_activity_selection">Selection</string>
-    <string name="title_activity_select_source_location">SelectSourceLocation</string>
+    <!-- end activity_selection_screen -->
+
+    <string name="title_activity_selection">OSU Wayfinding</string>
+    <string name="title_activity_select_source_location">Starting Location</string>
     <string name="title_activity_select_tour">SelectTour</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="title_activity_select_destination_location">SelectDestinationLocation</string>
-    <!-- end activity_selection_screen -->
+    <string name="title_activity_select_destination_location">Destination Location</string>
+
 
 
 

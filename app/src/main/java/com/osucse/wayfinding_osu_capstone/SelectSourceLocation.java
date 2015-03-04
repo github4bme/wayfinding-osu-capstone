@@ -22,7 +22,7 @@ public class SelectSourceLocation extends ActionBarActivity {
     public static ArrayAdapter<String> adapter;
     public static ListView listView;
     public static EditText editText;
-
+    public final static String SOURCE_LOCATION = "com.osucse.wayfinding_osu_capstone.SOURCE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +60,7 @@ public class SelectSourceLocation extends ActionBarActivity {
 
                 String selectedItem = ((TextView)view).getText().toString();
                 Intent intent = new Intent(SelectSourceLocation.this, SelectDestinationLocation.class);
-                intent.putExtra("SOURCE_LOCATION",selectedItem);
+                intent.putExtra(SOURCE_LOCATION, selectedItem);
                 startActivity(intent);
                 SelectSourceLocation.this.finish();
             }
