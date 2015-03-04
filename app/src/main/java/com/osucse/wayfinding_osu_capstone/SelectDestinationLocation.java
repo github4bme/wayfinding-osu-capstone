@@ -14,6 +14,8 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 
 public class SelectDestinationLocation extends ActionBarActivity {
 
@@ -35,8 +37,12 @@ public class SelectDestinationLocation extends ActionBarActivity {
         editText = (EditText) findViewById(R.id.destination_list_search);
         editText.setText(message);
 
+        // creates a clone of the location list
+        ArrayList <String> destinations = (ArrayList<String>) StartUpTasks.cloneLocationList();
+        destinations.add(0, "Current Location");
+
         // creates adapter and attaches it to the listview
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, StartUpTasks.getLocationList());
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, destinations);
         listView.setAdapter(adapter);
 
         // create listeners for the edittext and listview items

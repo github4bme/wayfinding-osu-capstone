@@ -55,6 +55,14 @@ public class StartUpTasks {
         Collections.sort(LOCATION_LIST);
     }
 
+    public static List<String> cloneLocationList () {
+        List<String> clone = new ArrayList <String> (LOCATION_LIST.size());
+        for(String item: LOCATION_LIST) {
+            clone.add(item);
+        }
+        return clone;
+    }
+
 
     public static LocationCollection getLocationCollection () {
         return LOCATION_COLLECTION;
