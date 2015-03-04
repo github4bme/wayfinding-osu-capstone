@@ -1,5 +1,7 @@
 package com.osucse.utilities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Created by tjf3191 on 2/16/15.
  */
@@ -27,8 +29,45 @@ public class Coordinate {
     private double longitude;
 
     /**
+     * The default constructor
+    
+    public Coordinate() {
+        this.eastling = 0.0;
+        this.northling = 0.0;
+        this.latitude = 0.0;
+        this.longitude = 0.0;
+    }
+
+    /**
+     * The primary constructor to build a coordinate and calculate the opposing format
+     * @param x the x value of the coordinate, either eastling(feet) or longitude(degrees)
+     * @param y the y value of the coordinate, either northling(feet) or latitude(degrees)
+     * @param type the type of conversion to calculate
+
+    public Coordinate (double x, double y, Coordinate.TYPE type) {
+
+        double[] results;
+
+        if (type == TYPE.NAD_27) {
+            this.eastling = x;
+            this.northling = y;
+            results = Utility.Nad27toGCS(eastling, northling);
+            this.latitude = results[1];
+            this.longitude = results[0];
+
+        } else if (type == TYPE.GCS) {
+            this.latitude = y;
+            this.longitude = x;
+            results = Utility.GCStoNad27(this.latitude, this.longitude);
+            this.eastling = results[1];
+            this.northling = results[0];
+        }
+    }*/
+
+    /**
      * @return the eastling value
      */
+    @JsonIgnore
     public double getEastling(){
         return this.eastling;
     }
@@ -36,6 +75,7 @@ public class Coordinate {
     /**
      * @return the northling value
      */
+    @JsonIgnore
     public double getNorthling(){
         return this.northling;
     }
@@ -76,4 +116,14 @@ public class Coordinate {
         return distance(c1, c2) < EPSILON;
     }
 
+    /**
+     * Overides the toString method for pretty output.
+     * @return a string representation of the data within
+     */
+    @Override
+    public String toString () {
+        String nad27 = String.format("Eastling:  %7.5f\nNorthling: %7.5f\n", this.getEastling(), this.getNorthling());
+        String gcs = String.format("Latitude:  %7.5f\nLongitude: %7.5f", this.getLatitude(), this.getLongitude());
+        return nad27 + gcs;
+    }
 }

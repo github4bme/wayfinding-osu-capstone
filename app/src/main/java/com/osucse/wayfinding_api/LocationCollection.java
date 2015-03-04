@@ -7,6 +7,7 @@ public class LocationCollection
 {
     private List<Location> locations;
 
+    /*
     public LocationCollection()
     {
         locations = new ArrayList<Location>();
@@ -15,7 +16,7 @@ public class LocationCollection
     public LocationCollection(List<Location> buildings)
     {
         this.locations = buildings;
-    }
+    }*/
 
     public List<Location> getLocations() {
         return locations;

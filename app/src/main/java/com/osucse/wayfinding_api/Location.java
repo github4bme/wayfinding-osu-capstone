@@ -7,12 +7,13 @@ public class Location extends Node{
 
     private int id;
 
+    /*
     public Location(int id, String name, Coordinate coord)
     {
         super(coord);
         this.id = id;
         this.name = name;
-    }
+    }*/
 
     public int getId() {
         return id;

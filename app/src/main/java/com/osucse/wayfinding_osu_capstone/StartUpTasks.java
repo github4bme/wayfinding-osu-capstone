@@ -34,7 +34,7 @@ public class StartUpTasks {
             restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
             LOCATION_COLLECTION = restTemplate.getForObject(url, LocationCollection.class);
         } catch (Exception e) {
-            Log.e("LocationList", e.getMessage(), e);
+            Log.e("Error pulling info", e.getMessage(), e);
         }
         return LOCATION_COLLECTION;
     }

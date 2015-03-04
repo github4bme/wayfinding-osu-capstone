@@ -78,10 +78,6 @@ public class Selection extends ActionBarActivity {
                 startActivity(intent);
                 return true;
 
-            case R.id.action_activity_location_list:
-                intent = new Intent(this, LocationList.class);
-                startActivity(intent);
-                return true;
         }
 
         return super.onOptionsItemSelected(item);
