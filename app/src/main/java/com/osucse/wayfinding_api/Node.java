@@ -1,6 +1,6 @@
 package com.osucse.wayfinding_api;
 
-import com.osucse.wayfinding_api.utilities.Coordinate;
+import com.osucse.utilities.Coordinate;
 
 public class Node {
     private Coordinate coordinate;

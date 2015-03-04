@@ -1,4 +1,4 @@
-package com.osucse.wayfinding_api.utilities;
+package com.osucse.utilities;
 
 /**
  * Created by tjf3191 on 2/16/15.
@@ -35,32 +35,6 @@ public class Coordinate {
         this.latitude = 0.0;
         this.longitude = 0.0;
     }
-
-    /** removed for app version
-     * The primary constructor to build a coordinate and calculate the opposing format
-     * @param x the x value of the coordinate, either eastling(feet) or longitude(degrees)
-     * @param y the y value of the coordinate, either northling(feet) or latitude(degrees)
-     * @param type the type of conversion to calculate
-
-    public Coordinate (double x, double y, Coordinate.TYPE type) {
-
-        double[] results;
-
-        if (type == TYPE.NAD_27) {
-            this.eastling = x;
-            this.northling = y;
-            results = Utility.Nad27toGCS(eastling, northling);
-            this.latitude = results[1];
-            this.longitude = results[0];
-
-        } else if (type == TYPE.GCS) {
-            this.latitude = y;
-            this.longitude = x;
-            results = Utility.GCStoNad27(this.latitude, this.longitude);
-            this.eastling = results[1];
-            this.northling = results[0];
-        }
-    }*/
 
     /**
      * @return the eastling value
