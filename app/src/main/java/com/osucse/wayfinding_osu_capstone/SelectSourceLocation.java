@@ -1,5 +1,6 @@
 package com.osucse.wayfinding_osu_capstone;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -58,6 +59,9 @@ public class SelectSourceLocation extends ActionBarActivity {
                                     long id) {
 
                 String selectedItem = ((TextView)view).getText().toString();
+                Intent intent = new Intent(SelectSourceLocation.this, SelectDestinationLocation.class);
+                intent.putExtra("SOURCE_LOCATION",selectedItem);
+                startActivity(intent);
                 SelectSourceLocation.this.finish();
             }
         });

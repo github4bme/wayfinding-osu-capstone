@@ -84,6 +84,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.osucse.wayfinding_osu_capstone.Selection" />
         </activity>
+        <activity
+            android:name=".SelectDestinationLocation"
+            android:label="@string/title_activity_select_destination_location"
+            android:parentActivityName=".SelectSourceLocation" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.osucse.wayfinding_osu_capstone.SelectSourceLocation" />
+        </activity>
     </application>
 
 </manifest>
