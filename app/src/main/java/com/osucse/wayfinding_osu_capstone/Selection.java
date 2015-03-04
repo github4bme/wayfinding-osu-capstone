@@ -1,11 +1,24 @@
 package com.osucse.wayfinding_osu_capstone;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
+
+import com.osucse.wayfinding_api.Location;
+import com.osucse.wayfinding_api.LocationCollection;
+
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 public class Selection extends ActionBarActivity {
@@ -14,6 +27,7 @@ public class Selection extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selection);
+        new HttpRequestTask().execute();
     }
 
 
@@ -64,7 +78,10 @@ public class Selection extends ActionBarActivity {
                 startActivity(intent);
                 return true;
 
-
+            case R.id.action_activity_location_list:
+                intent = new Intent(this, LocationList.class);
+                startActivity(intent);
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -97,5 +114,22 @@ public class Selection extends ActionBarActivity {
     private void goToSettings () {
         Intent intent = new Intent(this, Settings.class);
         startActivity(intent);
+    }
+
+
+
+
+    private class HttpRequestTask extends AsyncTask<Void, Void, LocationCollection> {
+        @Override
+        protected LocationCollection doInBackground(Void... params) {
+            StartUpTasks.getLocationCollectionFromServer();
+            return StartUpTasks.getLocationCollection();
+        }
+
+        @Override
+        protected void onPostExecute(LocationCollection locations) {
+            StartUpTasks.createLocationList();
+        }
+
     }
 }
