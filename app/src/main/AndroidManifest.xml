@@ -37,22 +37,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
-            android:label="@string/hello_world"
-            android:parentActivityName=".Selection" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVIY"
-                android:value="com.osu.cse.wayfinding_osu_capstone.Selection" />
-        </activity>
-        <activity
-            android:name=".LocationList"
-            android:label="@string/title_activity_location_list"
-            android:parentActivityName=".Selection" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.osucse.wayfinding_osu_capstone.Selection" />
-        </activity>
-        <activity
             android:name=".DisplayMapActivity"
             android:label="@string/title_activity_display_map"
             android:parentActivityName=".Selection" >

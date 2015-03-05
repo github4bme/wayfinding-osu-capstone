@@ -1,50 +1,80 @@
 package com.osucse.wayfinding_osu_capstone;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.osucse.wayfinding_api.Location;
 
 import java.util.ArrayList;
 
-
+/**
+ * SelectSourceLocation is the first step in the navigation portion
+ * of the app. It displays to the user the locations that you are
+ * starting at, and for you to choose one. Once you choose an app
+ * the activity stops and passes that data on to the select
+ * destination activity.
+ *
+ * TODO:
+ * - add some way for the user to select their current location
+ *   to the list of locations
+ */
 public class SelectSourceLocation extends ActionBarActivity {
 
-    public static ArrayAdapter<Location> adapter;
-    public static ListView listView;
-    public static EditText editText;
-    public final static String SOURCE_LOCATION = "com.osucse.wayfinding_osu_capstone.SOURCE";
-    public final static String CURRENT_LOCATION = "Current Location";
+    // instance variables
+    public ArrayAdapter<Location>    adapter;
+    public ArrayList <Location>      sources;
+    public ListView                  listView;
+    public EditText                  editText;
+
+    // memory location to pass between intents
+    public final static String       SOURCE_LOCATION = "com.osucse.wayfinding_osu_capstone.SOURCE";
+
+    // static variable to kill activity with an intent
+    public final static String      KILL_SELECT_DESTINATION = "KILL_SELECT_DESTINATION";
+
+    // broadcastReceiver for killing the activity remotely
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context arg0, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(KILL_SELECT_DESTINATION)) {
+                killActivity();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_source_location);
 
+        // add a broadcast reliever for killing the activity remotely
+        registerReceiver(receiver, new IntentFilter(KILL_SELECT_DESTINATION));
+
         // connect activity to layout items
         listView = (ListView) findViewById(R.id.source_list);
         editText = (EditText) findViewById(R.id.source_list_search);
 
         // creates a clone of the location list
-        ArrayList <Location> sources = StartUpTasks.cloneLocationCollection();
-        //sources.add(new Location(CURRENT_LOCATION));
+        sources = StartUpTasks.cloneLocationCollection();
 
-        // creates adapter and attaches it to the listview
+        // creates adapter and attaches it to the listView
         adapter = new ArrayAdapter<Location>(this, android.R.layout.simple_list_item_1, sources);
         listView.setAdapter(adapter);
 
-        // create listeners for the edittext and listview items
+        // create listener for the editText and have it filter the list on input changes
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -55,57 +85,34 @@ public class SelectSourceLocation extends ActionBarActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-                //possibly resort list...
-            }
+            public void afterTextChanged(Editable s) {}
         });
 
+        // create a listener for when an item is selected in the list
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position,
-                                    long id) {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-
+                // get the id of the selected item
                 String selectedItem = Integer.toString(((Location)(parent.getItemAtPosition(position))).getId());
+
+                // create an intent
                 Intent intent = new Intent(SelectSourceLocation.this, SelectDestinationLocation.class);
 
+                // add the selected id to intent
+                intent.putExtra(SOURCE_LOCATION, selectedItem);
 
-                if (selectedItem.equals(CURRENT_LOCATION)) {
-                    // somehow get users location????
-                    double latitude = 0.0;
-                    double longitude = 0.0;
-                    //intent.putExtra(SOURCE_LOCATION);
-                } else {
-                    intent.putExtra(SOURCE_LOCATION, selectedItem);
-                }
-
+                // start the intent
                 startActivity(intent);
-                SelectSourceLocation.this.finish();
             }
         });
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_select_source_location, menu);
-        return true;
+    /**
+     * Simple private class that is used to kill this activity.
+     */
+    private void killActivity () {
+        this.unregisterReceiver(receiver);
+        this.finish();
     }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-
 }

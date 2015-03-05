@@ -30,32 +30,51 @@ public class Selection extends ActionBarActivity {
     }
 
     /**
-     * Handler for when the direction
-     * @param view
+     * Handler for when the directions_button is pressed on screen.
+     * @param view a required input for the button
      */
     public void directionsButtonPressed (View view) {
         goToDirections();
     }
 
+    /**
+     * Handler for when the tours_button is pressed on screen.
+     * @param view a required input for the button
+     */
     public void tourButtonPressed (View view) {
         goToTours();
     }
 
+    /**
+     * Handler for when the settings_button is pressed on screen.
+     * @param view a required input for the button
+     */
     public void settingsButtonPressed (View view) {
         goToSettings();
     }
 
-    // intent switching methods
+    /**
+     * Starts an intent for the SelectSourceLocation activity, which
+     * starts the navigation sub-process of the app.
+     */
     private void goToDirections () {
         Intent intent = new Intent(this, SelectSourceLocation.class);
         startActivity(intent);
     }
 
+    /**
+     * Starts an intent for the SelectTour activity, which starts
+     * the tour sub-process of the app.
+     */
     private void goToTours () {
         Intent intent = new Intent(this, SelectTour.class);
         startActivity(intent);
     }
 
+    /**
+     * Starts an intent for the Settings activity, which allows
+     * users to change characteristics of the navigation.
+     */
     private void goToSettings () {
         Intent intent = new Intent(this, Settings.class);
         startActivity(intent);
@@ -67,13 +86,12 @@ public class Selection extends ActionBarActivity {
     private class HttpRequestTask extends AsyncTask<Void, Void, LocationCollection> {
         @Override
         protected LocationCollection doInBackground(Void... params) {
-            StartUpTasks.getLocationCollectionFromServer();
-            return StartUpTasks.getLocationCollection();
+            return StartUpTasks.getLocationCollectionFromServer();
         }
 
         @Override
         protected void onPostExecute(LocationCollection locations) {
-            //
+            // nothing to post execute
         }
 
     }
