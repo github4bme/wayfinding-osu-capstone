@@ -14,14 +14,19 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.osucse.wayfinding_api.Location;
+
 import java.util.ArrayList;
 
 
 public class SelectDestinationLocation extends ActionBarActivity {
 
-    public static ArrayAdapter<String> adapter;
+    public static ArrayAdapter<Location> adapter;
     public static ListView listView;
     public static EditText editText;
+    public static String incomingSource;
+    public final static String SOURCE_LOCATION = "com.osucse.wayfinding_osu_capstone.SOURCE";
+    public final static String DESTINATION_LOCATION = "com.osucse.wayfinding_osu_capstone.DESTINATION";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +34,7 @@ public class SelectDestinationLocation extends ActionBarActivity {
         setContentView(R.layout.activity_select_destination_location);
 
         Intent intent = getIntent();
-        String message = intent.getStringExtra(SelectSourceLocation.SOURCE_LOCATION);
+        incomingSource = intent.getStringExtra(SelectSourceLocation.SOURCE_LOCATION);
 
 
         // connect activity to layout items
@@ -37,10 +42,10 @@ public class SelectDestinationLocation extends ActionBarActivity {
         editText = (EditText) findViewById(R.id.destination_list_search);
 
         // creates a clone of the location list
-        ArrayList <String> destinations = (ArrayList<String>) StartUpTasks.cloneLocationList();
+        ArrayList <Location> destinations = StartUpTasks.cloneLocationCollection();
 
         // creates adapter and attaches it to the listview
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, destinations);
+        adapter = new ArrayAdapter<Location>(this, android.R.layout.simple_list_item_1, destinations);
         listView.setAdapter(adapter);
 
         // create listeners for the edittext and listview items
@@ -64,7 +69,15 @@ public class SelectDestinationLocation extends ActionBarActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
 
-                String selectedItem = ((TextView)view).getText().toString();
+                String selectedItem = Integer.toString(((Location)(parent.getItemAtPosition(position))).getId());
+                Intent intent = new Intent(SelectDestinationLocation.this, DisplayMapActivity.class);
+
+
+                intent.putExtra(SOURCE_LOCATION, incomingSource);
+                intent.putExtra(DESTINATION_LOCATION, selectedItem);
+
+                startActivity(intent);
+                SelectDestinationLocation.this.finish();
             }
         });
 

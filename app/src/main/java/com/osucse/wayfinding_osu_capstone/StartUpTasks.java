@@ -25,7 +25,6 @@ public class StartUpTasks {
 
     // location data
     private static LocationCollection LOCATION_COLLECTION = null;
-    private static List<String> LOCATION_LIST;
 
     public static LocationCollection getLocationCollectionFromServer () {
         try {
@@ -34,43 +33,30 @@ public class StartUpTasks {
             restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
             LOCATION_COLLECTION = restTemplate.getForObject(url, LocationCollection.class);
         } catch (Exception e) {
-            Log.e("Error pulling info", e.getMessage(), e);
+            Log.e("LocationList", e.getMessage(), e);
         }
         return LOCATION_COLLECTION;
     }
 
-    public static void createLocationList () {
+    public static ArrayList<Location> cloneLocationCollection () {
 
-        LOCATION_LIST = new ArrayList<String>();
-
-        if (LOCATION_COLLECTION == null){return;}
+        ArrayList<Location> clone = new ArrayList<Location>(LOCATION_COLLECTION.getLocations().size());
 
         for(Location l : LOCATION_COLLECTION.getLocations())
         {
             if(l.getName() != null) {
-                LOCATION_LIST.add(l.getName());
+                clone.add(l);
             }
         }
 
-        Collections.sort(LOCATION_LIST);
-    }
-
-    public static List<String> cloneLocationList () {
-        List<String> clone = new ArrayList <String> (LOCATION_LIST.size());
-        for(String item: LOCATION_LIST) {
-            clone.add(item);
-        }
+        Collections.sort(clone);
         return clone;
     }
-
 
     public static LocationCollection getLocationCollection () {
         return LOCATION_COLLECTION;
     }
 
-    public static List<String> getLocationList () {
-        return LOCATION_LIST;
-    }
 }
 
 

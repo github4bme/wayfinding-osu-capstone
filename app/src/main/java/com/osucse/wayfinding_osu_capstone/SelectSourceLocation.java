@@ -14,15 +14,18 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.osucse.wayfinding_api.Location;
+
 import java.util.ArrayList;
 
 
 public class SelectSourceLocation extends ActionBarActivity {
 
-    public static ArrayAdapter<String> adapter;
+    public static ArrayAdapter<Location> adapter;
     public static ListView listView;
     public static EditText editText;
     public final static String SOURCE_LOCATION = "com.osucse.wayfinding_osu_capstone.SOURCE";
+    public final static String CURRENT_LOCATION = "Current Location";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,11 +37,11 @@ public class SelectSourceLocation extends ActionBarActivity {
         editText = (EditText) findViewById(R.id.source_list_search);
 
         // creates a clone of the location list
-        ArrayList <String> sources = (ArrayList<String>) StartUpTasks.cloneLocationList();
-        sources.add(0, "Current Location");
+        ArrayList <Location> sources = StartUpTasks.cloneLocationCollection();
+        //sources.add(new Location(CURRENT_LOCATION));
 
         // creates adapter and attaches it to the listview
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, sources);
+        adapter = new ArrayAdapter<Location>(this, android.R.layout.simple_list_item_1, sources);
         listView.setAdapter(adapter);
 
         // create listeners for the edittext and listview items
@@ -62,9 +65,20 @@ public class SelectSourceLocation extends ActionBarActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
 
-                String selectedItem = ((TextView)view).getText().toString();
+
+                String selectedItem = Integer.toString(((Location)(parent.getItemAtPosition(position))).getId());
                 Intent intent = new Intent(SelectSourceLocation.this, SelectDestinationLocation.class);
-                intent.putExtra(SOURCE_LOCATION, selectedItem);
+
+
+                if (selectedItem.equals(CURRENT_LOCATION)) {
+                    // somehow get users location????
+                    double latitude = 0.0;
+                    double longitude = 0.0;
+                    //intent.putExtra(SOURCE_LOCATION);
+                } else {
+                    intent.putExtra(SOURCE_LOCATION, selectedItem);
+                }
+
                 startActivity(intent);
                 SelectSourceLocation.this.finish();
             }

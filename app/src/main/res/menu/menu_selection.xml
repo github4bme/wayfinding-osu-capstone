@@ -22,12 +22,6 @@
         app:showAsAction="never" />
 
     <!--where to add your activity -->
-    <item
-        android:id="@+id/action_main_activity"
-        android:title="MainActivity"
-        android:orderInCategory="3"
-        app:showAsAction="never" />
-
 
     <item
         android:id="@+id/action_activity_display_map_activity"
@@ -35,10 +29,5 @@
         android:orderInCategory="3"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/action_activity_location_list"
-        android:title="LocationList"
-        android:orderInCategory="3"
-        app:showAsAction="never" />
 </menu>
 

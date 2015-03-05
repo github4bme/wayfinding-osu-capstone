@@ -2,18 +2,10 @@ package com.osucse.wayfinding_api;
 
 import com.osucse.utilities.Coordinate;
 
-public class Location extends Node{
+public class Location extends Node implements Comparable<Location>{
     private String name;
 
     private int id;
-
-    /*
-    public Location(int id, String name, Coordinate coord)
-    {
-        super(coord);
-        this.id = id;
-        this.name = name;
-    }*/
 
     public int getId() {
         return id;
@@ -27,6 +19,13 @@ public class Location extends Node{
     @Override
     public String toString()
     {
-        return "Location: " + this.name + " -- Lat: " + this.getCoordinate().getLatitude() + " Long: " + this.getCoordinate().getLongitude();
+        return this.name;
     }
+
+
+    @Override
+    public int compareTo(Location comp) {
+        return this.getName().compareTo(comp.getName());
+    }
+
 }

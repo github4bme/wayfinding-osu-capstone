@@ -45,11 +45,13 @@ public class DisplayMapActivity extends FragmentActivity {
         setContentView(R.layout.activity_display_map);
 
         Intent intent = getIntent();
-        String startLocation = intent.getStringExtra(MainActivity.START_LOCATION);
+        String startLocation = intent.getStringExtra(SelectDestinationLocation.SOURCE_LOCATION);
+        String endLocation = intent.getStringExtra(SelectDestinationLocation.DESTINATION_LOCATION);
+
         //TextView textView = new TextView(this);
         TextView startLocationDisplay = (TextView) findViewById(R.id.start_location_display);
         startLocationDisplay.setTextSize(20);
-        startLocationDisplay.setText(startLocation);
+        startLocationDisplay.setText("starting id: " + startLocation + " ending id:" + endLocation);
         //setContentView(textView);
 
         setUpMapIfNeeded();
