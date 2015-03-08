@@ -72,12 +72,12 @@ public class StartUpTasks {
         for(Location l : LOCATION_COLLECTION.getLocations())
         {
             if(l.getName() != null) {
-                LOCATION_LIST.add(l);
+                temp.add(l);
             }
         }
 
         // sorts the LocationCollection by name (see added compareTo part of the location class)
-        Collections.sort(LOCATION_LIST);
+        Collections.sort(temp);
 
         return temp;
     }
