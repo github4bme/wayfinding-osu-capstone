@@ -8,23 +8,38 @@
         android:id="@+id/start_location_display"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Testing" />
+        android:text="0" />
 
     <TextView
         android:id="@+id/lat_display"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Testing" />
+        android:text="0" />
     <TextView
         android:id="@+id/lng_display"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Testing" />
+        android:text="0" />
     <TextView
         android:id="@+id/time_display"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Testing" />
+        android:text="0" />
+    <TextView
+        android:id="@+id/bearing_to_dest_display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0" />
+    <TextView
+        android:id="@+id/curr_bearing_display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0" />
+    <TextView
+        android:id="@+id/rotation_display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0" />
 
     <fragment android:id="@+id/map"
         android:layout_width="match_parent"

@@ -17,6 +17,14 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.location.LocationServices;
 import android.util.Log;
 import com.google.android.gms.common.ConnectionResult;
+import android.hardware.SensorEventListener;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.content.Context;
+import android.hardware.SensorEvent;
+
+
+
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,7 +35,7 @@ import java.text.DateFormat;
 import java.util.*;
 
 
-public class DisplayMapActivity extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnMapReadyCallback {
+public class DisplayMapActivity extends FragmentActivity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnMapReadyCallback {
     private static final LatLng DEST = new LatLng(39.9986444, -083.0150867);
     private static final LatLng NEXT = new LatLng(39.9985652, -083.0151295);
     private static final LatLng NEXT1 = new LatLng(39.9984717, -083.0151624);
@@ -42,7 +50,8 @@ public class DisplayMapActivity extends FragmentActivity implements GoogleApiCli
     protected GoogleApiClient mGoogleApiClient;
     protected LocationRequest mLocationRequest;
 
-
+    private SensorManager mSensorManager;
+    private Sensor mSensor;
 
     /****** to be deleted
      *
@@ -51,9 +60,17 @@ public class DisplayMapActivity extends FragmentActivity implements GoogleApiCli
     protected TextView latDisplay;
     protected TextView lngDisplay;
     protected TextView timeDisplay;
+    protected TextView bearingToDestDisplay;
+    protected TextView currBearingDisplay;
+    protected TextView rotationDisplay;
 
     protected android.location.Location mCurrentLocation;
     protected String mLastUpdateTime;
+    protected float bearingToDestDegrees;
+    protected float currBearing;
+
+    protected boolean runningOnEmulator = false;
+
     /**/
     /** */
     //?????
@@ -89,6 +106,21 @@ public class DisplayMapActivity extends FragmentActivity implements GoogleApiCli
         timeDisplay.setTextSize(20);
         timeDisplay.setText("time: ");
 
+        bearingToDestDisplay = (TextView) findViewById(R.id.bearing_to_dest_display);
+        bearingToDestDisplay.setTextSize(20);
+        bearingToDestDisplay.setText("Bearing to Dest: ");
+
+        currBearingDisplay = (TextView) findViewById(R.id.curr_bearing_display);
+        currBearingDisplay.setTextSize(20);
+        currBearingDisplay.setText("Current Bearing: ");
+
+        rotationDisplay = (TextView) findViewById(R.id.rotation_display);
+        rotationDisplay.setTextSize(20);
+        rotationDisplay.setText("Rotation of image: ");
+
+        /**/
+
+        //??????
         mRequestingLocationUpdates =  true;
 
         // To bring back saved state if activity is interrupted
@@ -104,6 +136,13 @@ public class DisplayMapActivity extends FragmentActivity implements GoogleApiCli
 
         // Sets up a GoogleMap and calls onMapReady()
         map.getMapAsync(this);
+
+
+
+        if (!runningOnEmulator) {
+            mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+            mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        }
     }
 
     protected void createLocationRequest() {
@@ -196,14 +235,22 @@ public class DisplayMapActivity extends FragmentActivity implements GoogleApiCli
     @Override
     public void onLocationChanged(android.location.Location location) {
         mCurrentLocation = location;
+
+        android.location.Location destLocation = createAndroidLocation(DEST);
+        bearingToDestDegrees = mCurrentLocation.bearingTo(destLocation);
+
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
         updateUI();
     }
 
     private void updateUI() {
-        latDisplay.setText(String.valueOf(mCurrentLocation.getLatitude()));
-        lngDisplay.setText(String.valueOf(mCurrentLocation.getLongitude()));
-        timeDisplay.setText(mLastUpdateTime);
+        latDisplay.setText(String.valueOf("Current lat: " + mCurrentLocation.getLatitude()));
+        lngDisplay.setText(String.valueOf("Current long: " + mCurrentLocation.getLongitude()));
+        timeDisplay.setText("Time updated: " + mLastUpdateTime);
+        bearingToDestDisplay.setText("Bearing to Dest: " + Float.toString(bearingToDestDegrees));
+        currBearingDisplay.setText("Orientation of device: " + Float.toString(currBearing));
+        rotationDisplay.setText("Rotation of image: " + Float.toString(bearingToDestDegrees - currBearing));
+
     }
 
     @Override
@@ -211,6 +258,10 @@ public class DisplayMapActivity extends FragmentActivity implements GoogleApiCli
         super.onPause();
         // stops location updates when the app is in the background
         stopLocationUpdates();
+
+        if (!runningOnEmulator) {
+            mSensorManager.unregisterListener(this);
+        }
     }
 
     protected void stopLocationUpdates() {
@@ -225,6 +276,10 @@ public class DisplayMapActivity extends FragmentActivity implements GoogleApiCli
         // tutorial here
         if (mGoogleApiClient.isConnected() && !mRequestingLocationUpdates) {
             startLocationUpdates();
+        }
+
+        if (!runningOnEmulator) {
+            mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
     }
 
@@ -279,5 +334,33 @@ public class DisplayMapActivity extends FragmentActivity implements GoogleApiCli
             ourMap.moveCamera(CameraUpdateFactory.newLatLngZoom(start,
                     18));
         }
+    }
+
+    private android.location.Location createAndroidLocation(LatLng point) {
+        // provider name is unnecessary
+        android.location.Location newLocation = new android.location.Location("");
+        newLocation.setLatitude(point.latitude);
+        newLocation.setLongitude(point.longitude);
+        return newLocation;
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // I am unsure why the accuracy would change.  It is possible it is changing in order to suit the
+        // device.
+        Log.i("Unknown", "*********************\nAccuracy Changed for Sensor\n*********************");
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        // multiplied by -180 in order to change the sign of the rotation to match bearing calculation
+        // and convert from fraction of 0-1 to 0-180 degrees
+        currBearing = event.values[2] * -180.0f;
+        // check is put in to stop the initial null pointer exception at start before the API
+        // client is connected and a change in location is detected
+        if (mCurrentLocation == null) {
+            mCurrentLocation = createAndroidLocation(new LatLng(0.0, 0.0));
+        }
+        updateUI();
     }
 }
