@@ -22,6 +22,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.content.Context;
 import android.hardware.SensorEvent;
+import android.widget.ImageView;
+
 
 
 
@@ -63,6 +65,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     protected TextView bearingToDestDisplay;
     protected TextView currBearingDisplay;
     protected TextView rotationDisplay;
+    protected ImageView arrowImage;
 
     protected android.location.Location mCurrentLocation;
     protected String mLastUpdateTime;
@@ -119,6 +122,8 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         rotationDisplay.setText("Rotation of image: ");
 
         /**/
+
+        arrowImage = (ImageView) findViewById(R.id.arrow_image);
 
         //??????
         mRequestingLocationUpdates =  true;
@@ -249,8 +254,10 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         timeDisplay.setText("Time updated: " + mLastUpdateTime);
         bearingToDestDisplay.setText("Bearing to Dest: " + Float.toString(bearingToDestDegrees));
         currBearingDisplay.setText("Orientation of device: " + Float.toString(currBearing));
-        rotationDisplay.setText("Rotation of image: " + Float.toString(bearingToDestDegrees - currBearing));
-
+        // need to rotate the arrow by the difference of the two bearings
+        float arrowRotation = bearingToDestDegrees - currBearing;
+        rotationDisplay.setText("Rotation of image: " + Float.toString(arrowRotation));
+        arrowImage.setRotation(arrowRotation);
     }
 
     @Override
