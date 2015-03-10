@@ -370,10 +370,10 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         // This is called every time a change in the device's orientation is detected
         // Because this will be called very often, the logic should be kept simple
 
-        // Multiplied by -180 in order to change the sign of the rotation to match bearing calculation
-        // and convert from fraction of 0-1 to 0-180 degrees; this makes 0 pointing west
-        // Subtract 90 in order to make 0 degrees point north
-        currBearing = event.values[2] * -180.0f - 90.0f;
+        // The even.values[2] gives the rotation about the z axis as sin(theta/2)
+        // where theta is the rotation
+        // Need to do this calculation to get the rotation, theta, in degrees
+        currBearing = (float) (Math.toDegrees(Math.asin((double) event.values[2])) * -2.0);
         updateUI();
     }
 }
