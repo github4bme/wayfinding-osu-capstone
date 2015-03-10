@@ -370,8 +370,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         // This is called every time a change in the device's orientation is detected
         // Because this will be called very often, the logic should be kept simple
 
-        // The even.values[2] gives the rotation about the z axis as sin(theta/2)
-        // where theta is the rotation
+        // The even.values[2] gives sin(theta/2) where theta is the rotation about the z axis
         // Need to do this calculation to get the rotation, theta, in degrees
         currBearing = (float) (Math.toDegrees(Math.asin((double) event.values[2])) * -2.0);
         updateUI();
