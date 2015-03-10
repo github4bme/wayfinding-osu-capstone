@@ -24,10 +24,6 @@ import android.content.Context;
 import android.hardware.SensorEvent;
 import android.widget.ImageView;
 
-
-
-
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -49,34 +45,42 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     private static final String LAST_UPDATED_TIME_STRING_KEY = "com.osucse.wayfinding_osu_capstone.DisplayMapActivity.lastUpdatedTimeStringKey";
 
     protected GoogleMap ourMap;
+
+    // Used for location services
     protected GoogleApiClient mGoogleApiClient;
     protected LocationRequest mLocationRequest;
 
+    // Used for orientation of the phone
     private SensorManager mSensorManager;
     private Sensor mSensor;
 
-    /****** to be deleted
+    /****** Used for monitoring purposes
      *
      */
-
     protected TextView latDisplay;
     protected TextView lngDisplay;
     protected TextView timeDisplay;
     protected TextView bearingToDestDisplay;
     protected TextView currBearingDisplay;
     protected TextView rotationDisplay;
+
+    protected String mLastUpdateTime;
+
+    /**************/
+
+
     protected ImageView arrowImage;
 
     protected android.location.Location mCurrentLocation;
-    protected String mLastUpdateTime;
     protected float bearingToDestDegrees;
     protected float currBearing;
 
+    /************/
     protected boolean runningOnEmulator = false;
+    /************/
 
-    /**/
-    /** */
-    //?????
+    // Variable that could be used for turning location updates on and off
+    // This might be helpful for running on emulator if we find that the updates cause problems
     protected boolean mRequestingLocationUpdates;
 
     @Override
@@ -88,44 +92,43 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         String startLocation = intent.getStringExtra(SelectDestinationLocation.SOURCE_LOCATION);
         String endLocation = intent.getStringExtra(SelectDestinationLocation.DESTINATION_LOCATION);
 
-        TextView startLocationDisplay = (TextView) findViewById(R.id.start_location_display);
-        startLocationDisplay.setTextSize(20);
-        startLocationDisplay.setText("starting id: " + startLocation + " ending id:" + endLocation);
-
-
-        /****** to be deleted
+        /****** Used for monitoring data
          *
          */
+        TextView startLocationDisplay = (TextView) findViewById(R.id.start_location_display);
+        startLocationDisplay.setTextSize(20);
+        startLocationDisplay.setText("Starting id: " + startLocation + " Ending id: " + endLocation);
+
         latDisplay = (TextView) findViewById(R.id.lat_display);
         latDisplay.setTextSize(20);
-        latDisplay.setText("lat: ");
-
+        latDisplay.setText("Current lat: ");
 
         lngDisplay = (TextView) findViewById(R.id.lng_display);
         lngDisplay.setTextSize(20);
-        lngDisplay.setText("lng: ");
+        lngDisplay.setText("Current lng: ");
 
         timeDisplay = (TextView) findViewById(R.id.time_display);
         timeDisplay.setTextSize(20);
-        timeDisplay.setText("time: ");
+        timeDisplay.setText("Time updated: ");
 
         bearingToDestDisplay = (TextView) findViewById(R.id.bearing_to_dest_display);
         bearingToDestDisplay.setTextSize(20);
-        bearingToDestDisplay.setText("Bearing to Dest: ");
+        bearingToDestDisplay.setText("Bearing to dest: ");
 
         currBearingDisplay = (TextView) findViewById(R.id.curr_bearing_display);
         currBearingDisplay.setTextSize(20);
-        currBearingDisplay.setText("Current Bearing: ");
+        currBearingDisplay.setText("Orientation of device: ");
 
         rotationDisplay = (TextView) findViewById(R.id.rotation_display);
         rotationDisplay.setTextSize(20);
         rotationDisplay.setText("Rotation of image: ");
 
-        /**/
+        /*******************/
 
         arrowImage = (ImageView) findViewById(R.id.arrow_image);
 
-        //??????
+        // Set to true for all cases because we do not have any reason to turn these updates off
+        // E.g. a setting to disable location information
         mRequestingLocationUpdates =  true;
 
         // To bring back saved state if activity is interrupted
@@ -142,14 +145,18 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         // Sets up a GoogleMap and calls onMapReady()
         map.getMapAsync(this);
 
-
+        // Set from null to stop initial null pointer exception in onSensorChanged() calling updateUI() before API
+        // client has connected to set our user's current location
+        mCurrentLocation = createAndroidLocation(new LatLng(0.0, 0.0));
 
         if (!runningOnEmulator) {
+            // Used for geting orientation of phone
             mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
             mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         }
     }
 
+    // Defines how and when our location updates are made
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);
@@ -182,45 +189,39 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
     @Override
     public void onConnected(Bundle connectionHint) {
+        // I left this commented section out as an example of how to get the user's current location
+        // This could be used when adding the user's current location to the list
 //        android.location.Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
 //                mGoogleApiClient);
 
         if (mRequestingLocationUpdates) {
             startLocationUpdates();
         }
-
-//        if (mLastLocation != null) {
-            // currentLocationMarker = ourMap.addMarker(new MarkerOptions().title("I'm Here" + iteration).position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())));
-            // Marker currenLocationMarker = ourMap.addMarker(new MarkerOptions().title("I'm Here").position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())));
-//        }
     }
 
     protected void startLocationUpdates() {
-        // adds location listener "this" to our Api Client
+        // Adds location listener "this" to our Api Client
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient, mLocationRequest, this);
     }
 
+    // Code used to repopulate necessary fields if the Activity is interrupted
     private void updateValuesFromBundle(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
-            // Update the value of mRequestingLocationUpdates from the Bundle, and
-            // make sure that the Start Updates and Stop Updates buttons are
-            // correctly enabled or disabled.
+            // Update the value of mRequestingLocationUpdates from the Bundle
             if (savedInstanceState.keySet().contains(REQUESTING_LOCATION_UPDATES_KEY)) {
                 mRequestingLocationUpdates = savedInstanceState.getBoolean(
                         REQUESTING_LOCATION_UPDATES_KEY);
-                //setButtonsEnabledState();
             }
 
-            // Update the value of mCurrentLocation from the Bundle and update the
-            // UI to show the correct latitude and longitude.
+            // Update the value of mCurrentLocation from the Bundle
             if (savedInstanceState.keySet().contains(LOCATION_KEY)) {
                 // Since LOCATION_KEY was found in the Bundle, we can be sure that
                 // mCurrentLocationis not null.
                 mCurrentLocation = savedInstanceState.getParcelable(LOCATION_KEY);
             }
 
-            // Update the value of mLastUpdateTime from the Bundle and update the UI.
+            // Update the value of mLastUpdateTime from the Bundle
             if (savedInstanceState.keySet().contains(LAST_UPDATED_TIME_STRING_KEY)) {
                 mLastUpdateTime = savedInstanceState.getString(
                         LAST_UPDATED_TIME_STRING_KEY);
@@ -229,7 +230,9 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         }
     }
 
+    @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Saves all fo the pertinent information if Activity is interrupted
         savedInstanceState.putBoolean(REQUESTING_LOCATION_UPDATES_KEY,
                 mRequestingLocationUpdates);
         savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
@@ -239,6 +242,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
     @Override
     public void onLocationChanged(android.location.Location location) {
+        // This is called anytime the location is detected as changed
         mCurrentLocation = location;
 
         android.location.Location destLocation = createAndroidLocation(DEST);
@@ -252,9 +256,10 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         latDisplay.setText(String.valueOf("Current lat: " + mCurrentLocation.getLatitude()));
         lngDisplay.setText(String.valueOf("Current long: " + mCurrentLocation.getLongitude()));
         timeDisplay.setText("Time updated: " + mLastUpdateTime);
-        bearingToDestDisplay.setText("Bearing to Dest: " + Float.toString(bearingToDestDegrees));
+        bearingToDestDisplay.setText("Bearing to dest: " + Float.toString(bearingToDestDegrees));
         currBearingDisplay.setText("Orientation of device: " + Float.toString(currBearing));
-        // need to rotate the arrow by the difference of the two bearings
+
+        // Need to rotate the arrow by the difference of the two bearings
         float arrowRotation = bearingToDestDegrees - currBearing;
         rotationDisplay.setText("Rotation of image: " + Float.toString(arrowRotation));
         arrowImage.setRotation(arrowRotation);
@@ -263,7 +268,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     @Override
     protected void onPause() {
         super.onPause();
-        // stops location updates when the app is in the background
+        // Stops location updates when the app is in the background
         stopLocationUpdates();
 
         if (!runningOnEmulator) {
@@ -279,7 +284,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     @Override
     public void onResume() {
         super.onResume();
-        // I am unclear as to why we use not mRequestingLocationUpdates, but I am following Google's
+        // I am unclear as to why we use 'not' mRequestingLocationUpdates, but I am following Google's
         // tutorial here
         if (mGoogleApiClient.isConnected() && !mRequestingLocationUpdates) {
             startLocationUpdates();
@@ -305,7 +310,8 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        // set created googleMap to our global map
+        // This is called when our getMapAsync() in onCreate() successfully gets a map
+        // Set created googleMap to our global map
         ourMap = googleMap;
 
         List<LatLng> path = new ArrayList<LatLng>();
@@ -337,14 +343,15 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
                     .addPolyline((new PolylineOptions())
                             .add(start, end).width(5).color(Color.BLUE)
                             .geodesic(true));
-            // move camera to zoom on map
+            // Move camera to zoom on map
             ourMap.moveCamera(CameraUpdateFactory.newLatLngZoom(start,
                     18));
         }
     }
 
+    // Simple helper method for converting from LatLng to an android.location.Location
     private android.location.Location createAndroidLocation(LatLng point) {
-        // provider name is unnecessary
+        // Provider name is unnecessary
         android.location.Location newLocation = new android.location.Location("");
         newLocation.setLatitude(point.latitude);
         newLocation.setLongitude(point.longitude);
@@ -354,20 +361,19 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // I am unsure why the accuracy would change.  It is possible it is changing in order to suit the
-        // device.
+        // device
         Log.i("Unknown", "*********************\nAccuracy Changed for Sensor\n*********************");
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        // multiplied by -180 in order to change the sign of the rotation to match bearing calculation
-        // and convert from fraction of 0-1 to 0-180 degrees
-        currBearing = event.values[2] * -180.0f;
-        // check is put in to stop the initial null pointer exception at start before the API
-        // client is connected and a change in location is detected
-        if (mCurrentLocation == null) {
-            mCurrentLocation = createAndroidLocation(new LatLng(0.0, 0.0));
-        }
+        // This is called every time a change in the device's orientation is detected
+        // Because this will be called very often, the logic should be kept simple
+
+        // Multiplied by -180 in order to change the sign of the rotation to match bearing calculation
+        // and convert from fraction of 0-1 to 0-180 degrees; this makes 0 pointing west
+        // Subtract 90 in order to make 0 degrees point north
+        currBearing = event.values[2] * -180.0f - 90.0f;
         updateUI();
     }
 }
