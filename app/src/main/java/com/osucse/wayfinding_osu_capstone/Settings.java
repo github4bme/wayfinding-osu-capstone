@@ -9,6 +9,9 @@ import android.widget.Switch;
 
 public class Settings extends ActionBarActivity {
 
+    public static final String ACCESSIBLE_ROUTING = "ACCESSIBLE_ROUTING";
+    public static final String VISUALLY_IMPAIRED = "VISUALLY_IMPAIRED";
+
     private Switch accessibleSwitch;
     private Switch visualSwitch;
     private Switch grailSwitch;
@@ -30,8 +33,8 @@ public class Settings extends ActionBarActivity {
         settings = getPreferences(MODE_PRIVATE);
 
         // load switch states from memory
-        this.accessibleSwitch.setChecked(settings.getBoolean("accessible", false));
-        this.visualSwitch.setChecked(settings.getBoolean("visual", false));
+        this.accessibleSwitch.setChecked(settings.getBoolean(ACCESSIBLE_ROUTING, false));
+        this.visualSwitch.setChecked(settings.getBoolean(VISUALLY_IMPAIRED, false));
         this.grailSwitch.setChecked(settings.getBoolean("grail", false));
 
         // for adding commits
@@ -45,7 +48,7 @@ public class Settings extends ActionBarActivity {
      */
     public void accessibleSwitchStateChange (View view) {
 
-        this.editor.putBoolean("accessible", ((Switch) view).isChecked());
+        this.editor.putBoolean(ACCESSIBLE_ROUTING, ((Switch) view).isChecked());
 
         this.editor.commit();
     }
@@ -56,7 +59,7 @@ public class Settings extends ActionBarActivity {
      */
     public void visualSwitchStateChange (View view) {
 
-        this.editor.putBoolean("visual", ((Switch) view).isChecked());
+        this.editor.putBoolean(VISUALLY_IMPAIRED, ((Switch) view).isChecked());
 
         this.editor.commit();
     }
