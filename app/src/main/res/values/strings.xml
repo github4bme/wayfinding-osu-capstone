@@ -29,6 +29,8 @@
 
     <!-- activity_settings -->
     <string name="setting_item_accessible">Only show accessible routes</string>
+    <string name="setting_item_visual">Visually impaired mode</string>
+    <string name="setting_item_grail">Holy Grail mode</string>
     <!-- end activity_settings -->
 
 </resources>

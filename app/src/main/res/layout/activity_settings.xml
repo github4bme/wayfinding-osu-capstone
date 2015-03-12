@@ -13,7 +13,23 @@
         android:layout_width="fill_parent"
         android:layout_height="@dimen/setting_item_height"
         android:text="@string/setting_item_accessible"
-        android:id="@+id/settings_accessible_switch"
+        android:id="@+id/settings_switch_accessible"
+        android:splitTrack="false"
+        android:showText="false" />
+
+    <Switch
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/setting_item_height"
+        android:text="@string/setting_item_visual"
+        android:id="@+id/settings_switch_visual"
+        android:splitTrack="false"
+        android:showText="false" />
+
+    <Switch
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/setting_item_height"
+        android:text="@string/setting_item_grail"
+        android:id="@+id/settings_switch_grail"
         android:splitTrack="false"
         android:showText="false" />
 </LinearLayout>
