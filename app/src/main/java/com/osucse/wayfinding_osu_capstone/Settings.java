@@ -11,4 +11,18 @@ public class Settings extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
     }
+
+    public void accessibleSwitchStateChange () {
+
+    }
+
+    public void visualSwitchStateChange () {
+
+    }
+
+    public void grailSwitchStateChange () {
+        
+    }
+
+
 }
