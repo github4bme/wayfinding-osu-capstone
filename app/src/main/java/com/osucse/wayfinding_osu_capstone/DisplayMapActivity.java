@@ -16,7 +16,19 @@ import android.util.Log;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.SupportMapFragment;
+
+
+// Josh Added
+import com.google.android.gms.maps.OnMapReadyCallback;
+
+
+
+
+
+
+
+
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 import java.util.*;
@@ -24,6 +36,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 import com.osucse.wayfinding_api.*;
 //import com.osucse.utilities.Coordinate;
+//import com.google.android.gms.maps.SupportMapFragment;
 
 
 public class DisplayMapActivity extends FragmentActivity {
@@ -49,7 +62,8 @@ public class DisplayMapActivity extends FragmentActivity {
 
 
     private GoogleMap ourMap;
-    private
+    List<LatLng> ourRoute = new ArrayList<LatLng>();
+
 
 
 
@@ -72,36 +86,16 @@ public class DisplayMapActivity extends FragmentActivity {
         startLocation = intent.getStringExtra(SelectDestinationLocation.SOURCE_LOCATION);
         endLocation = intent.getStringExtra(SelectDestinationLocation.DESTINATION_LOCATION);
 
-        //TextView textView = new TextView(this);
         TextView startLocationDisplay = (TextView) findViewById(R.id.start_location_display);
         startLocationDisplay.setTextSize(20);
         startLocationDisplay.setText("This is all me -- starting id: " + startLocation + " ending id:" + endLocation);
         //setContentView(textView);
         new HttpRequestTask().execute();
-
-
-
-        MapFragment map = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-
-        // Sets up a GoogleMap and calls onMapReady()
-        map.getMapAsync(this);
-
-
-//        setUpMapIfNeeded();
     }
 
-//    private void setUpMapIfNeeded() {
-//        // check if we have got the googleMap already
-//        if (ourMap == null) {
-//            ourMap = ((SupportMapFragment) getSupportFragmentManager()
-//                    .findFragmentById(R.id.map)).getMap();
-//            if (ourMap != null) {
-//                ourMap.setMyLocationEnabled(true);
-//            }
-//        }
-//    }
 
-    private class HttpRequestTask extends AsyncTask<Void, Void, Route> {
+
+    private class HttpRequestTask extends AsyncTask<Void, Void, Route> implements OnMapReadyCallback {
         @Override
         protected Route doInBackground(Void... params) {
             try {
@@ -114,43 +108,54 @@ public class DisplayMapActivity extends FragmentActivity {
             } catch (Exception e) {
                 Log.e("Route", e.getMessage(), e);
             }
-
             return null;
         }
 
         @Override
         protected void onPostExecute(Route collection) {
-            final List<Node> routePoints = collection.getRoute();
-            plotRoute(routePoints);
+            if (collection != null) {
+                final List<Node> routePoints = collection.getRoute();
+
+                // Fills ourRoute with our path's lat/long coordinates
+                for (int i = 0; i < routePoints.size(); i++) {
+                    ourRoute.add(new LatLng(routePoints.get(i).getCoordinate().getLatitude(),
+                            routePoints.get(i).getCoordinate().getLongitude()));
+                }
+
+                MapFragment map = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+
+                // Sets up a non-null GoogleMap and calls onMapReady()
+                map.getMapAsync(this);
+            }
         }
 
+        @Override
+        public void onMapReady(GoogleMap googleMap) {
+            // This is called when our getMapAsync() in onCreate() successfully gets a map
+            // Set created googleMap to our global map
+            ourMap = googleMap;
+
+            plotRoute();
+            ourMap.setMyLocationEnabled(true);
+        }
     }
+
 
 
     /**
      * Plots the route on the map
-     * @param route
      */
-    private void plotRoute(List<Node> route) {
-        int pathSize = route.size();
-        int current =0;
-        LatLng start = null;
-        LatLng end = null;
-        for (int i =1; i < pathSize; i++){
-            if (start == null) {
-                start = new LatLng(route.get(current).getCoordinate().getLatitude(), route.get(current).getCoordinate().getLongitude());
-            }else{
-                start = end;
-            }
-            current++;
-            end = new LatLng(route.get(current).getCoordinate().getLatitude(), route.get(current).getCoordinate().getLongitude());
-            googleMap
-                    .addPolyline((new PolylineOptions())
-                            .add(start, end).width(5).color(Color.BLUE)
-                            .geodesic(true));
-            // move camera to zoom on map
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(start,
-                    17));
+    private void plotRoute() {
+        // move camera to zoom on map to starting location
+        ourMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ourRoute.get(0),
+                17));
+
+        // Loop puts a line between all points in ourRoute
+        // Loop is kept so that we do not start a line at the last point
+        for (int i = 0; i < ourRoute.size() - 1; i++){
+            ourMap.addPolyline((new PolylineOptions()).add(ourRoute.get(i), ourRoute.get(i + 1))
+                    .width(5).color(Color.BLUE).geodesic(true));
         }
     }
 }
+
