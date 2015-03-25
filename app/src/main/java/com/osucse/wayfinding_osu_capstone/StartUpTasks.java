@@ -1,5 +1,6 @@
 package com.osucse.wayfinding_osu_capstone;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.osucse.wayfinding_api.Location;
@@ -8,8 +9,15 @@ import com.osucse.wayfinding_api.LocationCollection;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 
 /**
  * Created by thomas forte on 3/3/2015.
@@ -19,10 +27,13 @@ public class StartUpTasks {
     // server url
     private static final String URL = "http://54.200.238.22:9000/";
 
-    // location data that is copied from the api server
-    private static LocationCollection LOCATION_COLLECTION = null;
+    // the list of locations from server
+    private static ArrayList<Location> LOCATION_LIST;
 
-    private static ArrayList<Location> LOCATION_LIST = null;
+    private static final String LOCATION_LIST_FILE = "LOCATION_LIST_FILE";
+
+
+
 
     /**
      * getLocationCollectionFromServer will attempt to get a connection
@@ -35,30 +46,23 @@ public class StartUpTasks {
      * @return a pointer to the LOCATION_COLLECTION object
      */
     public static LocationCollection getLocationCollectionFromServer () {
+        LocationCollection locationCollection = null;
         try {
             String url = URL + "locations";
             RestTemplate restTemplate = new RestTemplate();
             restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-            LOCATION_COLLECTION = restTemplate.getForObject(url, LocationCollection.class);
-            LOCATION_LIST = makeLocationList(LOCATION_COLLECTION);
+            locationCollection = restTemplate.getForObject(url, LocationCollection.class);
+
+            LOCATION_LIST = makeLocationList(locationCollection);
+
         } catch (Exception e) {
             Log.e("LocationList", e.getMessage(), e);
         }
-        return LOCATION_COLLECTION;
-    }
-
-
-
-    /**
-     * cloneLocationCollection
-     * @return a shallow copy of LOCATION_LIST
-     */
-    public static ArrayList<Location> cloneLocationCollection () {
-        return new ArrayList<Location>(LOCATION_LIST);
+        return locationCollection;
     }
 
     /**
-     * Processes the LOCATION_COLLECTION by removing null locations, and sorting the
+     * Processes the locationCollection by removing null locations, and sorting the
      * remaining locations. The result is returned
      * @param locationCollection a LocationCollection to process
      * @return a processed ArrayList of the LocationCollection data
@@ -69,7 +73,7 @@ public class StartUpTasks {
         ArrayList<Location> temp = new ArrayList<Location>(locationCollection.getLocations().size());
 
         // removes null location data while copying pointers
-        for(Location l : LOCATION_COLLECTION.getLocations())
+        for(Location l : locationCollection.getLocations())
         {
             if(l.getName() != null) {
                 temp.add(l);
@@ -82,7 +86,43 @@ public class StartUpTasks {
         return temp;
     }
 
+    private static void saveLocationList (Context context) {
+        try {
+            FileOutputStream fos = context.openFileOutput(LOCATION_LIST_FILE, Context.MODE_PRIVATE);
+            ObjectOutputStream oos= new ObjectOutputStream(fos);
+            oos.writeObject(LOCATION_LIST);
+            oos.close();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private static void loadLocationList () {
+        LOCATION_LIST = new ArrayList<Location>();
+        try
+        {
+            FileInputStream fis = new FileInputStream(LOCATION_LIST_FILE);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            LOCATION_LIST = (ArrayList) ois.readObject();
+            ois.close();
+            fis.close();
+        }catch(IOException ioe){
+            ioe.printStackTrace();
+        }catch(ClassNotFoundException c){
+            System.out.println("Class not found");
+            c.printStackTrace();
+        }
+    }
+
+    private static boolean doesLocationFileExist () {
+        File file = new File(LOCATION_LIST_FILE);
+        return file.exists();
+    }
+
+    public static ArrayList<Location> getLocationList () {
+        return new ArrayList<Location>(LOCATION_LIST);
+    }
 }
 
 

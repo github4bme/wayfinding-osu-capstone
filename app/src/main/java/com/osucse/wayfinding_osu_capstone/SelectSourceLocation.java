@@ -68,7 +68,7 @@ public class SelectSourceLocation extends ActionBarActivity {
         editText = (EditText) findViewById(R.id.source_list_search);
 
         // creates a clone of the location list
-        sources = StartUpTasks.cloneLocationCollection();
+        sources = StartUpTasks.getLocationList();
 
         // creates adapter and attaches it to the listView
         adapter = new ArrayAdapter<Location>(this, android.R.layout.simple_list_item_1, sources);
