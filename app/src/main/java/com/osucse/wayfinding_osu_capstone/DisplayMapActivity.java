@@ -11,13 +11,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 
-
-// Josh Added
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.common.ConnectionResult;
@@ -27,7 +24,6 @@ import android.hardware.SensorManager;
 import android.content.Context;
 import android.hardware.SensorEvent;
 import android.widget.ImageView;
-
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -40,7 +36,9 @@ import com.osucse.wayfinding_api.*;
 
 public class DisplayMapActivity extends FragmentActivity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String URL = "http://54.200.238.22:9000/";
-    private static final String LOCATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayMapActivity.locationKey";
+    private static final String CURRENT_LOCATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayMapActivity.currentLocationKey";
+    private static final String NEXT_DESTINATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayMapActivity.nextDestinationKey";
+    private static final float AT_LOCATION_RADIUS = 10.0f;
 
     private GoogleMap ourMap;
     List<LatLng> ourRoute = new ArrayList<LatLng>();
@@ -61,6 +59,8 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     protected android.location.Location mCurrentLocation;
     protected float bearingToDestDegrees;
     protected float currBearing;
+    // Set to 0, 0 for rare case of null pointer exception
+    protected LatLng mNextDestination = new LatLng(0.0, 0.0);
 
     /******
      *  Boolean value for running on emulator
@@ -82,7 +82,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
         TextView startLocationDisplay = (TextView) findViewById(R.id.start_location_display);
         startLocationDisplay.setTextSize(20);
-        startLocationDisplay.setText("This is all me");
+        startLocationDisplay.setText("OSU Wayfinding Application");
         arrowImage = (ImageView) findViewById(R.id.arrow_image);
 
         new HttpRequestTask().execute();
@@ -138,6 +138,9 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
                             routePoints.get(i).getCoordinate().getLongitude()));
                 }
 
+                // Set first destination to the start of the route
+                mNextDestination = ourRoute.get(0);
+
                 MapFragment map = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 
                 // Sets up a non-null GoogleMap and calls onMapReady()
@@ -153,7 +156,6 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
             plotRoute();
             ourMap.setMyLocationEnabled(true);
-            ourMap.addMarker(new MarkerOptions().title("Start").position(ourRoute.get(0)));
         }
     }
 
@@ -172,20 +174,6 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
                     .width(5).color(Color.BLUE).geodesic(true));
         }
     }
-
-
-
-
-
-
-
-    /********************************************************************/
-
-
-
-
-
-
 
     // Defines how and when our location updates are made
     protected void createLocationRequest() {
@@ -220,10 +208,11 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        // I left this commented section out as an example of how to get the user's current location
-        // This could be used when adding the user's current location to the list
-//        android.location.Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-//                mGoogleApiClient);
+        // Set user's current location
+        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+
+        checkNextDestUpdateUI();
 
         if (mRequestingLocationUpdates) {
             startLocationUpdates();
@@ -236,38 +225,33 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
                 mGoogleApiClient, mLocationRequest, this);
     }
 
-    // Code used to repopulate necessary fields if the Activity is interrupted
-    private void updateValuesFromBundle(Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            // Update the value of mCurrentLocation from the Bundle
-            if (savedInstanceState.keySet().contains(LOCATION_KEY)) {
-                // Since LOCATION_KEY was found in the Bundle, we can be sure that
-                // mCurrentLocationis not null.
-                mCurrentLocation = savedInstanceState.getParcelable(LOCATION_KEY);
-            }
-            updateUI();
-        }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        // Saves all of the pertinent information if Activity is interrupted
-        savedInstanceState.putParcelable(LOCATION_KEY, mCurrentLocation);
-        super.onSaveInstanceState(savedInstanceState);
-    }
-
     @Override
     public void onLocationChanged(android.location.Location currentLocation) {
         // This is called anytime the location is detected as changed
         mCurrentLocation = currentLocation;
 
-        /***********
-         * logic for location to point arrow at
-         */
-        android.location.Location destLocation = createAndroidLocation(ourRoute.get(0));
+        checkNextDestUpdateUI();
+    }
 
-        bearingToDestDegrees = mCurrentLocation.bearingTo(destLocation);
+    /**
+     * Method that checks to see if user is within AT_LOCATION_RADIUS distance from any point
+     * on route; if the user is, then method sets mNextDestination to next point on route
+     */
+    private void checkNextDestUpdateUI() {
+        LatLng tempDest = mNextDestination;
 
+        // Loop checks to see if the user is close to a point on the route
+        for (int i = 0; i < ourRoute.size() - 1; i++) {
+            float distance = mCurrentLocation.distanceTo(createAndroidLocation(ourRoute.get(i)));
+            if (distance < AT_LOCATION_RADIUS) {
+                mNextDestination = ourRoute.get(i + 1);
+            }
+        }
+        if (ourMap != null && tempDest != mNextDestination) {
+            ourMap.addMarker(new MarkerOptions().title("Next Dest").position(mNextDestination));
+        }
+
+        bearingToDestDegrees = mCurrentLocation.bearingTo(createAndroidLocation(mNextDestination));
         updateUI();
     }
 
@@ -275,6 +259,33 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         // Need to rotate the arrow by the difference of the two bearings
         float arrowRotation = bearingToDestDegrees - currBearing;
         arrowImage.setRotation(arrowRotation);
+    }
+
+    // Code used to repopulate necessary fields if the Activity is interrupted
+    private void updateValuesFromBundle(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            // Update the value of mCurrentLocation from the Bundle
+            if (savedInstanceState.keySet().contains(CURRENT_LOCATION_KEY)) {
+                // Since LOCATION_KEY was found in the Bundle, we can be sure that
+                // mCurrentLocationis not null.
+                mCurrentLocation = savedInstanceState.getParcelable(CURRENT_LOCATION_KEY);
+            }
+
+            // Update the value of mNextDestination from the Bundle
+            if (savedInstanceState.keySet().contains(NEXT_DESTINATION_KEY)) {
+                mNextDestination = savedInstanceState.getParcelable(NEXT_DESTINATION_KEY);
+            }
+            bearingToDestDegrees = mCurrentLocation.bearingTo(createAndroidLocation(mNextDestination));
+            updateUI();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Saves all of the pertinent information if Activity is interrupted
+        savedInstanceState.putParcelable(CURRENT_LOCATION_KEY, mCurrentLocation);
+        savedInstanceState.putParcelable(NEXT_DESTINATION_KEY, mNextDestination);
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
@@ -347,4 +358,3 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         return newLocation;
     }
 }
-
