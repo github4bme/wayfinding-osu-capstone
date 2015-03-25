@@ -156,6 +156,9 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
             plotRoute();
             ourMap.setMyLocationEnabled(true);
+
+            // Set first marker to show the start of the route
+            ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
         }
     }
 
@@ -248,7 +251,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
             }
         }
         if (ourMap != null && tempDest != mNextDestination) {
-            ourMap.addMarker(new MarkerOptions().title("Next Dest").position(mNextDestination));
+            ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
         }
 
         bearingToDestDegrees = mCurrentLocation.bearingTo(createAndroidLocation(mNextDestination));
