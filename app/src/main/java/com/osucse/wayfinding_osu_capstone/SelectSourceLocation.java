@@ -14,21 +14,10 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.osucse.wayfinding_api.Location;
+import com.osucse.utilities.LocationTuple;
 
 import java.util.ArrayList;
 
-/**
- * SelectSourceLocation is the first step in the navigation portion
- * of the app. It displays to the user the locations that you are
- * starting at, and for you to choose one. Once you choose an app
- * the activity stops and passes that data on to the select
- * destination activity.
- *
- * TODO:
- * - add some way for the user to select their current location
- *   to the list of locations
- */
 public class SelectSourceLocation extends ActionBarActivity {
 
     // instance variables
@@ -69,6 +58,7 @@ public class SelectSourceLocation extends ActionBarActivity {
 
         // creates a clone of the location list
         sources = StartUpTasks.getLocationList();
+        sources.add(0, new LocationTuple("Current Location", "-1"));
 
         // creates adapter and attaches it to the listView
         adapter = new ArrayAdapter<LocationTuple>(this, android.R.layout.simple_list_item_1, sources);

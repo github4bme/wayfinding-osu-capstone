@@ -3,6 +3,7 @@ package com.osucse.wayfinding_osu_capstone;
 import android.content.Context;
 import android.util.Log;
 
+import com.osucse.utilities.LocationTuple;
 import com.osucse.wayfinding_api.Location;
 import com.osucse.wayfinding_api.LocationCollection;
 
@@ -11,9 +12,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.io.FileInputStream;

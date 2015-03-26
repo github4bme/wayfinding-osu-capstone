@@ -1,7 +1,6 @@
 package com.osucse.wayfinding_osu_capstone;
 
 import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -12,16 +11,15 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.osucse.wayfinding_api.Location;
+import com.osucse.utilities.LocationTuple;
 
 import java.util.ArrayList;
 
-/**
- *
- */
 public class SelectDestinationLocation extends ActionBarActivity {
 
-    // instance variables
+    /**
+     * Instance variables used by SelectDestinationLocation
+     */
     public ArrayAdapter<LocationTuple>  adapter;
     public ArrayList <LocationTuple>    destinations;
     public ListView                     listView;
@@ -29,17 +27,15 @@ public class SelectDestinationLocation extends ActionBarActivity {
     public String                       incomingSource;
 
     // memory location to pass between intents
-    public final static String      SOURCE_LOCATION
-            = "com.osucse.wayfinding_osu_capstone.SOURCE";
-    public final static String      DESTINATION_LOCATION
-            = "com.osucse.wayfinding_osu_capstone.DESTINATION";
+    public final static String      SOURCE_LOCATION = "com.osucse.wayfinding_osu_capstone.SOURCE";
+    public final static String      DESTINATION_LOCATION = "com.osucse.wayfinding_osu_capstone.DESTINATION";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_destination_location);
 
-
+        // relieve incoming data
         Intent intent = getIntent();
         incomingSource = intent.getStringExtra(SelectSourceLocation.SOURCE_LOCATION);
 
