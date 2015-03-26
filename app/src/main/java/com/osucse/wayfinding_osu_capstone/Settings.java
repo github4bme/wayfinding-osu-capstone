@@ -9,15 +9,20 @@ import android.widget.Switch;
 
 public class Settings extends ActionBarActivity {
 
+    /**
+     * Names of the setting locations
+     */
     public static final String ACCESSIBLE_ROUTING = "ACCESSIBLE_ROUTING";
     public static final String VISUALLY_IMPAIRED = "VISUALLY_IMPAIRED";
 
-    private Switch accessibleSwitch;
-    private Switch visualSwitch;
-    private Switch grailSwitch;
+    private static SharedPreferences settings;
 
-    private SharedPreferences settings;
-    private SharedPreferences.Editor editor;
+    /**
+     * Instance variables
+     */
+    private Switch                      accessibleSwitch;
+    private Switch                      visualSwitch;
+    private SharedPreferences.Editor    editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,15 +32,13 @@ public class Settings extends ActionBarActivity {
         // connect private members with view members
         this.accessibleSwitch = (Switch) findViewById(R.id.settings_switch_accessible);
         this.visualSwitch = (Switch) findViewById(R.id.settings_switch_visual);
-        this.grailSwitch = (Switch) findViewById(R.id.settings_switch_grail);
 
         // connect to preferences file
         settings = getPreferences(MODE_PRIVATE);
 
         // load switch states from memory
-        this.accessibleSwitch.setChecked(settings.getBoolean(ACCESSIBLE_ROUTING, false));
-        this.visualSwitch.setChecked(settings.getBoolean(VISUALLY_IMPAIRED, false));
-        this.grailSwitch.setChecked(settings.getBoolean("grail", false));
+        this.accessibleSwitch.setChecked(getSetting(ACCESSIBLE_ROUTING));
+        this.visualSwitch.setChecked(getSetting(VISUALLY_IMPAIRED));
 
         // for adding commits
         editor = settings.edit();
@@ -65,15 +68,11 @@ public class Settings extends ActionBarActivity {
     }
 
     /**
-     * Listener for the grail switch
-     * @param view
+     * Used to get the current values in the settings memory
+     * @param setting the setting to get the value of (ACCESSIBLE_ROUTING, VISUALLY_IMPAIRED, ...)
+     * @return the setting and false if it is not set
      */
-    public void grailSwitchStateChange (View view) {
-
-        this.editor.putBoolean("grail", ((Switch) view).isChecked());
-
-        this.editor.commit();
+    public static boolean getSetting(String setting) {
+        return settings.getBoolean(setting, false);
     }
-
-
 }

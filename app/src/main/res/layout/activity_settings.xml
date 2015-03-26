@@ -27,12 +27,4 @@
         android:showText="false"
         android:onClick="visualSwitchStateChange" />
 
-    <Switch
-        android:layout_width="fill_parent"
-        android:layout_height="@dimen/setting_item_height"
-        android:text="@string/setting_item_grail"
-        android:id="@+id/settings_switch_grail"
-        android:splitTrack="false"
-        android:showText="false"
-        android:onClick="grailSwitchStateChange" />
 </LinearLayout>
