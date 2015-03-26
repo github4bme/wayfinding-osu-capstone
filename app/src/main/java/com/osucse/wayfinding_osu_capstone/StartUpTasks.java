@@ -33,9 +33,16 @@ public class StartUpTasks {
     private static final String LOCATION_LIST_FILE = "LOCATION_LIST_FILE";
 
 
+    public static LocationCollection checkForLocationList (Context context) {
+        if (doesLocationFileExist()) {
+            loadLocationList(context);
+        } else {
+            getLocationCollectionFromServer(context);
+        }
+        return null;
+    }
 
-
-    public static LocationCollection getLocationCollectionFromServer () {
+    private static void  getLocationCollectionFromServer (Context context) {
         LocationCollection locationCollection = null;
         try {
             String url = URL + "locations";
@@ -43,14 +50,13 @@ public class StartUpTasks {
             restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
             locationCollection = restTemplate.getForObject(url, LocationCollection.class);
 
-            LOCATION_LIST = createLocationList(locationCollection);
-
         } catch (Exception e) {
             Log.e("LocationList", e.getMessage(), e);
         }
-        return locationCollection;
-    }
 
+        LOCATION_LIST = createLocationList(locationCollection);
+        saveLocationList(context);
+    }
 
     private static ArrayList<LocationTuple> createLocationList (LocationCollection locationCollection) {
 
@@ -83,7 +89,6 @@ public class StartUpTasks {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        LOCATION_LIST = null;
     }
 
     private static void loadLocationList (Context context) {
@@ -100,13 +105,6 @@ public class StartUpTasks {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public static LocationCollection test (Context context) {
-        Object o = getLocationCollectionFromServer();
-        saveLocationList(context);
-        loadLocationList(context);
-        return (LocationCollection)o;
     }
 
     private static boolean doesLocationFileExist () {

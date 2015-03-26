@@ -26,6 +26,7 @@ public class Selection extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selection);
+
         new HttpRequestTask().execute();
     }
 
@@ -86,7 +87,7 @@ public class Selection extends ActionBarActivity {
     private class HttpRequestTask extends AsyncTask<Void, Void, LocationCollection> {
         @Override
         protected LocationCollection doInBackground(Void... params) {
-            return StartUpTasks.test(getApplicationContext());
+            return StartUpTasks.checkForLocationList(getApplicationContext());
         }
 
         @Override
