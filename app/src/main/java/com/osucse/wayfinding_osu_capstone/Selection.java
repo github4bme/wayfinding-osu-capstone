@@ -86,7 +86,7 @@ public class Selection extends ActionBarActivity {
     private class HttpRequestTask extends AsyncTask<Void, Void, LocationCollection> {
         @Override
         protected LocationCollection doInBackground(Void... params) {
-            return StartUpTasks.getLocationCollectionFromServer();
+            return StartUpTasks.test(getApplicationContext());
         }
 
         @Override

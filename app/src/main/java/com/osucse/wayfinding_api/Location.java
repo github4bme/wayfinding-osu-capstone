@@ -1,6 +1,6 @@
 package com.osucse.wayfinding_api;
 
-public class Location extends Node implements Comparable<Location>{
+public class Location extends Node{
     private String name;
 
     private int id;
@@ -12,23 +12,6 @@ public class Location extends Node implements Comparable<Location>{
     public String getName()
     {
         return name;
-    }
-
-    @Override
-    public String toString()
-    {
-        return this.name;
-    }
-
-
-    /**
-     * Must have override for my adding of the Comparable<Location> implementation
-     * @param comp the item that this is being compared to
-     * @return an integer value (<(-1) for less than, 0 for equals, and >(1) for greater than)
-     */
-    @Override
-    public int compareTo(Location comp) {
-        return this.getName().toLowerCase().compareTo(comp.getName().toLowerCase());
     }
 
 }

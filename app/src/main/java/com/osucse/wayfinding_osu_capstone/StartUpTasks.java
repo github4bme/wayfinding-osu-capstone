@@ -9,6 +9,7 @@ import com.osucse.wayfinding_api.LocationCollection;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -27,24 +28,13 @@ public class StartUpTasks {
     // server url
     private static final String URL = "http://54.200.238.22:9000/";
 
-    // the list of locations from server
-    private static ArrayList<Location> LOCATION_LIST;
+    private static ArrayList<LocationTuple> LOCATION_LIST;
 
     private static final String LOCATION_LIST_FILE = "LOCATION_LIST_FILE";
 
 
 
 
-    /**
-     * getLocationCollectionFromServer will attempt to get a connection
-     * to the api server and pull the location data into the app. It fills
-     * the static variable with the LocationCollection information it collects
-     * and returns a pointer to that instance.
-     *
-     * Data: json is 156kb and takes 365ms to pull down on wireless.osu
-     *
-     * @return a pointer to the LOCATION_COLLECTION object
-     */
     public static LocationCollection getLocationCollectionFromServer () {
         LocationCollection locationCollection = null;
         try {
@@ -53,7 +43,7 @@ public class StartUpTasks {
             restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
             locationCollection = restTemplate.getForObject(url, LocationCollection.class);
 
-            LOCATION_LIST = makeLocationList(locationCollection);
+            LOCATION_LIST = createLocationList(locationCollection);
 
         } catch (Exception e) {
             Log.e("LocationList", e.getMessage(), e);
@@ -61,58 +51,62 @@ public class StartUpTasks {
         return locationCollection;
     }
 
-    /**
-     * Processes the locationCollection by removing null locations, and sorting the
-     * remaining locations. The result is returned
-     * @param locationCollection a LocationCollection to process
-     * @return a processed ArrayList of the LocationCollection data
-     */
-    private static ArrayList<Location> makeLocationList (LocationCollection locationCollection) {
+
+    private static ArrayList<LocationTuple> createLocationList (LocationCollection locationCollection) {
 
         // initialize a new array
-        ArrayList<Location> temp = new ArrayList<Location>(locationCollection.getLocations().size());
+        ArrayList<LocationTuple> temp = new ArrayList<LocationTuple>();
 
         // removes null location data while copying pointers
         for(Location l : locationCollection.getLocations())
         {
             if(l.getName() != null) {
-                temp.add(l);
+                temp.add(new LocationTuple(l.getName(), Integer.toString(l.getId())));
             }
         }
 
-        // sorts the LocationCollection by name (see added compareTo part of the location class)
         Collections.sort(temp);
 
         return temp;
     }
 
     private static void saveLocationList (Context context) {
+        FileOutputStream outputStream;
+
         try {
-            FileOutputStream fos = context.openFileOutput(LOCATION_LIST_FILE, Context.MODE_PRIVATE);
-            ObjectOutputStream oos= new ObjectOutputStream(fos);
-            oos.writeObject(LOCATION_LIST);
-            oos.close();
-            fos.close();
-        } catch (IOException e) {
+            outputStream = context.openFileOutput(LOCATION_LIST_FILE, Context.MODE_PRIVATE);
+            for (LocationTuple l : LOCATION_LIST) {
+                outputStream.write((l.getName() + "\n").getBytes());
+                outputStream.write((l.getId() + "\n").getBytes());
+            }
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        LOCATION_LIST = null;
+    }
+
+    private static void loadLocationList (Context context) {
+        LOCATION_LIST = new ArrayList<LocationTuple>();
+        try {
+            FileInputStream inputStream = context.openFileInput(LOCATION_LIST_FILE);
+            BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
+            String line;
+            while ((line = r.readLine()) != null) {
+                LOCATION_LIST.add(new LocationTuple(line, r.readLine()));
+            }
+            r.close();
+            inputStream.close();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void loadLocationList () {
-        LOCATION_LIST = new ArrayList<Location>();
-        try
-        {
-            FileInputStream fis = new FileInputStream(LOCATION_LIST_FILE);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            LOCATION_LIST = (ArrayList) ois.readObject();
-            ois.close();
-            fis.close();
-        }catch(IOException ioe){
-            ioe.printStackTrace();
-        }catch(ClassNotFoundException c){
-            System.out.println("Class not found");
-            c.printStackTrace();
-        }
+    public static LocationCollection test (Context context) {
+        Object o = getLocationCollectionFromServer();
+        saveLocationList(context);
+        loadLocationList(context);
+        return (LocationCollection)o;
     }
 
     private static boolean doesLocationFileExist () {
@@ -120,8 +114,8 @@ public class StartUpTasks {
         return file.exists();
     }
 
-    public static ArrayList<Location> getLocationList () {
-        return new ArrayList<Location>(LOCATION_LIST);
+    public static ArrayList<LocationTuple> getLocationList () {
+        return new ArrayList<LocationTuple>(LOCATION_LIST);
     }
 }
 

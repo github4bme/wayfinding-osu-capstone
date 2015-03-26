@@ -22,11 +22,11 @@ import java.util.ArrayList;
 public class SelectDestinationLocation extends ActionBarActivity {
 
     // instance variables
-    public ArrayAdapter<Location>   adapter;
-    public ArrayList <Location>     destinations;
-    public ListView                 listView;
-    public EditText                 editText;
-    public String                   incomingSource;
+    public ArrayAdapter<LocationTuple>  adapter;
+    public ArrayList <LocationTuple>    destinations;
+    public ListView                     listView;
+    public EditText                     editText;
+    public String                       incomingSource;
 
     // memory location to pass between intents
     public final static String      SOURCE_LOCATION
@@ -51,7 +51,7 @@ public class SelectDestinationLocation extends ActionBarActivity {
         destinations = StartUpTasks.getLocationList();
 
         // creates adapter and attaches it to the listView
-        adapter = new ArrayAdapter<Location>(this, android.R.layout.simple_list_item_1, destinations);
+        adapter = new ArrayAdapter<LocationTuple>(this, android.R.layout.simple_list_item_1, destinations);
         listView.setAdapter(adapter);
 
         // create listener for the editText and have it filter the list on input changes
@@ -74,7 +74,7 @@ public class SelectDestinationLocation extends ActionBarActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 // get the id of the selected item
-                String selectedItem = Integer.toString(((Location)(parent.getItemAtPosition(position))).getId());
+                String selectedItem = ((LocationTuple)(parent.getItemAtPosition(position))).getId();
 
                 // create an intent
                 Intent intent = new Intent(SelectDestinationLocation.this, DisplayMapActivity.class);
