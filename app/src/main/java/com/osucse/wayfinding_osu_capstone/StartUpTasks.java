@@ -31,11 +31,16 @@ public class StartUpTasks {
     private static final String LOCATION_LIST_FILE = "LOCATION_LIST_FILE";
 
 
+    private static boolean onece = false;
+
     public static LocationCollection checkForLocationList (Context context) {
-        if (doesLocationFileExist()) {
+        if (onece) {
+            Log.w("myApp", "Location file exists");
             loadLocationList(context);
         } else {
+            Log.w("myApp", "No location file, pulling from server");
             getLocationCollectionFromServer(context);
+            onece = true;
         }
         return null;
     }
@@ -85,7 +90,7 @@ public class StartUpTasks {
             }
             outputStream.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.w("myApp", "ERROR writing file!!!");
         }
     }
 
