@@ -79,12 +79,15 @@ public class SelectDestinationLocation extends ActionBarActivity {
                 intent.putExtra(SOURCE_LOCATION, incomingSource);
                 intent.putExtra(DESTINATION_LOCATION, selectedItem);
 
+                //clear the stack
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
                 // start the intent
                 startActivity(intent);
 
                 // finish the SelectSource & SelectDestination activities
-                intent = new Intent(SelectSourceLocation.KILL_SELECT_DESTINATION);
-                sendBroadcast(intent);
+                //intent = new Intent(SelectSourceLocation.KILL_SELECT_DESTINATION);
+                //sendBroadcast(intent);
                 SelectDestinationLocation.this.finish();
             }
         });

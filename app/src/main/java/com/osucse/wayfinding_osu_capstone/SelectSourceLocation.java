@@ -33,6 +33,7 @@ public class SelectSourceLocation extends ActionBarActivity {
     public final static String      KILL_SELECT_DESTINATION = "KILL_SELECT_DESTINATION";
 
     // broadcastReceiver for killing the activity remotely
+    /*
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
 
         @Override
@@ -42,7 +43,7 @@ public class SelectSourceLocation extends ActionBarActivity {
                 killActivity();
             }
         }
-    };
+    };*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +51,7 @@ public class SelectSourceLocation extends ActionBarActivity {
         setContentView(R.layout.activity_select_source_location);
 
         // add a broadcast reliever for killing the activity remotely
-        registerReceiver(receiver, new IntentFilter(KILL_SELECT_DESTINATION));
+        //registerReceiver(receiver, new IntentFilter(KILL_SELECT_DESTINATION));
 
         // connect activity to layout items
         listView = (ListView) findViewById(R.id.source_list);
@@ -100,9 +101,9 @@ public class SelectSourceLocation extends ActionBarActivity {
 
     /**
      * Simple private class that is used to kill this activity.
-     */
+
     private void killActivity () {
         this.unregisterReceiver(receiver);
         this.finish();
-    }
+    }*/
 }
