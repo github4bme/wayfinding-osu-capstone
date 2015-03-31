@@ -1,5 +1,6 @@
 package com.osucse.wayfinding_osu_capstone;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -16,6 +17,8 @@ import java.util.*;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import com.osucse.wayfinding_api.*;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import com.osucse.utilities.Coordinate;
 
 
@@ -79,11 +82,30 @@ public class DisplayMapActivity extends FragmentActivity {
 
         @Override
         protected void onPostExecute(Route collection) {
-            final List<Node> routePoints = collection.getRoute();
-            plotRoute(routePoints);
+            //if route was generated
+            if (collection != null){
+                final List<Node> routePoints = collection.getRoute();
+                plotRoute(routePoints);
+            }else{
+            //if no route generated, show error and go to home screen
+                Builder noRoute = new AlertDialog.Builder(DisplayMapActivity.this);
+                noRoute.setTitle("Error");
+                noRoute.setMessage("There is no possible route between these points.");
+                noRoute.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog, int which){
+                        Intent intent = new Intent(DisplayMapActivity.this, Selection.class);
+                        startActivity(intent);
+                    }
+                });
+                noRoute.show();
+            }
+
         }
 
     }
+
+
 
 
     /**
