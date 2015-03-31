@@ -3,6 +3,7 @@ package com.osucse.wayfinding_osu_capstone;
 import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Switch;
 
@@ -37,8 +38,8 @@ public class Settings extends ActionBarActivity {
         settings = getPreferences(MODE_PRIVATE);
 
         // load switch states from memory
-        this.accessibleSwitch.setChecked(getSetting(ACCESSIBLE_ROUTING));
-        this.visualSwitch.setChecked(getSetting(VISUALLY_IMPAIRED));
+        this.accessibleSwitch.setChecked(settings.getBoolean(ACCESSIBLE_ROUTING, false));
+        this.visualSwitch.setChecked(settings.getBoolean(VISUALLY_IMPAIRED, false));
 
         // for adding commits
         editor = settings.edit();
@@ -65,14 +66,5 @@ public class Settings extends ActionBarActivity {
         this.editor.putBoolean(VISUALLY_IMPAIRED, ((Switch) view).isChecked());
 
         this.editor.commit();
-    }
-
-    /**
-     * Used to get the current values in the settings memory
-     * @param setting the setting to get the value of (ACCESSIBLE_ROUTING, VISUALLY_IMPAIRED, ...)
-     * @return the setting and false if it is not set
-     */
-    public static boolean getSetting(String setting) {
-        return settings.getBoolean(setting, false);
     }
 }
