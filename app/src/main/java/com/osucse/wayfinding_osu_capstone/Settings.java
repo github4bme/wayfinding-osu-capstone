@@ -17,13 +17,13 @@ public class Settings extends ActionBarActivity {
     public static final String VISUALLY_IMPAIRED = "VISUALLY_IMPAIRED";
 
     private static SharedPreferences settings;
+    private static SharedPreferences.Editor editor;
 
     /**
      * Instance variables
      */
     private Switch                      accessibleSwitch;
     private Switch                      visualSwitch;
-    private SharedPreferences.Editor    editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +41,6 @@ public class Settings extends ActionBarActivity {
         this.accessibleSwitch.setChecked(settings.getBoolean(ACCESSIBLE_ROUTING, false));
         this.visualSwitch.setChecked(settings.getBoolean(VISUALLY_IMPAIRED, false));
 
-        // for adding commits
-        editor = settings.edit();
     }
 
 
@@ -50,21 +48,25 @@ public class Settings extends ActionBarActivity {
      * Listener for the accessible switch
      * @param view
      */
-    public void accessibleSwitchStateChange (View view) {
+    public static void accessibleSwitchStateChange (View view) {
 
-        this.editor.putBoolean(ACCESSIBLE_ROUTING, ((Switch) view).isChecked());
+        editor = settings.edit();
 
-        this.editor.commit();
+        editor.putBoolean(ACCESSIBLE_ROUTING, ((Switch) view).isChecked());
+
+        editor.commit();
     }
 
     /**
      * Listener for the visual switch
      * @param view
      */
-    public void visualSwitchStateChange (View view) {
+    public static void visualSwitchStateChange (View view) {
 
-        this.editor.putBoolean(VISUALLY_IMPAIRED, ((Switch) view).isChecked());
+        editor = settings.edit();
 
-        this.editor.commit();
+        editor.putBoolean(VISUALLY_IMPAIRED, ((Switch) view).isChecked());
+
+        editor.commit();
     }
 }
