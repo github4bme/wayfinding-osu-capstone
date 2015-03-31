@@ -5,6 +5,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.Switch;
 
 
@@ -34,6 +35,20 @@ public class Settings extends ActionBarActivity {
         this.accessibleSwitch = (Switch) findViewById(R.id.settings_switch_accessible);
         this.visualSwitch = (Switch) findViewById(R.id.settings_switch_visual);
 
+        // listener for the accessibleSwitch
+        this.accessibleSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Settings.accessibleSwitchStateChange(isChecked);
+            }
+        });
+
+        // listener for the visualSwitch
+        this.visualSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Settings.visualSwitchStateChange(isChecked);
+            }
+        });
+
         // connect to preferences file
         settings = getPreferences(MODE_PRIVATE);
 
@@ -45,28 +60,37 @@ public class Settings extends ActionBarActivity {
 
 
     /**
-     * Listener for the accessible switch
-     * @param view
+     * Helper method for changing the accessibleSwitch
+     * @param bool what to set the switch state to
      */
-    public static void accessibleSwitchStateChange (View view) {
+    private static void accessibleSwitchStateChange (Boolean bool) {
 
         editor = settings.edit();
 
-        editor.putBoolean(ACCESSIBLE_ROUTING, ((Switch) view).isChecked());
+        editor.putBoolean(ACCESSIBLE_ROUTING, bool);
 
         editor.commit();
     }
 
     /**
-     * Listener for the visual switch
-     * @param view
+     * Helper method for changing the visualSwitch
+     * @param bool what to set the switch state to
      */
-    public static void visualSwitchStateChange (View view) {
+    private static void visualSwitchStateChange (boolean bool) {
 
         editor = settings.edit();
 
-        editor.putBoolean(VISUALLY_IMPAIRED, ((Switch) view).isChecked());
+        editor.putBoolean(VISUALLY_IMPAIRED, bool);
 
         editor.commit();
+    }
+
+
+    public static boolean getAccessibleSetting () {
+        return settings.getBoolean(ACCESSIBLE_ROUTING, false);
+    }
+
+    public static boolean getVisualSetting () {
+        return settings.getBoolean(VISUALLY_IMPAIRED, false);
     }
 }

@@ -15,8 +15,7 @@
         android:text="@string/setting_item_accessible"
         android:id="@+id/settings_switch_accessible"
         android:splitTrack="false"
-        android:showText="false"
-        android:onClick="accessibleSwitchStateChange" />
+        android:showText="false" />
 
     <Switch
         android:layout_width="fill_parent"
@@ -24,7 +23,6 @@
         android:text="@string/setting_item_visual"
         android:id="@+id/settings_switch_visual"
         android:splitTrack="false"
-        android:showText="false"
-        android:onClick="visualSwitchStateChange" />
+        android:showText="false" />
 
 </LinearLayout>
