@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.osucse.wayfinding_api.LocationCollection;
@@ -27,6 +28,7 @@ public class Selection extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selection);
         new HttpRequestTask().execute();
+
     }
 
     /**
