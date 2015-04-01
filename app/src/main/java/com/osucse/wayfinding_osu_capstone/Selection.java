@@ -26,7 +26,6 @@ public class Selection extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selection);
-        new HttpRequestTask().execute();
     }
 
     /**
@@ -58,8 +57,8 @@ public class Selection extends ActionBarActivity {
      * starts the navigation sub-process of the app.
      */
     private void goToDirections () {
-        Intent intent = new Intent(this, SelectSourceLocation.class);
-        startActivity(intent);
+        // Get list with http request then go to next activity after list is retrieved
+        new HttpRequestTask().execute();
     }
 
     /**
@@ -91,8 +90,8 @@ public class Selection extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(LocationCollection locations) {
-            // nothing to post execute
+            Intent intent = new Intent(Selection.this, SelectSourceLocation.class);
+            startActivity(intent);
         }
-
     }
 }
