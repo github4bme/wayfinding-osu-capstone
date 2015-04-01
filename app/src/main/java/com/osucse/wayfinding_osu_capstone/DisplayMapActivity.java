@@ -94,8 +94,7 @@ public class DisplayMapActivity extends FragmentActivity {
                 noRoute.setPositiveButton("OK", new DialogInterface.OnClickListener(){
                     @Override
                     public void onClick(DialogInterface dialog, int which){
-                        Intent intent = new Intent(DisplayMapActivity.this, Selection.class);
-                        startActivity(intent);
+                        finish();
                     }
                 });
                 noRoute.show();
