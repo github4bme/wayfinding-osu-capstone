@@ -156,6 +156,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
             plotRoute();
             ourMap.setMyLocationEnabled(true);
+            ourMap.getUiSettings().setMapToolbarEnabled(false);
 
             // Set first marker to show the start of the route
             ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
