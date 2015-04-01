@@ -1,6 +1,5 @@
 package com.osucse.wayfinding_osu_capstone;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ public class Settings extends ActionBarActivity {
     /**
      * Names of the setting locations
      */
-    public static final String SHARED_PREFERENCES = "SHARED_PREFERENCES";
     public static final String ACCESSIBLE_ROUTING = "ACCESSIBLE_ROUTING";
     public static final String VISUALLY_IMPAIRED = "VISUALLY_IMPAIRED";
 
@@ -52,7 +50,7 @@ public class Settings extends ActionBarActivity {
         });
 
         // connect to preferences file
-        settings = getSharedPreferences(SHARED_PREFERENCES, MODE_PRIVATE);
+        settings = getPreferences(MODE_PRIVATE);
 
         // load switch states from memory
         this.accessibleSwitch.setChecked(settings.getBoolean(ACCESSIBLE_ROUTING, false));
@@ -87,21 +85,12 @@ public class Settings extends ActionBarActivity {
         editor.commit();
     }
 
-    /**
-     * This will tell you the value of the ACCESSIBLE_ROUTING
-     * @param activity required for fetching preferences (just use this)
-     * @return true or false
-     */
-    public static boolean getAccessibleSetting (Activity activity) {
-        return activity.getSharedPreferences(SHARED_PREFERENCES, MODE_PRIVATE).getBoolean(ACCESSIBLE_ROUTING, false);
+
+    public static boolean getAccessibleSetting () {
+        return settings.getBoolean(ACCESSIBLE_ROUTING, false);
     }
 
-    /**
-     * This will tell you the value of the VISUALLY_IMPAIRED
-     * @param activity required for fetching preferences (just use this)
-     * @return true or false
-     */
-    public static boolean getVisualSetting (Activity activity) {
-        return activity.getSharedPreferences(SHARED_PREFERENCES, MODE_PRIVATE).getBoolean(VISUALLY_IMPAIRED, false);
+    public static boolean getVisualSetting () {
+        return settings.getBoolean(VISUALLY_IMPAIRED, false);
     }
 }
