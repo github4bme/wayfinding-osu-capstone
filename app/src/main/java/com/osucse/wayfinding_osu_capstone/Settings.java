@@ -1,39 +1,96 @@
 package com.osucse.wayfinding_osu_capstone;
 
+import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.util.Log;
+import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 
 
 public class Settings extends ActionBarActivity {
+
+    /**
+     * Names of the setting locations
+     */
+    public static final String ACCESSIBLE_ROUTING = "ACCESSIBLE_ROUTING";
+    public static final String VISUALLY_IMPAIRED = "VISUALLY_IMPAIRED";
+
+    private static SharedPreferences settings;
+    private static SharedPreferences.Editor editor;
+
+    /**
+     * Instance variables
+     */
+    private Switch                      accessibleSwitch;
+    private Switch                      visualSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+
+        // connect private members with view members
+        this.accessibleSwitch = (Switch) findViewById(R.id.settings_switch_accessible);
+        this.visualSwitch = (Switch) findViewById(R.id.settings_switch_visual);
+
+        // listener for the accessibleSwitch
+        this.accessibleSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Settings.accessibleSwitchStateChange(isChecked);
+            }
+        });
+
+        // listener for the visualSwitch
+        this.visualSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Settings.visualSwitchStateChange(isChecked);
+            }
+        });
+
+        // connect to preferences file
+        settings = getPreferences(MODE_PRIVATE);
+
+        // load switch states from memory
+        this.accessibleSwitch.setChecked(settings.getBoolean(ACCESSIBLE_ROUTING, false));
+        this.visualSwitch.setChecked(settings.getBoolean(VISUALLY_IMPAIRED, false));
+
     }
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_settings, menu);
-        return true;
+    /**
+     * Helper method for changing the accessibleSwitch
+     * @param bool what to set the switch state to
+     */
+    private static void accessibleSwitchStateChange (Boolean bool) {
+
+        editor = settings.edit();
+
+        editor.putBoolean(ACCESSIBLE_ROUTING, bool);
+
+        editor.commit();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+    /**
+     * Helper method for changing the visualSwitch
+     * @param bool what to set the switch state to
+     */
+    private static void visualSwitchStateChange (boolean bool) {
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+        editor = settings.edit();
 
-        return super.onOptionsItemSelected(item);
+        editor.putBoolean(VISUALLY_IMPAIRED, bool);
+
+        editor.commit();
+    }
+
+
+    public static boolean getAccessibleSetting () {
+        return settings.getBoolean(ACCESSIBLE_ROUTING, false);
+    }
+
+    public static boolean getVisualSetting () {
+        return settings.getBoolean(VISUALLY_IMPAIRED, false);
     }
 }
