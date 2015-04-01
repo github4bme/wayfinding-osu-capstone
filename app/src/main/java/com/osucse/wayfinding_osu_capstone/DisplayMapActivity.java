@@ -156,6 +156,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
             plotRoute();
             ourMap.setMyLocationEnabled(true);
+            ourMap.getUiSettings().setMapToolbarEnabled(false);
 
             // Set first marker to show the start of the route
             ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
@@ -181,8 +182,13 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     // Defines how and when our location updates are made
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
+        // Original settings for later comparison
+//        mLocationRequest.setInterval(10000);
+//        mLocationRequest.setFastestInterval(5000);
+        
+        // Set update rate to as fast as possible
+        mLocationRequest.setInterval(0);
+        mLocationRequest.setFastestInterval(0);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
