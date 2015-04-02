@@ -17,9 +17,8 @@ public class Location extends Node implements Comparable<Location>{
     @Override
     public String toString()
     {
-        return this.name;
+        return getName(); // for the array adapter
     }
-
 
     /**
      * Must have override for my adding of the Comparable<Location> implementation
@@ -30,5 +29,4 @@ public class Location extends Node implements Comparable<Location>{
     public int compareTo(Location comp) {
         return this.getName().toLowerCase().compareTo(comp.getName().toLowerCase());
     }
-
 }
