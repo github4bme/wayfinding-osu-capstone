@@ -37,6 +37,12 @@
             android:id="@+id/settings_button"
             android:onClick="settingsButtonPressed" />
 
+        <TextView
+            android:id="@+id/loading_list_display"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="" />
+
     </LinearLayout>
 
     <RelativeLayout
