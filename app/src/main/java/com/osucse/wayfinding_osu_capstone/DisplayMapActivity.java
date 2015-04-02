@@ -89,10 +89,9 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         // Set boolean for asynchronous ordering
         // if true get current location THEN get route and build map
         // else (get current location) AND (get route and build map) in parallel
-
-        // to be deleted 1/1
-        startLocation = "-1";
-
+        // *****************
+//        startLocation = "-1";
+        // *****************
         routeGenUsesCurrLoc = (startLocation == "-1");
 
         // if not called here then called in onConnected
