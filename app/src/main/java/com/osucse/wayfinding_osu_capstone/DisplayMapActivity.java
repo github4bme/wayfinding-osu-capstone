@@ -51,6 +51,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     private SensorManager mSensorManager;
     private Sensor mSensor;
 
+    protected TextView textMessageDisplay;
     protected ImageView arrowImage;
 
     protected String startLocation;
@@ -79,9 +80,9 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         setContentView(R.layout.activity_display_map);
         Intent intent = getIntent();
 
-        TextView startLocationDisplay = (TextView) findViewById(R.id.start_location_display);
-        startLocationDisplay.setTextSize(20);
-        startLocationDisplay.setText("OSU Wayfinding Application");
+        textMessageDisplay = (TextView) findViewById(R.id.text_message_display);
+        textMessageDisplay.setTextSize(20);
+        textMessageDisplay.setText("OSU Wayfinding Application");
         arrowImage = (ImageView) findViewById(R.id.arrow_image);
 
         startLocation = intent.getStringExtra(SelectDestinationLocation.SOURCE_LOCATION);
@@ -163,6 +164,8 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
                 // Sets up a non-null GoogleMap and calls onMapReady()
                 map.getMapAsync(this);
+            } else {
+                textMessageDisplay.setText("HTTP RETURNED NULL");
             }
         }
 
