@@ -74,6 +74,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     protected boolean mRequestingLocationUpdates;
 
     protected TextView startLocationDisplay;
+    protected String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,7 +131,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         @Override
         protected Route doInBackground(Void... params) {
             try {
-                String url;
+//                String url;
                 if (routeGenUsesCurrLoc) {
                     url = URL + "generateRouteCurrent?dest=" + endLocation + "&currlat=" +
                             Double.toString(mCurrentLocation.getLatitude()) + "&currlong=" +
@@ -138,8 +139,6 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
                 } else {
                     url = URL + "generateRoute?from=" + startLocation + "&to=" + endLocation;
                 }
-
-                DisplayMapActivity.this.startLocationDisplay.setText(url);
 
                 RestTemplate restTemplate = new RestTemplate();
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
@@ -164,6 +163,9 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
                 // Set first destination to the start of the route
                 mNextDestination = ourRoute.get(0);
+
+                startLocationDisplay.setText(url);
+
 
                 MapFragment map = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 
