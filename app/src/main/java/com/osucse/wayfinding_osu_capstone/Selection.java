@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import com.osucse.wayfinding_api.LocationCollection;
 
@@ -57,6 +58,9 @@ public class Selection extends ActionBarActivity {
      * starts the navigation sub-process of the app.
      */
     private void goToDirections () {
+        TextView loadingListDisplay = (TextView) findViewById(R.id.loading_list_display);
+        loadingListDisplay.setTextSize(20);
+        loadingListDisplay.setText("Loading...");
         // Get list with http request then go to next activity after list is retrieved
         new HttpRequestTask().execute();
     }
