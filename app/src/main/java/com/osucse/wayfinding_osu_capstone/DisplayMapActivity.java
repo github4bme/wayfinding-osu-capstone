@@ -73,13 +73,15 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     // This might be helpful for running on emulator if we find that the updates cause problems
     protected boolean mRequestingLocationUpdates;
 
+    protected TextView startLocationDisplay;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_map);
         Intent intent = getIntent();
 
-        TextView startLocationDisplay = (TextView) findViewById(R.id.start_location_display);
+        startLocationDisplay = (TextView) findViewById(R.id.start_location_display);
         startLocationDisplay.setTextSize(20);
         startLocationDisplay.setText("OSU Wayfinding Application");
         arrowImage = (ImageView) findViewById(R.id.arrow_image);
@@ -136,6 +138,9 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
                 } else {
                     url = URL + "generateRoute?from=" + startLocation + "&to=" + endLocation;
                 }
+
+                DisplayMapActivity.this.startLocationDisplay.setText(url);
+
                 RestTemplate restTemplate = new RestTemplate();
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
                 Route collection = restTemplate.getForObject(url, Route.class);
@@ -195,6 +200,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         for (int i = 0; i < ourRoute.size() - 1; i++){
             ourMap.addPolyline((new PolylineOptions()).add(ourRoute.get(i), ourRoute.get(i + 1))
                     .width(5).color(Color.BLUE).geodesic(true));
+            ourMap.addMarker(new MarkerOptions().title(Integer.toString(i)).position(ourRoute.get(i)));
         }
     }
 
