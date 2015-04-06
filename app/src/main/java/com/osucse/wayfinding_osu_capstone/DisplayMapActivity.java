@@ -80,7 +80,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         setContentView(R.layout.activity_display_map);
         Intent intent = getIntent();
 
-        textMessageDisplay = (TextView) findViewById(R.id.text_message_display);
+        textMessageDisplay = (TextView) findViewById(R.id.text_message_map_display);
         textMessageDisplay.setTextSize(20);
         textMessageDisplay.setText("OSU Wayfinding Application");
         arrowImage = (ImageView) findViewById(R.id.arrow_image);

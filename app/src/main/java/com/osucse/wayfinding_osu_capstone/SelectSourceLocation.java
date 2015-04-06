@@ -32,8 +32,8 @@ import java.util.ArrayList;
 public class SelectSourceLocation extends ActionBarActivity {
 
     // instance variables
-    public ArrayAdapter<LocationShell>    adapter;
-    public ArrayList <LocationShell> sourcesShell;
+    public ArrayList <Location>      sources;
+    public ArrayAdapter<Location>    adapter;
     public ListView                  listView;
     public EditText                  editText;
 
@@ -67,11 +67,11 @@ public class SelectSourceLocation extends ActionBarActivity {
         listView = (ListView) findViewById(R.id.source_list);
         editText = (EditText) findViewById(R.id.source_list_search);
 
-        // Gets sources location list and adds "Current Location" to this list
-        buildSourcesShell();
+        // gets copy of ordered list of locations
+        sources = StartUpTasks.cloneLocationCollection();
 
         // creates adapter and attaches it to the listView
-        adapter = new ArrayAdapter<LocationShell>(this, android.R.layout.simple_list_item_1, sourcesShell);
+        adapter = new ArrayAdapter<Location>(this, android.R.layout.simple_list_item_1, sources);
         listView.setAdapter(adapter);
 
         // create listener for the editText and have it filter the list on input changes
@@ -92,9 +92,8 @@ public class SelectSourceLocation extends ActionBarActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
                 // get the id of the selected item
-                String selectedItem = Integer.toString(((LocationShell)(parent.getItemAtPosition(position))).getId());
+                String selectedItem = Integer.toString(((Location) (parent.getItemAtPosition(position))).getId());
 
                 // create an intent
                 Intent intent = new Intent(SelectSourceLocation.this, SelectDestinationLocation.class);
@@ -109,53 +108,22 @@ public class SelectSourceLocation extends ActionBarActivity {
     }
 
     /**
+     * Create and execute an intent with source location set to -1
+     */
+    public void useCurrentLocation(View view) {
+        // create an intent
+        Intent intent = new Intent(this, SelectDestinationLocation.class);
+
+        // set the source location id to -1 for current location; add to intent
+        intent.putExtra(SOURCE_LOCATION, "-1");
+        startActivity(intent);
+    }
+
+    /**
      * Simple private class that is used to kill this activity.
      */
     private void killActivity () {
         this.unregisterReceiver(receiver);
         this.finish();
-    }
-
-    /**
-     * Gets location list for sources and adds "Current Location" to the front of that list
-     */
-    protected void buildSourcesShell() {
-        // creates a clone of the location list (the list is sorted)
-        ArrayList <Location> sources = StartUpTasks.cloneLocationCollection();
-
-        sourcesShell = new ArrayList<LocationShell>();
-        // have "Current Location" at the front of the list
-        sourcesShell.add(0, new LocationShell("Current Location", -1));
-
-        for (int i = 0; i < sources.size(); i++) {
-            Location locToAdd = sources.get(i);
-            // put locToAdd in index + 1 of sources shell because "Current Location" is first
-            sourcesShell.add(i + 1, new LocationShell(locToAdd.getName(), locToAdd.getId()));
-        }
-    }
-    /**
-     * Shell object for JSON created locations so we can add "current location" to the list
-     */
-    private class LocationShell {
-        private String name;
-        private int id;
-
-        public LocationShell(String nameInput, int idInput) {
-            this.name = nameInput;
-            this.id = idInput;
-        }
-
-        @Override
-        public String toString() {
-            return this.name;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public int getId() {
-            return this.id;
-        }
     }
 }
