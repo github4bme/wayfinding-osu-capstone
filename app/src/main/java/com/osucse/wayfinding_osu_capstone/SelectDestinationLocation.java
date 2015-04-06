@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.osucse.wayfinding_api.Location;
+import com.osucse.wayfinding_osu_capstone.Settings;
 
 import java.util.ArrayList;
 
@@ -77,7 +78,14 @@ public class SelectDestinationLocation extends ActionBarActivity {
                 String selectedItem = Integer.toString(((Location)(parent.getItemAtPosition(position))).getId());
 
                 // create an intent
-                Intent intent = new Intent(SelectDestinationLocation.this, DisplayMapActivity.class);
+                Intent intent = null;
+
+                if (Settings.getVisualSetting()){
+                    intent = new Intent(SelectDestinationLocation.this, DisplayArrowActivity.class);
+                } else {
+                    intent = new Intent(SelectDestinationLocation.this, DisplayMapActivity.class);
+                }
+
 
                 // add the selected id to intent
                 intent.putExtra(SOURCE_LOCATION, incomingSource);
