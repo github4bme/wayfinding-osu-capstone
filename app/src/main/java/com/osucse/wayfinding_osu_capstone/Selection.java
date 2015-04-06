@@ -94,6 +94,11 @@ public class Selection extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(LocationCollection locations) {
+            // Clears the "Loading..." message so it is not there when you navigate back to this screen from Map Display
+            // This has never given me a threading error, but it is possible that it could
+            TextView loadingListDisplay = (TextView) Selection.this.findViewById(R.id.loading_list_display);
+            loadingListDisplay.setTextSize(20);
+            loadingListDisplay.setText("");
             Intent intent = new Intent(Selection.this, SelectSourceLocation.class);
             startActivity(intent);
         }

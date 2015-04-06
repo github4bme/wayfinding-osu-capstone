@@ -53,10 +53,12 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     private SensorManager mSensorManager;
     private Sensor mSensor;
 
+    protected TextView textMessageDisplay;
     protected ImageView arrowImage;
 
     protected String startLocation;
     protected String endLocation;
+    protected boolean routeGenUsesCurrLoc;
 
     protected android.location.Location mCurrentLocation;
     protected float bearingToDestDegrees;
@@ -79,15 +81,24 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_map);
         Intent intent = getIntent();
-        startLocation = intent.getStringExtra(SelectDestinationLocation.SOURCE_LOCATION);
-        endLocation = intent.getStringExtra(SelectDestinationLocation.DESTINATION_LOCATION);
 
-        TextView startLocationDisplay = (TextView) findViewById(R.id.start_location_display);
-        startLocationDisplay.setTextSize(20);
-        startLocationDisplay.setText("OSU Wayfinding Application");
+        textMessageDisplay = (TextView) findViewById(R.id.text_message_map_display);
+        textMessageDisplay.setTextSize(20);
+        textMessageDisplay.setText("OSU Wayfinding Application");
         arrowImage = (ImageView) findViewById(R.id.arrow_image);
 
-        new HttpRequestTask().execute();
+        startLocation = intent.getStringExtra(SelectDestinationLocation.SOURCE_LOCATION);
+        endLocation = intent.getStringExtra(SelectDestinationLocation.DESTINATION_LOCATION);
+        // Set boolean for ordering of asynchronous operations
+        // if true get current location THEN get route and build map
+        // else (get current location) AND (get route and build map) in parallel
+        // NOTE: Uses parseInt() for comparison because comparison to String "-1" was strangely failing
+        routeGenUsesCurrLoc = (Integer.parseInt(startLocation) == -1);
+
+        // if not called here then called in onConnected
+        if (!routeGenUsesCurrLoc) {
+            new HttpRequestTask().execute();
+        }
 
         // Set to true for all cases because we do not have any reason to turn these updates off
         // E.g. a setting to disable location information
@@ -117,8 +128,14 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         @Override
         protected Route doInBackground(Void... params) {
             try {
-
-                final String url = URL + "generateRoute?from=" + startLocation + "&to=" + endLocation;
+                String url;
+                if (routeGenUsesCurrLoc) {
+                    url = URL + "generateRouteCurrent?dest=" + endLocation + "&currlat=" +
+                            Double.toString(mCurrentLocation.getLatitude()) + "&currlong=" +
+                            Double.toString(mCurrentLocation.getLongitude());
+                } else {
+                    url = URL + "generateRoute?from=" + startLocation + "&to=" + endLocation;
+                }
                 RestTemplate restTemplate = new RestTemplate();
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
                 Route collection = restTemplate.getForObject(url, Route.class);
@@ -236,6 +253,11 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         // Set user's current location
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
+
+        // if route gen uses current location then current location must be found first
+        if (routeGenUsesCurrLoc) {
+            new HttpRequestTask().execute();
+        }
 
         checkNextDestUpdateUI();
 

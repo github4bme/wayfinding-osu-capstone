@@ -32,8 +32,8 @@ import java.util.ArrayList;
 public class SelectSourceLocation extends ActionBarActivity {
 
     // instance variables
-    public ArrayAdapter<Location>    adapter;
     public ArrayList <Location>      sources;
+    public ArrayAdapter<Location>    adapter;
     public ListView                  listView;
     public EditText                  editText;
 
@@ -67,7 +67,7 @@ public class SelectSourceLocation extends ActionBarActivity {
         listView = (ListView) findViewById(R.id.source_list);
         editText = (EditText) findViewById(R.id.source_list_search);
 
-        // creates a clone of the location list
+        // gets copy of ordered list of locations
         sources = StartUpTasks.cloneLocationCollection();
 
         // creates adapter and attaches it to the listView
@@ -92,9 +92,8 @@ public class SelectSourceLocation extends ActionBarActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
                 // get the id of the selected item
-                String selectedItem = Integer.toString(((Location)(parent.getItemAtPosition(position))).getId());
+                String selectedItem = Integer.toString(((Location) (parent.getItemAtPosition(position))).getId());
 
                 // create an intent
                 Intent intent = new Intent(SelectSourceLocation.this, SelectDestinationLocation.class);
@@ -106,6 +105,18 @@ public class SelectSourceLocation extends ActionBarActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    /**
+     * Create and execute an intent with source location set to -1
+     */
+    public void useCurrentLocation(View view) {
+        // create an intent
+        Intent intent = new Intent(this, SelectDestinationLocation.class);
+
+        // set the source location id to -1 for current location; add to intent
+        intent.putExtra(SOURCE_LOCATION, "-1");
+        startActivity(intent);
     }
 
     /**
