@@ -36,11 +36,11 @@ import com.osucse.wayfinding_api.*;
 
 public class DisplayArrowActivity extends FragmentActivity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String URL = "http://54.200.238.22:9000/";
-    private static final String CURRENT_LOCATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayMapActivity.currentLocationKey";
-    private static final String NEXT_DESTINATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayMapActivity.nextDestinationKey";
+    private static final String CURRENT_LOCATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayArrowActivity.currentLocationKey";
+    private static final String NEXT_DESTINATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayArrowActivity.nextDestinationKey";
     private static final float AT_LOCATION_RADIUS = 10.0f;
 
-    private GoogleMap ourMap;
+//    private GoogleMap ourMap;
     List<LatLng> ourRoute = new ArrayList<LatLng>();
 
     // Used for location services
@@ -111,7 +111,7 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
         updateValuesFromBundle(savedInstanceState);
     }
 
-    private class HttpRequestTask extends AsyncTask<Void, Void, Route> implements OnMapReadyCallback {
+    private class HttpRequestTask extends AsyncTask<Void, Void, Route> {
         @Override
         protected Route doInBackground(Void... params) {
             try {
@@ -148,36 +148,36 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
             }
         }
 
-        @Override
-        public void onMapReady(GoogleMap googleMap) {
-            // This is called when our getMapAsync() in onCreate() successfully gets a map
-            // Set created googleMap to our global map
-            ourMap = googleMap;
-
-            plotRoute();
-            ourMap.setMyLocationEnabled(true);
-            ourMap.getUiSettings().setMapToolbarEnabled(false);
-
-            // Set first marker to show the start of the route
-            ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
-        }
+//        @Override
+//        public void onMapReady(GoogleMap googleMap) {
+//            // This is called when our getMapAsync() in onCreate() successfully gets a map
+//            // Set created googleMap to our global map
+//            ourMap = googleMap;
+//
+//            plotRoute();
+//            ourMap.setMyLocationEnabled(true);
+//            ourMap.getUiSettings().setMapToolbarEnabled(false);
+//
+//            // Set first marker to show the start of the route
+//            ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
+//        }
     }
 
-    /**
-     * Plots the route on the map
-     */
-    private void plotRoute() {
-        // move camera to zoom on map to starting location
-        ourMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ourRoute.get(0),
-                17));
-
-        // Loop puts a line between all points in ourRoute
-        // Loop is kept so that we do not start a line at the last point
-        for (int i = 0; i < ourRoute.size() - 1; i++){
-            ourMap.addPolyline((new PolylineOptions()).add(ourRoute.get(i), ourRoute.get(i + 1))
-                    .width(5).color(Color.BLUE).geodesic(true));
-        }
-    }
+//    /**
+//     * Plots the route on the map
+//     */
+//    private void plotRoute() {
+//        // move camera to zoom on map to starting location
+//        ourMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ourRoute.get(0),
+//                17));
+//
+//        // Loop puts a line between all points in ourRoute
+//        // Loop is kept so that we do not start a line at the last point
+//        for (int i = 0; i < ourRoute.size() - 1; i++){
+//            ourMap.addPolyline((new PolylineOptions()).add(ourRoute.get(i), ourRoute.get(i + 1))
+//                    .width(5).color(Color.BLUE).geodesic(true));
+//        }
+//    }
 
     // Defines how and when our location updates are made
     protected void createLocationRequest() {
@@ -256,9 +256,9 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
                 mNextDestination = ourRoute.get(i + 1);
             }
         }
-        if (ourMap != null && tempDest != mNextDestination) {
-            ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
-        }
+//        if (ourMap != null && tempDest != mNextDestination) {
+//            ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
+//        }
 
         bearingToDestDegrees = mCurrentLocation.bearingTo(createAndroidLocation(mNextDestination));
         updateUI();
