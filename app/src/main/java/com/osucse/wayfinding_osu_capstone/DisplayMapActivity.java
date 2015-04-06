@@ -87,13 +87,11 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
         startLocation = intent.getStringExtra(SelectDestinationLocation.SOURCE_LOCATION);
         endLocation = intent.getStringExtra(SelectDestinationLocation.DESTINATION_LOCATION);
-        // Set boolean for asynchronous ordering
+        // Set boolean for ordering of asynchronous operations
         // if true get current location THEN get route and build map
         // else (get current location) AND (get route and build map) in parallel
-        // *****************
-//        startLocation = "-1";
-        // *****************
-        routeGenUsesCurrLoc = (startLocation == "-1");
+        // NOTE: Uses parseInt() for comparison because comparison to String "-1" was strangely failing
+        routeGenUsesCurrLoc = (Integer.parseInt(startLocation) == -1);
 
         // if not called here then called in onConnected
         if (!routeGenUsesCurrLoc) {
@@ -164,8 +162,6 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
                 // Sets up a non-null GoogleMap and calls onMapReady()
                 map.getMapAsync(this);
-            } else {
-                textMessageDisplay.setText("HTTP RETURNED NULL");
             }
         }
 
