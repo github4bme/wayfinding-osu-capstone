@@ -1,21 +1,15 @@
 package com.osucse.wayfinding_osu_capstone;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.widget.TextView;
 import android.util.Log;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.common.ConnectionResult;
 import android.hardware.SensorEventListener;
@@ -26,7 +20,6 @@ import android.hardware.SensorEvent;
 import android.widget.ImageView;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.PolylineOptions;
 import java.util.*;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
@@ -40,7 +33,6 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
     private static final String NEXT_DESTINATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayArrowActivity.nextDestinationKey";
     private static final float AT_LOCATION_RADIUS = 10.0f;
 
-//    private GoogleMap ourMap;
     List<LatLng> ourRoute = new ArrayList<LatLng>();
 
     // Used for location services
@@ -51,10 +43,12 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
     private SensorManager mSensorManager;
     private Sensor mSensor;
 
+    protected TextView textMessageDisplay;
     protected ImageView arrowImage;
 
     protected String startLocation;
     protected String endLocation;
+    protected boolean routeGenUsesCurrLoc;
 
     protected android.location.Location mCurrentLocation;
     protected float bearingToDestDegrees;
@@ -77,15 +71,24 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_arrow);
         Intent intent = getIntent();
-        startLocation = intent.getStringExtra(SelectDestinationLocation.SOURCE_LOCATION);
-        endLocation = intent.getStringExtra(SelectDestinationLocation.DESTINATION_LOCATION);
 
-        TextView startLocationDisplay = (TextView) findViewById(R.id.start_location_display);
-        startLocationDisplay.setTextSize(20);
-        startLocationDisplay.setText("OSU Wayfinding Application");
+        textMessageDisplay = (TextView) findViewById(R.id.text_message_display);
+        textMessageDisplay.setTextSize(20);
+        textMessageDisplay.setText("OSU Wayfinding Application");
         arrowImage = (ImageView) findViewById(R.id.arrow_image);
 
-        new HttpRequestTask().execute();
+        startLocation = intent.getStringExtra(SelectDestinationLocation.SOURCE_LOCATION);
+        endLocation = intent.getStringExtra(SelectDestinationLocation.DESTINATION_LOCATION);
+        // Set boolean for ordering of asynchronous operations
+        // if true get current location THEN get route and build map
+        // else (get current location) AND (get route and build map) in parallel
+        // NOTE: Uses parseInt() for comparison because comparison to String "-1" was strangely failing
+        routeGenUsesCurrLoc = (Integer.parseInt(startLocation) == -1);
+
+        // if not called here then called in onConnected
+        if (!routeGenUsesCurrLoc) {
+            new HttpRequestTask().execute();
+        }
 
         // Set to true for all cases because we do not have any reason to turn these updates off
         // E.g. a setting to disable location information
@@ -115,8 +118,14 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
         @Override
         protected Route doInBackground(Void... params) {
             try {
-
-                final String url = URL + "generateRoute?from=" + startLocation + "&to=" + endLocation;
+                String url;
+                if (routeGenUsesCurrLoc) {
+                    url = URL + "generateRouteCurrent?dest=" + endLocation + "&currlat=" +
+                            Double.toString(mCurrentLocation.getLatitude()) + "&currlong=" +
+                            Double.toString(mCurrentLocation.getLongitude());
+                } else {
+                    url = URL + "generateRoute?from=" + startLocation + "&to=" + endLocation;
+                }
                 RestTemplate restTemplate = new RestTemplate();
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
                 Route collection = restTemplate.getForObject(url, Route.class);
@@ -140,44 +149,9 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
 
                 // Set first destination to the start of the route
                 mNextDestination = ourRoute.get(0);
-
-                //MapFragment map = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-
-                // Sets up a non-null GoogleMap and calls onMapReady()
-                //map.getMapAsync(this);
             }
         }
-
-//        @Override
-//        public void onMapReady(GoogleMap googleMap) {
-//            // This is called when our getMapAsync() in onCreate() successfully gets a map
-//            // Set created googleMap to our global map
-//            ourMap = googleMap;
-//
-//            plotRoute();
-//            ourMap.setMyLocationEnabled(true);
-//            ourMap.getUiSettings().setMapToolbarEnabled(false);
-//
-//            // Set first marker to show the start of the route
-//            ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
-//        }
     }
-
-//    /**
-//     * Plots the route on the map
-//     */
-//    private void plotRoute() {
-//        // move camera to zoom on map to starting location
-//        ourMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ourRoute.get(0),
-//                17));
-//
-//        // Loop puts a line between all points in ourRoute
-//        // Loop is kept so that we do not start a line at the last point
-//        for (int i = 0; i < ourRoute.size() - 1; i++){
-//            ourMap.addPolyline((new PolylineOptions()).add(ourRoute.get(i), ourRoute.get(i + 1))
-//                    .width(5).color(Color.BLUE).geodesic(true));
-//        }
-//    }
 
     // Defines how and when our location updates are made
     protected void createLocationRequest() {
@@ -221,6 +195,11 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
         mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
 
+        // if route gen uses current location then current location must be found first
+        if (routeGenUsesCurrLoc) {
+            new HttpRequestTask().execute();
+        }
+
         checkNextDestUpdateUI();
 
         if (mRequestingLocationUpdates) {
@@ -247,8 +226,6 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
      * on route; if the user is, then method sets mNextDestination to next point on route
      */
     private void checkNextDestUpdateUI() {
-        LatLng tempDest = mNextDestination;
-
         // Loop checks to see if the user is close to a point on the route
         for (int i = 0; i < ourRoute.size() - 1; i++) {
             float distance = mCurrentLocation.distanceTo(createAndroidLocation(ourRoute.get(i)));
@@ -256,9 +233,6 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
                 mNextDestination = ourRoute.get(i + 1);
             }
         }
-//        if (ourMap != null && tempDest != mNextDestination) {
-//            ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
-//        }
 
         bearingToDestDegrees = mCurrentLocation.bearingTo(createAndroidLocation(mNextDestination));
         updateUI();
