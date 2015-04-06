@@ -1,5 +1,7 @@
 package com.osucse.wayfinding_osu_capstone;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -146,6 +148,20 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
                 // Sets up a non-null GoogleMap and calls onMapReady()
                 map.getMapAsync(this);
             }
+            else{
+                //if no route generated, show error and go to home screen
+                AlertDialog.Builder noRoute = new AlertDialog.Builder(DisplayMapActivity.this);
+                noRoute.setTitle("Error");
+                noRoute.setMessage("There is no possible route between these points.");
+                noRoute.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog, int which){
+                        finish();
+                    }
+                });
+                noRoute.show();
+            }
+
         }
 
         @Override
