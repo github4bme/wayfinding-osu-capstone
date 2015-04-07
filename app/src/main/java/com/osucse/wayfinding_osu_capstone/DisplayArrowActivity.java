@@ -25,6 +25,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 import com.osucse.wayfinding_api.*;
 
+import static com.google.maps.android.SphericalUtil.computeDistanceBetween;
 
 
 public class DisplayArrowActivity extends FragmentActivity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -213,12 +214,37 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
                 mGoogleApiClient, mLocationRequest, this);
     }
 
+    private void recalculateDistanceAndETA()
+    {
+        double distanceLeftInMeters = 0;
+
+        distanceLeftInMeters = computeDistanceBetween(new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), mNextDestination);
+
+        TextView checkpointTV = (TextView) findViewById(R.id.checkpointTextView);
+        checkpointTV.setText(String.format("%.3f", distanceLeftInMeters / 1609.44) + " mi. to next checkpoint");
+
+        for(int i = ourRoute.indexOf(mNextDestination) + 1; i < ourRoute.size() - 2; i++)
+        {
+            distanceLeftInMeters += computeDistanceBetween(ourRoute.get(i), ourRoute.get(i + 1));
+        }
+
+        double distanceLeftInMiles = distanceLeftInMeters / 1609.344;
+
+        TextView distanceTV = (TextView) findViewById(R.id.distanceTextView);
+        distanceTV.setText(String.format("%.3f", distanceLeftInMiles) + " mi. remaining");
+
+        TextView etaTV = (TextView) findViewById(R.id.etaTextView);
+        etaTV.setText(Math.round(distanceLeftInMiles / 3.1 * 60) + " minutes");
+    }
+
     @Override
     public void onLocationChanged(android.location.Location currentLocation) {
         // This is called anytime the location is detected as changed
         mCurrentLocation = currentLocation;
 
         checkNextDestUpdateUI();
+
+        recalculateDistanceAndETA();
     }
 
     /**
