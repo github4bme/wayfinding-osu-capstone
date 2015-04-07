@@ -91,6 +91,9 @@ public class Settings extends ActionBarActivity {
     }
 
     public static boolean getVisualSetting () {
+        if (settings == null) {
+            return false;
+        }
         return settings.getBoolean(VISUALLY_IMPAIRED, false);
     }
 }
