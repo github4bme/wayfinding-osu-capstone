@@ -20,7 +20,7 @@ import java.util.Collections;
 public class StartUpTasks {
 
     // server url
-    private static final String URL = "http://192.168.1.100:9000";//"http://54.200.238.22:9000/";
+    private static final String URL = "http://54.200.238.22:9000/";
 
     private static ArrayList<Building> BUILDING_LIST = null;
 
