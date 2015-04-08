@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import com.osucse.wayfinding_api.BuildingCollection;
 import com.osucse.wayfinding_api.LocationCollection;
 
 
@@ -86,14 +87,14 @@ public class Selection extends ActionBarActivity {
     /**
      * A private internal class that handles updating the internal class StartUpTasks
      */
-    private class HttpRequestTask extends AsyncTask<Void, Void, LocationCollection> {
+    private class HttpRequestTask extends AsyncTask<Void, Void, BuildingCollection> {
         @Override
-        protected LocationCollection doInBackground(Void... params) {
-            return StartUpTasks.getLocationCollectionFromServer();
+        protected BuildingCollection doInBackground(Void... params) {
+            return StartUpTasks.getBuildingsFromServer();
         }
 
         @Override
-        protected void onPostExecute(LocationCollection locations) {
+        protected void onPostExecute(BuildingCollection buildings) {
             // Clears the "Loading..." message so it is not there when you navigate back to this screen from Map Display
             // This has never given me a threading error, but it is possible that it could
             TextView loadingListDisplay = (TextView) Selection.this.findViewById(R.id.loading_list_display);

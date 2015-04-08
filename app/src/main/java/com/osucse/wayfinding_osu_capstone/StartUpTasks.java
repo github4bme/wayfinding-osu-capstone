@@ -1,7 +1,10 @@
 package com.osucse.wayfinding_osu_capstone;
 
+import android.os.Build;
 import android.util.Log;
 
+import com.osucse.wayfinding_api.Building;
+import com.osucse.wayfinding_api.BuildingCollection;
 import com.osucse.wayfinding_api.Location;
 import com.osucse.wayfinding_api.LocationCollection;
 
@@ -17,72 +20,53 @@ import java.util.Collections;
 public class StartUpTasks {
 
     // server url
-    private static final String URL = "http://54.200.238.22:9000/";
+    private static final String URL = "http://192.168.1.100:9000";//"http://54.200.238.22:9000/";
 
-    // location data that is copied from the api server
-    private static LocationCollection LOCATION_COLLECTION = null;
-
-    private static ArrayList<Location> LOCATION_LIST = null;
+    private static ArrayList<Building> BUILDING_LIST = null;
 
     /**
-     * getLocationCollectionFromServer will attempt to get a connection
-     * to the api server and pull the location data into the app. It fills
-     * the static variable with the LocationCollection information it collects
-     * and returns a pointer to that instance.
      *
-     * Data: json is 156kb and takes 365ms to pull down on wireless.osu
-     *
-     * @return a pointer to the LOCATION_COLLECTION object
+     * @return
      */
-    public static LocationCollection getLocationCollectionFromServer () {
+    public static BuildingCollection getBuildingsFromServer () {
+        BuildingCollection buildingCollection = null;
         try {
-            String url = URL + "locations";
+            String url = URL + "buildings";
             RestTemplate restTemplate = new RestTemplate();
             restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-            LOCATION_COLLECTION = restTemplate.getForObject(url, LocationCollection.class);
-            LOCATION_LIST = makeLocationList(LOCATION_COLLECTION);
+            buildingCollection = restTemplate.getForObject(url, BuildingCollection.class);
+            BUILDING_LIST = makeBuildingList(buildingCollection);
         } catch (Exception e) {
             Log.e("LocationList", e.getMessage(), e);
         }
-        return LOCATION_COLLECTION;
-    }
-
-
-
-    /**
-     * cloneLocationCollection
-     * @return a shallow copy of LOCATION_LIST
-     */
-    public static ArrayList<Location> cloneLocationCollection () {
-        return new ArrayList<Location>(LOCATION_LIST);
+        return buildingCollection;
     }
 
     /**
-     * Processes the LOCATION_COLLECTION by removing null locations, and sorting the
-     * remaining locations. The result is returned
-     * @param locationCollection a LocationCollection to process
-     * @return a processed ArrayList of the LocationCollection data
+     *
+     * @param bc
+     * @return
      */
-    private static ArrayList<Location> makeLocationList (LocationCollection locationCollection) {
+    private static ArrayList<Building> makeBuildingList (BuildingCollection bc) {
+        ArrayList<Building> bl = new ArrayList<Building>();
 
-        // initialize a new array
-        ArrayList<Location> temp = new ArrayList<Location>(locationCollection.getLocations().size());
-
-        // removes null location data while copying pointers
-        for(Location l : LOCATION_COLLECTION.getLocations())
+        for(Building b : bc.getBuildings())
         {
-            if(l.getName() != null) {
-                temp.add(l);
-            }
+            bl.add(b);
         }
 
-        // sorts the LocationCollection by name (see added compareTo part of the location class)
-        Collections.sort(temp);
+        Collections.sort(bl);
 
-        return temp;
+        return bl;
     }
 
-
+    /**
+     *
+     * @return
+     */
+    public static ArrayList<Building> cloneBuildingList () {
+        return new ArrayList<Building>(BUILDING_LIST);
+    }
 }
 
 

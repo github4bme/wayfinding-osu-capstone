@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.osucse.wayfinding_api.Building;
 import com.osucse.wayfinding_api.Location;
 
 import java.util.ArrayList;
@@ -24,16 +25,12 @@ import java.util.ArrayList;
  * starting at, and for you to choose one. Once you choose an app
  * the activity stops and passes that data on to the select
  * destination activity.
- *
- * TODO:
- * - add some way for the user to select their current location
- *   to the list of locations
  */
 public class SelectSourceLocation extends ActionBarActivity {
 
     // instance variables
-    public ArrayList <Location>      sources;
-    public ArrayAdapter<Location>    adapter;
+    public ArrayList <Building>      sources;
+    public ArrayAdapter<Building>    adapter;
     public ListView                  listView;
     public EditText                  editText;
 
@@ -68,10 +65,10 @@ public class SelectSourceLocation extends ActionBarActivity {
         editText = (EditText) findViewById(R.id.source_list_search);
 
         // gets copy of ordered list of locations
-        sources = StartUpTasks.cloneLocationCollection();
+        sources = StartUpTasks.cloneBuildingList();
 
         // creates adapter and attaches it to the listView
-        adapter = new ArrayAdapter<Location>(this, android.R.layout.simple_list_item_1, sources);
+        adapter = new ArrayAdapter<Building>(this, android.R.layout.simple_list_item_1, sources);
         listView.setAdapter(adapter);
 
         // create listener for the editText and have it filter the list on input changes
@@ -93,7 +90,7 @@ public class SelectSourceLocation extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // get the id of the selected item
-                String selectedItem = Integer.toString(((Location) (parent.getItemAtPosition(position))).getId());
+                String selectedItem = Integer.toString(((Building) (parent.getItemAtPosition(position))).getId());
 
                 // create an intent
                 Intent intent = new Intent(SelectSourceLocation.this, SelectDestinationLocation.class);
