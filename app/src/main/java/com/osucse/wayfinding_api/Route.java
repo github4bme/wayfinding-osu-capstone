@@ -3,8 +3,8 @@ package com.osucse.wayfinding_api;
 import java.util.List;
 
 public class Route {
-    private Location startLocation;
-    private Location endLocation;
+    private Door startDoor;
+    private Door endDoor;
     private double lengthInFeet;
     private List<Node> route; // need to remove final
 
@@ -12,12 +12,12 @@ public class Route {
         return route;
     }
 
-    public Location getStartLocation() {
-        return startLocation;
+    public Door getStartDoor() {
+        return startDoor;
     }
 
-    public Location getEndLocation() {
-        return endLocation;
+    public Door getEndDoor() {
+        return endDoor;
     }
 
     public double getLengthInFeet() {

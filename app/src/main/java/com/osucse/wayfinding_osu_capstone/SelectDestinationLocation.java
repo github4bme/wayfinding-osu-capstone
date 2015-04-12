@@ -1,7 +1,6 @@
 package com.osucse.wayfinding_osu_capstone;
 
 import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -12,19 +11,15 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.osucse.wayfinding_api.Location;
-import com.osucse.wayfinding_osu_capstone.Settings;
+import com.osucse.wayfinding_api.Building;
 
 import java.util.ArrayList;
 
-/**
- *
- */
 public class SelectDestinationLocation extends ActionBarActivity {
 
     // instance variables
-    public ArrayAdapter<Location>   adapter;
-    public ArrayList <Location>     destinations;
+    public ArrayAdapter<Building>   adapter;
+    public ArrayList <Building>     destinations;
     public ListView                 listView;
     public EditText                 editText;
     public String                   incomingSource;
@@ -49,10 +44,10 @@ public class SelectDestinationLocation extends ActionBarActivity {
         editText = (EditText) findViewById(R.id.destination_list_search);
 
         // creates a clone of the location list
-        destinations = StartUpTasks.cloneLocationCollection();
+        destinations = StartUpTasks.cloneBuildingList();
 
         // creates adapter and attaches it to the listView
-        adapter = new ArrayAdapter<Location>(this, android.R.layout.simple_list_item_1, destinations);
+        adapter = new ArrayAdapter<Building>(this, android.R.layout.simple_list_item_1, destinations);
         listView.setAdapter(adapter);
 
         // create listener for the editText and have it filter the list on input changes
@@ -75,7 +70,7 @@ public class SelectDestinationLocation extends ActionBarActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 // get the id of the selected item
-                String selectedItem = Integer.toString(((Location)(parent.getItemAtPosition(position))).getId());
+                String selectedItem = Integer.toString(((Building)(parent.getItemAtPosition(position))).getBuildingId());
 
                 // create an intent
                 Intent intent = null;
