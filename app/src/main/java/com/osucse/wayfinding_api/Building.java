@@ -10,11 +10,11 @@ public class Building implements Comparable<Building>{
     private String name;
     private int id;
     private int buildingId;
-    private List<Location> doors;
+    private List<Door> doors;
 
     public String getName () { return this.name; }
 
-    public List<Location> getDoors () { return this.doors; }
+    public List<Door> getDoors () { return this.doors; }
 
     public int getId () { return this.id; }
 

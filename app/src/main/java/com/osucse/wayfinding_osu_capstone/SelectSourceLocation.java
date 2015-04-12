@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.osucse.wayfinding_api.Building;
-import com.osucse.wayfinding_api.Location;
 
 import java.util.ArrayList;
 
@@ -90,7 +89,7 @@ public class SelectSourceLocation extends ActionBarActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // get the id of the selected item
-                String selectedItem = Integer.toString(((Building) (parent.getItemAtPosition(position))).getId());
+                String selectedItem = Integer.toString(((Building) (parent.getItemAtPosition(position))).getBuildingId());
 
                 // create an intent
                 Intent intent = new Intent(SelectSourceLocation.this, SelectDestinationLocation.class);

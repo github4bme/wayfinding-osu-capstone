@@ -1,7 +1,6 @@
 package com.osucse.wayfinding_osu_capstone;
 
 import android.content.Intent;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -13,8 +12,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.osucse.wayfinding_api.Building;
-import com.osucse.wayfinding_api.Location;
-import com.osucse.wayfinding_osu_capstone.Settings;
 
 import java.util.ArrayList;
 
@@ -73,7 +70,7 @@ public class SelectDestinationLocation extends ActionBarActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 // get the id of the selected item
-                String selectedItem = Integer.toString(((Building)(parent.getItemAtPosition(position))).getId());
+                String selectedItem = Integer.toString(((Building)(parent.getItemAtPosition(position))).getBuildingId());
 
                 // create an intent
                 Intent intent = null;

@@ -1,6 +1,6 @@
 package com.osucse.wayfinding_api;
 
-public class Location extends Node{
+public class Door extends Node{
     private String name;
 
     private int id;

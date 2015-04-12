@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.osucse.wayfinding_api.BuildingCollection;
-import com.osucse.wayfinding_api.LocationCollection;
 
 
 /**

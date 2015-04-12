@@ -1,12 +1,9 @@
 package com.osucse.wayfinding_osu_capstone;
 
-import android.os.Build;
 import android.util.Log;
 
 import com.osucse.wayfinding_api.Building;
 import com.osucse.wayfinding_api.BuildingCollection;
-import com.osucse.wayfinding_api.Location;
-import com.osucse.wayfinding_api.LocationCollection;
 
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
