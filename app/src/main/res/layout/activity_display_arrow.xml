@@ -18,4 +18,51 @@
         android:src="@drawable/arrow"
         android:layout_weight="0.63" />
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/map"
+        android:layout_marginBottom="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"        >
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="85dp"
+            android:id="@+id/imageView"
+            android:background="#ffffffff"
+            android:layout_centerHorizontal="true"
+            />
+
+        <TextView
+            android:id="@+id/checkpointTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginLeft="5dp"
+            android:text="Distance to Next Checkpoint"
+            android:textSize="20dp"/>
+
+        <TextView
+            android:id="@+id/distanceTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:layout_marginLeft="5dp"
+            android:text="Distance Remaining"
+            android:textSize="20dp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/etaTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="55dp"
+            android:layout_marginLeft="5dp"
+            android:text="ETA"
+            android:textSize="20dp"
+            android:textStyle="bold"/>
+
+    </RelativeLayout>
+
 </LinearLayout>

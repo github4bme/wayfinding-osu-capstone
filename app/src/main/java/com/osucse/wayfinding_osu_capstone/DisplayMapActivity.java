@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.AsyncTask;
+import android.provider.Telephony;
 import android.support.v4.app.FragmentActivity;
 import android.widget.TextView;
 import android.util.Log;
@@ -29,12 +30,13 @@ import android.widget.ImageView;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
+
+import java.math.BigDecimal;
 import java.util.*;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 import com.osucse.wayfinding_api.*;
-
-
+import static com.google.maps.android.SphericalUtil.computeDistanceBetween;
 
 public class DisplayMapActivity extends FragmentActivity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String URL = "http://54.200.238.22:9000/";
@@ -278,6 +280,28 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         mCurrentLocation = currentLocation;
 
         checkNextDestUpdateUI();
+
+        recalculateDistanceAndETA();
+    }
+
+    private void recalculateDistanceAndETA()
+    {
+        double distanceLeftInMeters = 0;
+
+        distanceLeftInMeters = computeDistanceBetween(new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), mNextDestination);
+
+        for(int i = ourRoute.indexOf(mNextDestination) + 1; i < ourRoute.size() - 2; i++)
+        {
+            distanceLeftInMeters += computeDistanceBetween(ourRoute.get(i), ourRoute.get(i + 1));
+        }
+
+        double distanceLeftInMiles = distanceLeftInMeters / 1609.344;
+
+        TextView distanceTV = (TextView) findViewById(R.id.distanceTextView);
+        distanceTV.setText(String.format("%.3f", distanceLeftInMiles) + " mi. remaining");
+
+        TextView etaTV = (TextView) findViewById(R.id.etaTextView);
+        etaTV.setText(Math.round(distanceLeftInMiles / 3.1 * 60) + " minutes");
     }
 
     /**
