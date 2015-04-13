@@ -261,17 +261,6 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        // Set user's current location
-//        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(
-//                mGoogleApiClient);
-//
-//        // if route gen uses current location then current location must be found first
-//        if (routeGenUsesCurrLoc) {
-//            new HttpRequestTask().execute();
-//        }
-
-//        checkNextDestUpdateUI();
-
         if (mRequestingLocationUpdates) {
             startLocationUpdates();
         }
