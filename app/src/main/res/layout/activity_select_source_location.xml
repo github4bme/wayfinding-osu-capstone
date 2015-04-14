@@ -27,4 +27,5 @@
         android:smoothScrollbar="true"
         android:clickable="true"
         android:choiceMode="singleChoice" />
+
 </LinearLayout>

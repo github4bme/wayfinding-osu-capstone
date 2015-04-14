@@ -4,6 +4,8 @@ import android.util.Log;
 
 import com.osucse.wayfinding_api.Building;
 import com.osucse.wayfinding_api.BuildingCollection;
+import com.osucse.wayfinding_api.Tour;
+import com.osucse.wayfinding_api.TourCollection;
 
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
@@ -20,6 +22,7 @@ public class StartUpTasks {
     private static final String URL = "http://54.200.238.22:9000/";
 
     private static ArrayList<Building> BUILDING_LIST = null;
+    private static ArrayList<Tour> TOUR_LIST = null;
 
     /**
      *
@@ -63,6 +66,50 @@ public class StartUpTasks {
      */
     public static ArrayList<Building> cloneBuildingList () {
         return new ArrayList<Building>(BUILDING_LIST);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public static TourCollection getToursFromServer () {
+        TourCollection tourCollection = null;
+        try {
+            String url = URL + "tours";
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+            tourCollection = restTemplate.getForObject(url, TourCollection.class);
+            TOUR_LIST = makeTourList(tourCollection);
+        } catch (Exception e) {
+            Log.e("LocationList", e.getMessage(), e);
+        }
+        return tourCollection;
+    }
+
+    /**
+     *
+     * @param tc
+     * @return
+     */
+    private static ArrayList<Tour> makeTourList (TourCollection tc) {
+        ArrayList<Tour> tl = new ArrayList<Tour>();
+
+        for(Tour t : tc.getTours())
+        {
+            tl.add(t);
+        }
+
+        Collections.sort(tl);
+
+        return tl;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public static ArrayList<Tour> cloneTourList () {
+        return new ArrayList<Tour>(TOUR_LIST);
     }
 }
 
