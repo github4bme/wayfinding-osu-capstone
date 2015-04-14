@@ -81,7 +81,7 @@ public class StartUpTasks {
             tourCollection = restTemplate.getForObject(url, TourCollection.class);
             TOUR_LIST = makeTourList(tourCollection);
         } catch (Exception e) {
-            Log.e("LocationList", e.getMessage(), e);
+            Log.e("TourList", e.getMessage(), e);
         }
         return tourCollection;
     }
