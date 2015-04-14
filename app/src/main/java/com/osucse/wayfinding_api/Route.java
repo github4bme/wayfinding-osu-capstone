@@ -7,6 +7,7 @@ public class Route {
     private Door endDoor;
     private double lengthInFeet;
     private List<Node> route; // need to remove final
+    private String errorMsg;
 
     public List<Node> getRoute(){
         return route;
@@ -23,4 +24,6 @@ public class Route {
     public double getLengthInFeet() {
         return lengthInFeet;
     }
+
+    public String getErrorMsg() { return errorMsg; }
 }
