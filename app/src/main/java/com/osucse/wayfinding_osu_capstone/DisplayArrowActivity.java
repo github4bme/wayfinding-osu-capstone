@@ -1,5 +1,6 @@
 package com.osucse.wayfinding_osu_capstone;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.AsyncTask;
@@ -50,6 +51,8 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
     protected String startLocation;
     protected String endLocation;
     protected boolean routeGenUsesCurrLoc;
+
+    protected LatLng finalLocation;
 
     protected android.location.Location mCurrentLocation;
     protected float bearingToDestDegrees;
@@ -241,6 +244,15 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
     public void onLocationChanged(android.location.Location currentLocation) {
         // This is called anytime the location is detected as changed
         mCurrentLocation = currentLocation;
+        int routeSize = ourRoute.size()-1;
+        finalLocation = ourRoute.get(routeSize);
+
+        if(mCurrentLocation.distanceTo(createAndroidLocation(finalLocation)) < AT_LOCATION_RADIUS){
+            AlertDialog.Builder arrived = new AlertDialog.Builder(DisplayArrowActivity.this);
+            arrived.setTitle("Arrived");
+            arrived.setMessage("You Have Arrived!");
+            arrived.show();
+        }
 
         checkNextDestUpdateUI();
 
