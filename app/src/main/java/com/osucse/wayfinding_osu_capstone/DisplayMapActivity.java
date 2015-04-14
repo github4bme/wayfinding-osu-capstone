@@ -42,6 +42,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     private static final String URL = "http://54.200.238.22:9000/";
     private static final String CURRENT_LOCATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayMapActivity.currentLocationKey";
     private static final String NEXT_DESTINATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayMapActivity.nextDestinationKey";
+    private static final String TOUR_KEY = "com.usecse.wayfinding_osu_capstone.DisplayMapActivity.tourKey";
     private static final float AT_LOCATION_RADIUS = 10.0f;
 
     private GoogleMap ourMap;
@@ -60,6 +61,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
     protected String startLocation;
     protected String endLocation;
+    protected String tourLocation;
     protected boolean routeGenUsesCurrLoc;
 
     protected android.location.Location mCurrentLocation;
@@ -89,8 +91,12 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         textMessageDisplay.setText("OSU Wayfinding Application");
         arrowImage = (ImageView) findViewById(R.id.arrow_image);
 
+
         startLocation = intent.getStringExtra(SelectDestinationLocation.SOURCE_LOCATION);
         endLocation = intent.getStringExtra(SelectDestinationLocation.DESTINATION_LOCATION);
+        tourLocation = intent.getStringExtra(SelectTour.TOUR);
+
+
         // Set boolean for ordering of asynchronous operations
         // if true get current location THEN get route and build map
         // else (get current location) AND (get route and build map) in parallel

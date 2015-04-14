@@ -9,29 +9,22 @@ import java.util.List;
  */
 public class Tour implements Comparable<Tour>
 {
-    private String _name;
-    private int _id;
-    private Route _route;
-
-    public Tour(String name, int id, Route route)
-    {
-        this._name = name;
-        this._id = id;
-        this._route = route;
-    }
+    private String name;
+    private int id;
+    private Route route;
 
     public String getName()
     {
-        return _name;
+        return name;
     }
 
     public int getId()
     {
-        return _id;
+        return id;
     }
 
     @JsonIgnore
-    public Route getRoute() { return _route; }
+    public Route getRoute() { return route; }
 
     /**
      * Must have override for my adding of the Comparable<Location> implementation
@@ -41,5 +34,10 @@ public class Tour implements Comparable<Tour>
     @Override
     public int compareTo(Tour comp) {
         return this.getName().toLowerCase().compareTo(comp.getName().toLowerCase());
+    }
+
+    @Override
+    public String toString(){
+        return this.name;
     }
 }
