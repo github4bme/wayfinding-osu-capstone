@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.osucse.wayfinding_api.Building;
@@ -31,7 +30,7 @@ public class BuildingListAdapter extends BaseAdapter {
 
     private Activity activity;
     private LayoutInflater inflater;
-    private List<Building> buildings;
+    private ArrayList<Building> buildings;
     private ArrayList<Boolean> favorite;
 
     private static SharedPreferences sharedPreferences;
@@ -49,8 +48,11 @@ public class BuildingListAdapter extends BaseAdapter {
             this.favorite.add(false);
         }
 
-        Set<String> favoritesFromMemory = sharedPreferences.getStringSet(SHARED_FAVORITES, new HashSet<String>());
+        Set<String> favoritesFromMemory = new HashSet<String>();//= sharedPreferences.getStringSet(SHARED_FAVORITES, new HashSet<String>());
+        favoritesFromMemory.add("Converse Hall");
+        favoritesFromMemory.add("Riffe Building");
 
+        //O(n * m) where m is the amount of favorites
         for (String s : favoritesFromMemory){
 
             // really sloppy but works for now
@@ -61,7 +63,25 @@ public class BuildingListAdapter extends BaseAdapter {
             }
         }
 
-        // sort list
+        // sort list O(n)
+        sortbuildings(this.buildings, this.favorite);
+    }
+
+    private static void sortbuildings (ArrayList<Building> buildings, ArrayList<Boolean> favorite) {
+        ArrayList<Building> favoritedBuildings = new ArrayList<>();
+        ArrayList<Boolean> favoritedFavorites = new ArrayList<>();
+
+        int i = favorite.size()-1;
+        while (i > 0) {
+            if (favorite.get(i)) {
+                favoritedBuildings.add(0,buildings.remove(i));
+                favoritedFavorites.add(0,favorite.remove(i));
+            }
+            i--;
+        }
+
+        buildings.addAll(0,favoritedBuildings);
+        favorite.addAll(0,favoritedFavorites);
     }
 
     @Override

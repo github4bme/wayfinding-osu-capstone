@@ -28,7 +28,6 @@ import java.util.ArrayList;
 public class SelectSourceLocation extends ActionBarActivity {
 
     // instance variables
-    public ArrayList <Building>      sources;
     public BuildingListAdapter       adapter;
     public ListView                  listView;
     public EditText                  editText;
@@ -63,11 +62,8 @@ public class SelectSourceLocation extends ActionBarActivity {
         listView = (ListView) findViewById(R.id.source_list);
         editText = (EditText) findViewById(R.id.source_list_search);
 
-        // gets copy of ordered list of locations
-        sources = StartUpTasks.cloneBuildingList();
-
         // creates adapter and attaches it to the listView
-        adapter = new BuildingListAdapter(this, sources);
+        adapter = new BuildingListAdapter(this, getPreferences(MODE_PRIVATE));
         listView.setAdapter(adapter);
 
         /*
