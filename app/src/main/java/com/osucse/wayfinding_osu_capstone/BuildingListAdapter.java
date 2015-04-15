@@ -2,6 +2,7 @@ package com.osucse.wayfinding_osu_capstone;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +20,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by thomasforte on 4/14/15.
@@ -31,14 +34,34 @@ public class BuildingListAdapter extends BaseAdapter {
     private List<Building> buildings;
     private ArrayList<Boolean> favorite;
 
-    public BuildingListAdapter (Activity activity, List<Building> buildings) {
+    private static SharedPreferences sharedPreferences;
+    private static final String SHARED_FAVORITES = "SHARED_FAVORITES";
+
+    private static SharedPreferences.Editor editor;
+
+    public BuildingListAdapter (Activity activity, List<Building> buildings, SharedPreferences sharedPreferences) {
         this.activity = activity;
         this.buildings = buildings;
+        this.sharedPreferences = sharedPreferences;
 
         this.favorite = new ArrayList<Boolean>();
         for (Building b : this.buildings) {
             this.favorite.add(false);
         }
+
+        Set<String> favoritesFromMemory = sharedPreferences.getStringSet(SHARED_FAVORITES, new HashSet<String>());
+
+        for (String s : favoritesFromMemory){
+
+            // really sloppy but works for now
+            for (Building b : buildings) {
+                if (b.getName().equals(s)){
+                    favorite.set(buildings.indexOf(b), true);
+                }
+            }
+        }
+
+        // sort list
     }
 
     @Override
