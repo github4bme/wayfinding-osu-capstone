@@ -1,10 +1,15 @@
 package com.osucse.wayfinding_osu_capstone;
 
 import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import com.osucse.wayfinding_api.Building;
 import com.osucse.wayfinding_api.BuildingCollection;
@@ -22,12 +27,18 @@ import java.util.List;
 public class BuildingListAdapter extends BaseAdapter {
 
     private Activity activity;
-    //private LayoutInflater inflater;
+    private LayoutInflater inflater;
     private List<Building> buildings;
+    private ArrayList<Boolean> favorite;
 
     public BuildingListAdapter (Activity activity, List<Building> buildings) {
         this.activity = activity;
         this.buildings = buildings;
+
+        this.favorite = new ArrayList<Boolean>();
+        for (Building b : this.buildings) {
+            this.favorite.add(false);
+        }
     }
 
     @Override
@@ -48,9 +59,23 @@ public class BuildingListAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        // the hard part
+        if (inflater == null) {
+            inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
 
-        return null;
+        if (convertView == null) {
+            convertView = inflater.inflate(R.layout.listitem, null);
+        }
+
+        TextView buildingName = (TextView) convertView.findViewById(R.id.buildingName);
+        CheckBox favoriteBox = (CheckBox) convertView.findViewById(R.id.favoriteCheckBox);
+
+        Building b = (Building) getItem(position);
+
+        buildingName.setText(b.getName());
+        favoriteBox.setChecked(favorite.get(position));
+
+        return convertView;
     }
 
     /* ========================================================

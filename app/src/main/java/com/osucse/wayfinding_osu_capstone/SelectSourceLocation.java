@@ -29,7 +29,7 @@ public class SelectSourceLocation extends ActionBarActivity {
 
     // instance variables
     public ArrayList <Building>      sources;
-    public ArrayAdapter<Building>    adapter;
+    public BuildingListAdapter       adapter;
     public ListView                  listView;
     public EditText                  editText;
 
@@ -67,9 +67,10 @@ public class SelectSourceLocation extends ActionBarActivity {
         sources = StartUpTasks.cloneBuildingList();
 
         // creates adapter and attaches it to the listView
-        adapter = new ArrayAdapter<Building>(this, android.R.layout.simple_list_item_1, sources);
+        adapter = new BuildingListAdapter(this, sources);
         listView.setAdapter(adapter);
 
+        /*
         // create listener for the editText and have it filter the list on input changes
         editText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -82,7 +83,7 @@ public class SelectSourceLocation extends ActionBarActivity {
 
             @Override
             public void afterTextChanged(Editable s) {}
-        });
+        });*/
 
         // create a listener for when an item is selected in the list
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
