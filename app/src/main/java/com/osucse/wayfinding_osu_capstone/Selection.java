@@ -89,7 +89,7 @@ public class Selection extends ActionBarActivity {
     private class HttpRequestTask extends AsyncTask<Void, Void, BuildingCollection> {
         @Override
         protected BuildingCollection doInBackground(Void... params) {
-            return StartUpTasks.getBuildingsFromServer();
+            return BuildingListAdapter.getBuildingsFromServer();
         }
 
         @Override

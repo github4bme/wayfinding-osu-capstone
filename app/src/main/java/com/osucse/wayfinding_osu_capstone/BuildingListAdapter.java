@@ -39,9 +39,9 @@ public class BuildingListAdapter extends BaseAdapter {
 
     private static SharedPreferences.Editor editor;
 
-    public BuildingListAdapter (Activity activity, List<Building> buildings, SharedPreferences sharedPreferences) {
+    public BuildingListAdapter (Activity activity, SharedPreferences sharedPreferences) {
         this.activity = activity;
-        this.buildings = buildings;
+        this.buildings = cloneBuildingList();
         this.sharedPreferences = sharedPreferences;
 
         this.favorite = new ArrayList<Boolean>();

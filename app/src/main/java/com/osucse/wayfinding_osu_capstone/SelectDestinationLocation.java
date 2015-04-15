@@ -44,7 +44,7 @@ public class SelectDestinationLocation extends ActionBarActivity {
         editText = (EditText) findViewById(R.id.destination_list_search);
 
         // creates a clone of the location list
-        destinations = StartUpTasks.cloneBuildingList();
+        destinations = BuildingListAdapter.cloneBuildingList();
 
         // creates adapter and attaches it to the listView
         adapter = new ArrayAdapter<Building>(this, android.R.layout.simple_list_item_1, destinations);
