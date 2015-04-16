@@ -87,10 +87,15 @@ public class Settings extends ActionBarActivity {
 
 
     public static boolean getAccessibleSetting () {
+        // Default to false as answer if Settings page has not been visited
+        if (settings == null) {
+            return false;
+        }
         return settings.getBoolean(ACCESSIBLE_ROUTING, false);
     }
 
     public static boolean getVisualSetting () {
+        // Default to false as answer if Settings page has not been visited
         if (settings == null) {
             return false;
         }
