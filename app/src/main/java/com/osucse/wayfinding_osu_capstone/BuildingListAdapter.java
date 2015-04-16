@@ -8,8 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
@@ -40,8 +38,6 @@ public class BuildingListAdapter extends BaseAdapter implements Filterable {
     private ArrayList<Building>filteredData;
     private BuildingFilter mFilter;
 
-    //private static SharedPreferences.Editor editor;
-
     /* ========================================================
        Constructor
        ======================================================== */
@@ -54,9 +50,7 @@ public class BuildingListAdapter extends BaseAdapter implements Filterable {
 
         this.inflater = LayoutInflater.from(activity.getApplicationContext());
 
-        Set<String> favoritesFromMemory = new HashSet<String>();//= sharedPreferences.getStringSet(SHARED_FAVORITES, new HashSet<String>());
-        favoritesFromMemory.add("Converse Hall");
-        favoritesFromMemory.add("Riffe Building");
+        Set<String> favoritesFromMemory = sharedPreferences.getStringSet(SHARED_FAVORITES, new HashSet<String>());
 
         //O(n * m) where m is the amount of favorites
         for (String s : favoritesFromMemory){
@@ -95,16 +89,16 @@ public class BuildingListAdapter extends BaseAdapter implements Filterable {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
 
-        ViewHolder holder;
+        final ViewHolder holder;
 
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.listitem, null);
 
             holder = new ViewHolder();
             holder.buildingName = (TextView) convertView.findViewById(R.id.buildingName);
-            holder.favoriteBox = (CheckBox) convertView.findViewById(R.id.favoriteCheckBox);
+            //holder.favoriteBox = (CheckBox) convertView.findViewById(R.id.favoriteCheckBox);
 
             convertView.setTag(holder);
         } else {
@@ -114,14 +108,18 @@ public class BuildingListAdapter extends BaseAdapter implements Filterable {
         Building b = (Building) getItem(position);
 
         holder.buildingName.setText(b.getName());
-        holder.favoriteBox.setChecked(b.favorited);
+        //holder.favoriteBox.setChecked(b.favorited);
 
         return convertView;
     }
 
     static class ViewHolder {
         TextView buildingName;
-        CheckBox favoriteBox;
+        //CheckBox favoriteBox;
+    }
+
+    private void changeBuildingState (String name){
+
     }
 
     /* ========================================================
@@ -188,6 +186,8 @@ public class BuildingListAdapter extends BaseAdapter implements Filterable {
             i--;
         }
 
+        Collections.sort(buildings);
+
         buildings.addAll(0,favoritedBuildings);
     }
 
@@ -241,5 +241,22 @@ public class BuildingListAdapter extends BaseAdapter implements Filterable {
      */
     public static ArrayList<Building> cloneBuildingList () {
         return new ArrayList<Building>(BUILDING_LIST);
+    }
+
+    public void saveItemToFavorites(String newItemName) {
+        SharedPreferences.Editor editor = this.sharedPreferences.edit();
+
+        Set<String> set = new HashSet<String>();
+
+        for (Building b : buildings) {
+            if (b.favorited) {
+                set.add(b.getName());
+            }
+        }
+
+        set.add(newItemName);
+
+        editor.putStringSet(SHARED_FAVORITES, set);
+        editor.commit();
     }
 }

@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -80,6 +81,29 @@ public class SelectSourceLocation extends ActionBarActivity {
             public void afterTextChanged(Editable s) {}
         });
 
+        listView.setOnItemClickListener( new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Building itemClicked = adapter.getItem(position);
+
+                adapter.saveItemToFavorites(itemClicked.getName());
+
+                // get the id of the selected item
+                String selectedItemId = itemClicked.getBuildingId() + "";
+
+                // create an intent
+                Intent intent = new Intent(SelectSourceLocation.this, SelectDestinationLocation.class);
+
+                // add the selected id to intent
+                intent.putExtra(SOURCE_LOCATION, selectedItemId);
+
+                // start the intent
+                startActivity(intent);
+
+            }
+        });
+
+        /*
         // create a listener for when an item is selected in the list
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -96,7 +120,7 @@ public class SelectSourceLocation extends ActionBarActivity {
                 // start the intent
                 startActivity(intent);
             }
-        });
+        });*/
     }
 
     /**

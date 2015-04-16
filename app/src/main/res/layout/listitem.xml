@@ -12,11 +12,11 @@
         android:text="Large Text"
         android:id="@+id/buildingName"
         android:textColor="#ff000000" />
-
+<!--
     <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:id="@+id/favoriteCheckBox"
-        android:layout_gravity="right" />
+        android:layout_gravity="right" />-->
 </RelativeLayout>
