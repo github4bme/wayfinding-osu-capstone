@@ -23,6 +23,8 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.*;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+
+import com.osucse.utilities.Coordinate;
 import com.osucse.wayfinding_api.*;
 
 import static com.google.maps.android.SphericalUtil.computeDistanceBetween;
@@ -140,12 +142,12 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
         @Override
         protected void onPostExecute(Route collection) {
             if (collection != null) {
-                final List<Node> routePoints = collection.getRoute();
+                final List<Coordinate> routePoints = collection.getRoute();
 
                 // Fills ourRoute with our path's lat/long coordinates
                 for (int i = 0; i < routePoints.size(); i++) {
-                    ourRoute.add(new LatLng(routePoints.get(i).getCoordinate().getLatitude(),
-                            routePoints.get(i).getCoordinate().getLongitude()));
+                    ourRoute.add(new LatLng(routePoints.get(i).getLatitude(),
+                            routePoints.get(i).getLongitude()));
                 }
 
                 // Set first destination to the start of the route

@@ -1,14 +1,16 @@
 package com.osucse.wayfinding_api;
 
+import com.osucse.utilities.Coordinate;
+
 import java.util.List;
 
 public class Route {
     private Door startDoor;
     private Door endDoor;
     private double lengthInFeet;
-    private List<Node> route; // need to remove final
+    private List<Coordinate> route; // need to remove final
 
-    public List<Node> getRoute(){
+    public List<Coordinate> getRoute(){
         return route;
     }
 

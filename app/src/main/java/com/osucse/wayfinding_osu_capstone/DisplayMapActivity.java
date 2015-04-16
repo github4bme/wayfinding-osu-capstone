@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.AsyncTask;
-import android.provider.Telephony;
 import android.support.v4.app.FragmentActivity;
 import android.widget.TextView;
 import android.util.Log;
@@ -31,10 +30,11 @@ import android.widget.ImageView;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.math.BigDecimal;
 import java.util.*;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+
+import com.osucse.utilities.Coordinate;
 import com.osucse.wayfinding_api.*;
 import static com.google.maps.android.SphericalUtil.computeDistanceBetween;
 
@@ -61,7 +61,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
     protected String startLocation;
     protected String endLocation;
-    protected String tourLocation;
+    protected String tourId;
     protected boolean routeGenUsesCurrLoc;
 
     protected android.location.Location mCurrentLocation;
@@ -94,18 +94,23 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
         startLocation = intent.getStringExtra(SelectDestinationLocation.SOURCE_LOCATION);
         endLocation = intent.getStringExtra(SelectDestinationLocation.DESTINATION_LOCATION);
-        tourLocation = intent.getStringExtra(SelectTour.TOUR);
+        tourId = intent.getStringExtra(SelectTour.TOUR);
 
+        if(tourId != null)
+        {
+            new TourRequest().execute();
+        }
+        else {
+            // Set boolean for ordering of asynchronous operations
+            // if true get current location THEN get route and build map
+            // else (get current location) AND (get route and build map) in parallel
+            // NOTE: Uses parseInt() for comparison because comparison to String "-1" was strangely failing
+            routeGenUsesCurrLoc = (Integer.parseInt(startLocation) == -1);
 
-        // Set boolean for ordering of asynchronous operations
-        // if true get current location THEN get route and build map
-        // else (get current location) AND (get route and build map) in parallel
-        // NOTE: Uses parseInt() for comparison because comparison to String "-1" was strangely failing
-        routeGenUsesCurrLoc = (Integer.parseInt(startLocation) == -1);
-
-        // if not called here then called in onConnected
-        if (!routeGenUsesCurrLoc) {
-            new HttpRequestTask().execute();
+            // if not called here then called in onConnected
+            if (!routeGenUsesCurrLoc) {
+                new HttpRequestTask().execute();
+            }
         }
 
         // Set to true for all cases because we do not have any reason to turn these updates off
@@ -157,12 +162,12 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         @Override
         protected void onPostExecute(Route collection) {
             if (collection != null) {
-                final List<Node> routePoints = collection.getRoute();
+                final List<Coordinate> routePoints = collection.getRoute();
 
                 // Fills ourRoute with our path's lat/long coordinates
                 for (int i = 0; i < routePoints.size(); i++) {
-                    ourRoute.add(new LatLng(routePoints.get(i).getCoordinate().getLatitude(),
-                            routePoints.get(i).getCoordinate().getLongitude()));
+                    ourRoute.add(new LatLng(routePoints.get(i).getLatitude(),
+                            routePoints.get(i).getLongitude()));
                 }
 
                 // Set first destination to the start of the route
@@ -187,6 +192,55 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
                 noRoute.show();
             }
 
+        }
+
+        @Override
+        public void onMapReady(GoogleMap googleMap) {
+            // This is called when our getMapAsync() in onCreate() successfully gets a map
+            // Set created googleMap to our global map
+            ourMap = googleMap;
+
+            plotRoute();
+            ourMap.setMyLocationEnabled(true);
+            ourMap.getUiSettings().setMapToolbarEnabled(false);
+
+            // Set first marker to show the start of the route
+            ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
+        }
+    }
+
+    private class TourRequest extends AsyncTask<Void, Void, Route> implements OnMapReadyCallback {
+
+        @Override
+        protected Route doInBackground(Void... params) {
+            String url = URL + "tourRoute?id=" + tourId;
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+            Route tourRoute = restTemplate.getForObject(url, Route.class);
+            return tourRoute;
+        }
+
+        @Override
+        protected void onPostExecute(Route tourRoute)
+        {
+            if(tourRoute != null)
+            {
+                final List<Coordinate> routePoints = tourRoute.getRoute();
+
+                // Fills ourRoute with our path's lat/long coordinates
+                for (int i = 0; i < routePoints.size(); i++) {
+                    ourRoute.add(new LatLng(routePoints.get(i).getLatitude(),
+                            routePoints.get(i).getLongitude()));
+                }
+
+                // Set first destination to the start of the route
+                mNextDestination = ourRoute.get(0);
+
+                MapFragment map = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+
+                // Sets up a non-null GoogleMap and calls onMapReady()
+                map.getMapAsync(this);
+            }
         }
 
         @Override
