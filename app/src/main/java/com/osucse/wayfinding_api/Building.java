@@ -12,6 +12,8 @@ public class Building implements Comparable<Building>{
     private int buildingId;
     private List<Door> doors;
 
+    public boolean favorited;
+
     public String getName () { return this.name; }
 
     public List<Door> getDoors () { return this.doors; }

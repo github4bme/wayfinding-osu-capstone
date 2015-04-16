@@ -10,7 +10,8 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Large Text"
-        android:id="@+id/buildingName" />
+        android:id="@+id/buildingName"
+        android:textColor="#ff000000" />
 
     <CheckBox
         android:layout_width="wrap_content"

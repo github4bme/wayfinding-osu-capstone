@@ -63,10 +63,9 @@ public class SelectSourceLocation extends ActionBarActivity {
         editText = (EditText) findViewById(R.id.source_list_search);
 
         // creates adapter and attaches it to the listView
-        adapter = new BuildingListAdapter(this, getPreferences(MODE_PRIVATE));
+        adapter = new BuildingListAdapter(this);
         listView.setAdapter(adapter);
 
-        /*
         // create listener for the editText and have it filter the list on input changes
         editText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -74,12 +73,12 @@ public class SelectSourceLocation extends ActionBarActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                SelectSourceLocation.this.adapter.getFilter().filter(s);
+                SelectSourceLocation.this.adapter.getFilter().filter(s.toString());
             }
 
             @Override
             public void afterTextChanged(Editable s) {}
-        });*/
+        });
 
         // create a listener for when an item is selected in the list
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

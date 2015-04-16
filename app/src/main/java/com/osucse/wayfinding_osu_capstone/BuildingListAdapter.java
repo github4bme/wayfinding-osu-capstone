@@ -9,6 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.osucse.wayfinding_api.Building;
@@ -26,27 +29,30 @@ import java.util.Set;
 /**
  * Created by thomasforte on 4/14/15.
  */
-public class BuildingListAdapter extends BaseAdapter {
+public class BuildingListAdapter extends BaseAdapter implements Filterable {
 
-    private Activity activity;
     private LayoutInflater inflater;
     private ArrayList<Building> buildings;
-    private ArrayList<Boolean> favorite;
 
     private static SharedPreferences sharedPreferences;
     private static final String SHARED_FAVORITES = "SHARED_FAVORITES";
 
-    private static SharedPreferences.Editor editor;
+    private ArrayList<Building>filteredData;
+    private BuildingFilter mFilter;
 
-    public BuildingListAdapter (Activity activity, SharedPreferences sharedPreferences) {
-        this.activity = activity;
+    //private static SharedPreferences.Editor editor;
+
+    /* ========================================================
+       Constructor
+       ======================================================== */
+
+    public BuildingListAdapter (Activity activity) {
+
         this.buildings = cloneBuildingList();
-        this.sharedPreferences = sharedPreferences;
 
-        this.favorite = new ArrayList<Boolean>();
-        for (Building b : this.buildings) {
-            this.favorite.add(false);
-        }
+        this.sharedPreferences = activity.getPreferences(Context.MODE_PRIVATE);
+
+        this.inflater = LayoutInflater.from(activity.getApplicationContext());
 
         Set<String> favoritesFromMemory = new HashSet<String>();//= sharedPreferences.getStringSet(SHARED_FAVORITES, new HashSet<String>());
         favoritesFromMemory.add("Converse Hall");
@@ -58,40 +64,29 @@ public class BuildingListAdapter extends BaseAdapter {
             // really sloppy but works for now
             for (Building b : buildings) {
                 if (b.getName().equals(s)){
-                    favorite.set(buildings.indexOf(b), true);
+                    b.favorited = true;
                 }
             }
         }
 
         // sort list O(n)
-        sortbuildings(this.buildings, this.favorite);
+        sortbuildings(this.buildings);
+
+        this.filteredData = new ArrayList<Building>(this.buildings);
     }
 
-    private static void sortbuildings (ArrayList<Building> buildings, ArrayList<Boolean> favorite) {
-        ArrayList<Building> favoritedBuildings = new ArrayList<>();
-        ArrayList<Boolean> favoritedFavorites = new ArrayList<>();
-
-        int i = favorite.size()-1;
-        while (i > 0) {
-            if (favorite.get(i)) {
-                favoritedBuildings.add(0,buildings.remove(i));
-                favoritedFavorites.add(0,favorite.remove(i));
-            }
-            i--;
-        }
-
-        buildings.addAll(0,favoritedBuildings);
-        favorite.addAll(0,favoritedFavorites);
-    }
+    /* ========================================================
+       inheirted methods
+       ======================================================== */
 
     @Override
     public int getCount() {
-        return buildings.size();
+        return filteredData.size();
     }
 
     @Override
-    public Object getItem(int position) {
-        return buildings.get(position);
+    public Building getItem(int position) {
+        return filteredData.get(position);
     }
 
     @Override
@@ -102,27 +97,102 @@ public class BuildingListAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        if (inflater == null) {
-            inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        }
+        ViewHolder holder;
 
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.listitem, null);
-        }
 
-        TextView buildingName = (TextView) convertView.findViewById(R.id.buildingName);
-        CheckBox favoriteBox = (CheckBox) convertView.findViewById(R.id.favoriteCheckBox);
+            holder = new ViewHolder();
+            holder.buildingName = (TextView) convertView.findViewById(R.id.buildingName);
+            holder.favoriteBox = (CheckBox) convertView.findViewById(R.id.favoriteCheckBox);
+
+            convertView.setTag(holder);
+        } else {
+            holder = (ViewHolder) convertView.getTag();
+        }
 
         Building b = (Building) getItem(position);
 
-        buildingName.setText(b.getName());
-        favoriteBox.setChecked(favorite.get(position));
+        holder.buildingName.setText(b.getName());
+        holder.favoriteBox.setChecked(b.favorited);
 
         return convertView;
     }
 
+    static class ViewHolder {
+        TextView buildingName;
+        CheckBox favoriteBox;
+    }
+
     /* ========================================================
-       Get data from server
+       Filtering methods
+       ======================================================== */
+
+    @Override
+    public Filter getFilter() {
+        if (mFilter == null) {
+            mFilter = new BuildingFilter();
+        }
+        return this.mFilter;
+    }
+
+    private class BuildingFilter extends Filter {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+
+            String filterString = constraint.toString().toLowerCase();
+
+            FilterResults results = new FilterResults();
+
+            final List<Building> list = buildings;
+
+            int count = list.size();
+            final ArrayList<Building> nlist = new ArrayList<Building>(count);
+
+            Building filterableBuilding;
+
+            for (int i = 0; i < count; i++) {
+                filterableBuilding = list.get(i);
+                if (filterableBuilding.getName().toLowerCase().contains(filterString)) {
+                    nlist.add(filterableBuilding);
+                }
+            }
+
+            results.values = nlist;
+            results.count = nlist.size();
+
+            return results;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            filteredData = (ArrayList<Building>) results.values;
+            notifyDataSetChanged();
+        }
+
+    }
+
+    /* ========================================================
+       Sorting (assumes already in alphabetical order)
+       ======================================================== */
+
+    private static void sortbuildings (ArrayList<Building> buildings) {
+        ArrayList<Building> favoritedBuildings = new ArrayList<>();
+
+        int i = buildings.size()-1;
+        while (i > 0) {
+            if (buildings.get(i).favorited) {
+                favoritedBuildings.add(0,buildings.remove(i));
+            }
+            i--;
+        }
+
+        buildings.addAll(0,favoritedBuildings);
+    }
+
+    /* ========================================================
+       Getting data from server
        ======================================================== */
 
     private static final String URL = "http://54.200.238.22:9000/";
@@ -152,16 +222,17 @@ public class BuildingListAdapter extends BaseAdapter {
      * @return
      */
     private static ArrayList<Building> makeBuildingList (BuildingCollection bc) {
-        ArrayList<Building> bl = new ArrayList<Building>();
+        ArrayList<Building> buildings = new ArrayList<Building>();
 
         for(Building b : bc.getBuildings())
         {
-            bl.add(b);
+            b.favorited = false;
+            buildings.add(b);
         }
 
-        Collections.sort(bl);
+        Collections.sort(buildings);
 
-        return bl;
+        return buildings;
     }
 
     /**
