@@ -9,6 +9,7 @@ public class Route {
     private Door endDoor;
     private double lengthInFeet;
     private List<Coordinate> route; // need to remove final
+    private String errorMsg;
 
     public List<Coordinate> getRoute(){
         return route;
@@ -25,4 +26,6 @@ public class Route {
     public double getLengthInFeet() {
         return lengthInFeet;
     }
+
+    public String getErrorMsg() { return errorMsg; }
 }

@@ -172,9 +172,8 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
         @Override
         protected void onPostExecute(Route collection) {
-            if (collection != null) {
+            if (collection != null && collection.getErrorMsg() == null) {
                 final List<Coordinate> routePoints = collection.getRoute();
-
                 // Fills ourRoute with our path's lat/long coordinates
                 for (int i = 0; i < routePoints.size(); i++) {
                     ourRoute.add(new LatLng(routePoints.get(i).getLatitude(),
@@ -191,19 +190,16 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
                 // Sets up a non-null GoogleMap and calls onMapReady()
                 map.getMapAsync(this);
-            }
-            else{
-                // if no route generated, show error and go to home screen
-                AlertDialog.Builder noRoute = new AlertDialog.Builder(DisplayMapActivity.this);
-                noRoute.setTitle("Error");
-                noRoute.setMessage("There is no possible route between these points.");
-                noRoute.setPositiveButton("OK", new DialogInterface.OnClickListener(){
-                    @Override
-                    public void onClick(DialogInterface dialog, int which){
-                        finish();
-                    }
-                });
-                noRoute.show();
+            } else {
+                String message;
+                if (collection != null) {
+                    message = collection.getErrorMsg();
+                } else {
+                    message = "An unknown error has occured.";
+                }
+                AlertDialog.Builder errorDialog = new AlertDialog.Builder(DisplayMapActivity.this);
+                errorDialog.setTitle("Error");
+                errorDialog.setMessage(message);
             }
         }
 
@@ -236,7 +232,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         @Override
         protected void onPostExecute(Route tourRoute)
         {
-            if(tourRoute != null)
+            if (tourRoute != null && tourRoute.getErrorMsg() == null)
             {
                 final List<Coordinate> routePoints = tourRoute.getRoute();
 
@@ -253,6 +249,18 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
                 // Sets up a non-null GoogleMap and calls onMapReady()
                 map.getMapAsync(this);
+            }
+            else {
+                String message;
+                if(tourRoute != null) {
+                    message = tourRoute.getErrorMsg();
+                }
+                else {
+                    message = "An unknown error has occured.";
+                }
+                AlertDialog.Builder errorDialog = new AlertDialog.Builder(DisplayMapActivity.this);
+                errorDialog.setTitle("Error");
+                errorDialog.setMessage(message);
             }
         }
 
