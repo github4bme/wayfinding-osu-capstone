@@ -150,50 +150,35 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
         @Override
         protected void onPostExecute(Route collection) {
-            if (collection != null) {
-                if (collection.getErrorMsg() == null) {
-                    final List<Node> routePoints = collection.getRoute();
-                    // Fills ourRoute with our path's lat/long coordinates
-                    for (int i = 0; i < routePoints.size(); i++) {
-                        ourRoute.add(new LatLng(routePoints.get(i).getCoordinate().getLatitude(),
-                                routePoints.get(i).getCoordinate().getLongitude()));
-                    }
-
-                    // Set first destination to the start of the route
-                    mNextDestination = ourRoute.get(0);
-
-                    MapFragment map = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-
-                    // Sets up a non-null GoogleMap and calls onMapReady()
-                    map.getMapAsync(this);
-                } else{
-                    //Error box for start node error and no route error
-                    AlertDialog.Builder noRoute = new AlertDialog.Builder(DisplayMapActivity.this);
-                    noRoute.setTitle("Error");
-                    noRoute.setMessage(collection.getErrorMsg());
-                    noRoute.setPositiveButton("OK", new DialogInterface.OnClickListener(){
-                        @Override
-                        public void onClick(DialogInterface dialog, int which){
-                            finish();
-                        }
-                    });
-                    noRoute.show();
+            if(collection != null && collection.getErrorMsg() == null) {
+                final List<Node> routePoints = collection.getRoute();
+                // Fills ourRoute with our path's lat/long coordinates
+                for (int i = 0; i < routePoints.size(); i++) {
+                    ourRoute.add(new LatLng(routePoints.get(i).getCoordinate().getLatitude(),
+                            routePoints.get(i).getCoordinate().getLongitude()));
                 }
-            }
-            else{
-                //if unknown error occurred
-                AlertDialog.Builder unknownError = new AlertDialog.Builder(DisplayMapActivity.this);
-                unknownError.setTitle("Error");
-                unknownError.setMessage("An error occurred, please try again later.");
-                unknownError.setPositiveButton("OK", new DialogInterface.OnClickListener(){
-                    @Override
-                    public void onClick(DialogInterface dialog, int which){
-                        finish();
-                    }
-                });
-                unknownError.show();
-            }
 
+                // Set first destination to the start of the route
+                mNextDestination = ourRoute.get(0);
+
+                MapFragment map = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+
+                // Sets up a non-null GoogleMap and calls onMapReady()
+                map.getMapAsync(this);
+            }
+            else {
+                String message;
+                if(collection != null) {
+                    message = collection.getErrorMsg();
+                }
+                else {
+                    message = "An unknown error has occured.";
+                }
+                AlertDialog.Builder errorDialog = new AlertDialog.Builder(DisplayMapActivity.this);
+                errorDialog.setTitle("Error");
+                errorDialog.setMessage(message);
+                errorDialog.show();
+            }
         }
 
         @Override
