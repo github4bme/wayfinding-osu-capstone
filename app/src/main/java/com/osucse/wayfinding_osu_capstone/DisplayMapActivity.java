@@ -91,8 +91,6 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Set and lock orientation to portrait
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_display_map);
         Intent intent = getIntent();
 
