@@ -7,6 +7,12 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.RotateAnimation;
+import android.view.animation.ScaleAnimation;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.util.Log;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -86,6 +92,12 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     // Variable that could be used for turning location updates on and off
     // This might be helpful for running on emulator if we find that the updates cause problems
     protected boolean mRequestingLocationUpdates;
+
+    // Sizes and animation needed for arrow animation
+    protected float lastRotation = 0.0f;
+    protected float newScaleSize = 1.0f;
+    protected float oldScaleSize = 1.0f;
+    protected AnimationSet animationSet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -407,7 +419,42 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     private void updateUI() {
         // Need to rotate the arrow by the difference of the two bearings
         float arrowRotation = bearingToDestDegrees - currBearing;
-        arrowImage.setRotation(arrowRotation);
+
+        // change duration based on changing size or just rotating
+        int duration;
+        if (oldScaleSize != newScaleSize) {
+            duration = 1000;
+        } else {
+            duration = 1;
+        }
+
+        // null check is needed to short circuit the condition the first time to not get null exception
+        // check to make sure animation has ended
+        if (animationSet == null || animationSet.hasEnded()) {
+            // first param is offset of rotation; last 4 parameters are to set to rotate about middle of arrow
+            RotateAnimation rotateAnimation = new RotateAnimation(lastRotation, arrowRotation, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+            // set to make rotation not start from 0 for next rotation, but where it stopped
+            lastRotation = arrowRotation;
+            rotateAnimation.setDuration(duration);
+            rotateAnimation.setFillAfter(true);
+
+            // often this is just scaled to itself, but when different it enlarges or shrinks based on percentage of
+            // arrow image; last four params tell it to enlarge from upper left corner
+            // new scale size is changed if image is tapped
+            ScaleAnimation scaleAnimation = new ScaleAnimation(oldScaleSize, newScaleSize, oldScaleSize, newScaleSize, Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, 0f);
+            // set equal so no scale change is done unless image is touched
+            oldScaleSize = newScaleSize;
+            scaleAnimation.setDuration(duration);
+            scaleAnimation.setFillAfter(true);
+
+            animationSet = new AnimationSet(true);
+            animationSet.addAnimation(rotateAnimation);
+            animationSet.addAnimation(scaleAnimation);
+            animationSet.setFillAfter(true);
+            arrowImage.startAnimation(animationSet);
+        } else {
+            // do nothing until animation is done
+        }
     }
 
     // Code used to repopulate necessary fields if the Activity is interrupted
@@ -505,5 +552,22 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         newLocation.setLatitude(point.latitude);
         newLocation.setLongitude(point.longitude);
         return newLocation;
+    }
+
+    public void toggleArrowSize(View arrowImage) {
+        // get the percentage of arrow image needed to fill screen
+        LinearLayout overallLayout = (LinearLayout) findViewById(R.id.overall_linear_layout);
+        int widthLayout = overallLayout.getWidth();
+        int widthArrowImage = arrowImage.getWidth();
+        float percentArrowToFitLayout = (widthLayout * 1.0f) / (widthArrowImage * 1.0f);
+
+        // Check if should shrink arrow or enlarge
+        if (oldScaleSize == percentArrowToFitLayout) {
+            // If true then arrow has already been enlarged so shrink
+            newScaleSize = 1.0f;
+        } else {
+            // Arrow should be enlarged
+            newScaleSize = percentArrowToFitLayout;
+        }
     }
 }
