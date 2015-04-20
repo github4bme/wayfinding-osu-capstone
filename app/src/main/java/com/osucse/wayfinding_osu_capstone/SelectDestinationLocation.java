@@ -72,15 +72,7 @@ public class SelectDestinationLocation extends ActionBarActivity {
                 // get the id of the selected item
                 String selectedItem = Integer.toString(((Building)(parent.getItemAtPosition(position))).getBuildingId());
 
-                // create an intent
-                Intent intent = null;
-
-                if (Settings.getVisualSetting()){
-                    intent = new Intent(SelectDestinationLocation.this, DisplayArrowActivity.class);
-                } else {
-                    intent = new Intent(SelectDestinationLocation.this, DisplayMapActivity.class);
-                }
-
+                Intent intent = new Intent(SelectDestinationLocation.this, DisplayMapActivity.class);
 
                 // add the selected id to intent
                 intent.putExtra(SOURCE_LOCATION, incomingSource);

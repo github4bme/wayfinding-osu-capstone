@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.RotateAnimation;
@@ -95,7 +96,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     // Sizes and animation needed for arrow animation
     protected float lastRotation = 0.0f;
     protected float newScaleSize = 1.0f;
-    protected float oldScaleSize = 1.0f;
+    protected float currentScaleSize = 1.0f;
     protected AnimationSet animationSet;
 
     @Override
@@ -154,6 +155,23 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
         // To bring back saved state if activity is interrupted
         updateValuesFromBundle(savedInstanceState);
+
+
+        // The arrow's default size is set to small; this code checks the visually impaired setting;
+        // If set then arrow should be toggled to large; Must use Global Listener to wait for
+        // entire layout to be loaded before arrow is toggled
+        if (Settings.getVisualSetting()) {
+            final LinearLayout overallLayout = (LinearLayout) findViewById(R.id.overall_linear_layout);
+            ViewTreeObserver treeObserver = overallLayout.getViewTreeObserver();
+            treeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    toggleArrowSize(arrowImage);
+
+                    overallLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                }
+            });
+        }
     }
 
     private class HttpRequestTask extends AsyncTask<Void, Void, Route> implements OnMapReadyCallback {
@@ -418,7 +436,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
         // change duration based on changing size or just rotating
         int duration;
-        if (oldScaleSize != newScaleSize) {
+        if (currentScaleSize != newScaleSize) {
             duration = 1000;
         } else {
             duration = 1;
@@ -437,14 +455,14 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
             // often this is just scaled to itself, but when different it enlarges or shrinks based on percentage of
             // arrow image; last four params tell it to enlarge from upper left corner
             // new scale size is changed if image is tapped
-            ScaleAnimation scaleAnimation = new ScaleAnimation(oldScaleSize, newScaleSize, oldScaleSize, newScaleSize, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f);
+            ScaleAnimation scaleAnimation = new ScaleAnimation(currentScaleSize, newScaleSize, currentScaleSize, newScaleSize, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f);
 
             // booleans to see if arrow was enlarged with this animation
-            boolean enlarged = newScaleSize > oldScaleSize;
-            boolean shrunk = newScaleSize < oldScaleSize;
+            boolean enlarged = newScaleSize > currentScaleSize;
+            boolean shrunk = newScaleSize < currentScaleSize;
 
             // set equal so no scale change is done unless image is touched
-            oldScaleSize = newScaleSize;
+            currentScaleSize = newScaleSize;
             scaleAnimation.setDuration(duration);
             scaleAnimation.setFillAfter(true);
 
@@ -573,13 +591,13 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         int widthArrowImage = arrowImage.getWidth();
         float percentArrowToFitLayout = (widthLayout * 1.0f) / (widthArrowImage * 1.0f);
 
-        // Check if should shrink arrow or enlarge
-        if (oldScaleSize == percentArrowToFitLayout) {
-            // If true then arrow has already been enlarged so shrink
-            newScaleSize = 1.0f;
-        } else {
-            // Arrow should be enlarged
+        // Check if should shrink or enlarge arrow
+        if (currentScaleSize == 1.0f) {
+            // If true then arrow is small so need to enlarge
             newScaleSize = percentArrowToFitLayout;
+        } else {
+            // Arrow should be shrunk
+            newScaleSize = 1.0f;
         }
     }
 }
