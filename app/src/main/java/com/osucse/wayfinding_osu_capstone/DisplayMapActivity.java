@@ -17,6 +17,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.common.ConnectionResult;
@@ -46,6 +47,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     private static final float AT_LOCATION_RADIUS = 10.0f;
 
     private GoogleMap ourMap;
+    private Marker nextDestMarker;
     List<LatLng> ourRoute = new ArrayList<LatLng>();
 
     // Used for location services
@@ -58,11 +60,16 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
     protected TextView textMessageDisplay;
     protected ImageView arrowImage;
+    protected TextView distanceTV;
+    protected TextView etaTV;
 
     protected String startLocation;
     protected String endLocation;
     protected String tourId;
     protected boolean routeGenUsesCurrLoc;
+    protected boolean routeNeeded;
+
+    protected LatLng finalLocation;
 
     protected android.location.Location mCurrentLocation;
     protected float bearingToDestDegrees;
@@ -90,17 +97,21 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         textMessageDisplay.setTextSize(20);
         textMessageDisplay.setText("OSU Wayfinding Application");
         arrowImage = (ImageView) findViewById(R.id.arrow_image);
+        distanceTV = (TextView) findViewById(R.id.distanceTextView);
+        etaTV = (TextView) findViewById(R.id.etaTextView);
 
 
         startLocation = intent.getStringExtra(SelectDestinationLocation.SOURCE_LOCATION);
         endLocation = intent.getStringExtra(SelectDestinationLocation.DESTINATION_LOCATION);
         tourId = intent.getStringExtra(SelectTour.TOUR);
 
-        if(tourId != null)
-        {
+        // boolean used primarily for using current location for route
+        routeNeeded = true;
+
+        if(tourId != null) {
             new TourRequest().execute();
-        }
-        else {
+            routeGenUsesCurrLoc = false;
+        } else {
             // Set boolean for ordering of asynchronous operations
             // if true get current location THEN get route and build map
             // else (get current location) AND (get route and build map) in parallel
@@ -173,13 +184,16 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
                 // Set first destination to the start of the route
                 mNextDestination = ourRoute.get(0);
 
+                int lastIndex = ourRoute.size() - 1;
+                finalLocation = ourRoute.get(lastIndex);
+
                 MapFragment map = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 
                 // Sets up a non-null GoogleMap and calls onMapReady()
                 map.getMapAsync(this);
             }
             else{
-                //if no route generated, show error and go to home screen
+                // if no route generated, show error and go to home screen
                 AlertDialog.Builder noRoute = new AlertDialog.Builder(DisplayMapActivity.this);
                 noRoute.setTitle("Error");
                 noRoute.setMessage("There is no possible route between these points.");
@@ -191,7 +205,6 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
                 });
                 noRoute.show();
             }
-
         }
 
         @Override
@@ -205,7 +218,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
             ourMap.getUiSettings().setMapToolbarEnabled(false);
 
             // Set first marker to show the start of the route
-            ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
+            nextDestMarker = ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
         }
     }
 
@@ -312,17 +325,6 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        // Set user's current location
-        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-
-        // if route gen uses current location then current location must be found first
-        if (routeGenUsesCurrLoc) {
-            new HttpRequestTask().execute();
-        }
-
-        checkNextDestUpdateUI();
-
         if (mRequestingLocationUpdates) {
             startLocationUpdates();
         }
@@ -339,34 +341,49 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         // This is called anytime the location is detected as changed
         mCurrentLocation = currentLocation;
 
+        // null check needed if http request has yet to set finalLocation
+        if(finalLocation != null && mCurrentLocation.distanceTo(createAndroidLocation(finalLocation)) < AT_LOCATION_RADIUS){
+            AlertDialog.Builder arrived = new AlertDialog.Builder(DisplayMapActivity.this);
+            arrived.setTitle("Arrived");
+            arrived.setMessage("You Have Arrived!");
+            arrived.show();
+        }
+
+        // if route gen uses current location then current location must be found first
+        if (routeNeeded && routeGenUsesCurrLoc) {
+            new HttpRequestTask().execute();
+            // set so do not make http request again
+            routeNeeded = false;
+        }
+
         checkNextDestUpdateUI();
 
         recalculateDistanceAndETA();
     }
 
-    private void recalculateDistanceAndETA()
-    {
+    private void recalculateDistanceAndETA() {
         double distanceLeftInMeters = 0;
 
         distanceLeftInMeters = computeDistanceBetween(new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), mNextDestination);
 
-        for(int i = ourRoute.indexOf(mNextDestination) + 1; i < ourRoute.size() - 2; i++)
+        // Loops from index of nextDestination in route to the end adding up distances
+        for(int i = ourRoute.indexOf(mNextDestination); i < ourRoute.size() - 1; i++)
         {
             distanceLeftInMeters += computeDistanceBetween(ourRoute.get(i), ourRoute.get(i + 1));
         }
 
         double distanceLeftInMiles = distanceLeftInMeters / 1609.344;
 
-        TextView distanceTV = (TextView) findViewById(R.id.distanceTextView);
         distanceTV.setText(String.format("%.3f", distanceLeftInMiles) + " mi. remaining");
-
-        TextView etaTV = (TextView) findViewById(R.id.etaTextView);
         etaTV.setText(Math.round(distanceLeftInMiles / 3.1 * 60) + " minutes");
     }
 
     /**
      * Method that checks to see if user is within AT_LOCATION_RADIUS distance from any point
      * on route; if the user is, then method sets mNextDestination to next point on route
+     *
+     * NOTE: It is possible to go backwards on the route - this method will always try to point
+     * you to the next node as compared to where you currently are
      */
     private void checkNextDestUpdateUI() {
         LatLng tempDest = mNextDestination;
@@ -378,8 +395,9 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
                 mNextDestination = ourRoute.get(i + 1);
             }
         }
-        if (ourMap != null && tempDest != mNextDestination) {
-            ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
+        if (ourMap != null && nextDestMarker != null && tempDest != mNextDestination) {
+            nextDestMarker.remove();
+            nextDestMarker = ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
         }
 
         bearingToDestDegrees = mCurrentLocation.bearingTo(createAndroidLocation(mNextDestination));

@@ -1,5 +1,6 @@
 package com.osucse.wayfinding_osu_capstone;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.AsyncTask;
@@ -48,10 +49,16 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
 
     protected TextView textMessageDisplay;
     protected ImageView arrowImage;
+    protected TextView checkpointTV;
+    protected TextView distanceTV;
+    protected TextView etaTV;
 
     protected String startLocation;
     protected String endLocation;
     protected boolean routeGenUsesCurrLoc;
+    protected boolean routeNeeded;
+
+    protected LatLng finalLocation;
 
     protected android.location.Location mCurrentLocation;
     protected float bearingToDestDegrees;
@@ -79,9 +86,15 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
         textMessageDisplay.setTextSize(20);
         textMessageDisplay.setText("OSU Wayfinding Application");
         arrowImage = (ImageView) findViewById(R.id.arrow_image);
+        checkpointTV = (TextView) findViewById(R.id.checkpointTextView);
+        distanceTV = (TextView) findViewById(R.id.distanceTextView);
+        etaTV = (TextView) findViewById(R.id.etaTextView);
 
         startLocation = intent.getStringExtra(SelectDestinationLocation.SOURCE_LOCATION);
         endLocation = intent.getStringExtra(SelectDestinationLocation.DESTINATION_LOCATION);
+
+        // boolean used primarily for using current location for route
+        routeNeeded = true;
         // Set boolean for ordering of asynchronous operations
         // if true get current location THEN get route and build map
         // else (get current location) AND (get route and build map) in parallel
@@ -194,17 +207,6 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        // Set user's current location
-        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-
-        // if route gen uses current location then current location must be found first
-        if (routeGenUsesCurrLoc) {
-            new HttpRequestTask().execute();
-        }
-
-        checkNextDestUpdateUI();
-
         if (mRequestingLocationUpdates) {
             startLocationUpdates();
         }
@@ -216,26 +218,22 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
                 mGoogleApiClient, mLocationRequest, this);
     }
 
-    private void recalculateDistanceAndETA()
-    {
+    private void recalculateDistanceAndETA() {
         double distanceLeftInMeters = 0;
 
         distanceLeftInMeters = computeDistanceBetween(new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), mNextDestination);
 
-        TextView checkpointTV = (TextView) findViewById(R.id.checkpointTextView);
         checkpointTV.setText(String.format("%.3f", distanceLeftInMeters / 1609.44) + " mi. to next checkpoint");
 
-        for(int i = ourRoute.indexOf(mNextDestination) + 1; i < ourRoute.size() - 2; i++)
+        // Loops from index of nextDestination in route to the end adding up distances
+        for(int i = ourRoute.indexOf(mNextDestination); i < ourRoute.size() - 1; i++)
         {
             distanceLeftInMeters += computeDistanceBetween(ourRoute.get(i), ourRoute.get(i + 1));
         }
 
         double distanceLeftInMiles = distanceLeftInMeters / 1609.344;
 
-        TextView distanceTV = (TextView) findViewById(R.id.distanceTextView);
         distanceTV.setText(String.format("%.3f", distanceLeftInMiles) + " mi. remaining");
-
-        TextView etaTV = (TextView) findViewById(R.id.etaTextView);
         etaTV.setText(Math.round(distanceLeftInMiles / 3.1 * 60) + " minutes");
     }
 
@@ -243,6 +241,22 @@ public class DisplayArrowActivity extends FragmentActivity implements SensorEven
     public void onLocationChanged(android.location.Location currentLocation) {
         // This is called anytime the location is detected as changed
         mCurrentLocation = currentLocation;
+        int routeSize = ourRoute.size()-1;
+        finalLocation = ourRoute.get(routeSize);
+
+        if(mCurrentLocation.distanceTo(createAndroidLocation(finalLocation)) < AT_LOCATION_RADIUS){
+            AlertDialog.Builder arrived = new AlertDialog.Builder(DisplayArrowActivity.this);
+            arrived.setTitle("Arrived");
+            arrived.setMessage("You Have Arrived!");
+            arrived.show();
+        }
+
+        // if route gen uses current location then current location must be found first
+        if (routeNeeded && routeGenUsesCurrLoc) {
+            new HttpRequestTask().execute();
+            // set so do not make http request again
+            routeNeeded = false;
+        }
 
         checkNextDestUpdateUI();
 
