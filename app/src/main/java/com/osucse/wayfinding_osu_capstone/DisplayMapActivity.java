@@ -64,7 +64,6 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     private SensorManager mSensorManager;
     private Sensor mSensor;
 
-    protected TextView textMessageDisplay;
     protected ImageView arrowImage;
     protected TextView distanceTV;
     protected TextView etaTV;
@@ -105,9 +104,6 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         setContentView(R.layout.activity_display_map);
         Intent intent = getIntent();
 
-        textMessageDisplay = (TextView) findViewById(R.id.text_message_map_display);
-        textMessageDisplay.setTextSize(20);
-        textMessageDisplay.setText("OSU Wayfinding Application");
         arrowImage = (ImageView) findViewById(R.id.arrow_image);
         distanceTV = (TextView) findViewById(R.id.distanceTextView);
         etaTV = (TextView) findViewById(R.id.etaTextView);
@@ -441,7 +437,12 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
             // often this is just scaled to itself, but when different it enlarges or shrinks based on percentage of
             // arrow image; last four params tell it to enlarge from upper left corner
             // new scale size is changed if image is tapped
-            ScaleAnimation scaleAnimation = new ScaleAnimation(oldScaleSize, newScaleSize, oldScaleSize, newScaleSize, Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, 0f);
+            ScaleAnimation scaleAnimation = new ScaleAnimation(oldScaleSize, newScaleSize, oldScaleSize, newScaleSize, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f);
+
+            // booleans to see if arrow was enlarged with this animation
+            boolean enlarged = newScaleSize > oldScaleSize;
+            boolean shrunk = newScaleSize < oldScaleSize;
+
             // set equal so no scale change is done unless image is touched
             oldScaleSize = newScaleSize;
             scaleAnimation.setDuration(duration);
@@ -452,6 +453,16 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
             animationSet.addAnimation(scaleAnimation);
             animationSet.setFillAfter(true);
             arrowImage.startAnimation(animationSet);
+
+            // One line of repeated code, but most of the time we won't need to do
+            // either operation so I thought it would be better to keep them separate
+            if (enlarged) {
+                ImageView xIcon = (ImageView) findViewById(R.id.x_icon);
+                xIcon.setVisibility(View.VISIBLE);
+            } else if (shrunk) {
+                ImageView xIcon = (ImageView) findViewById(R.id.x_icon);
+                xIcon.setVisibility(View.INVISIBLE);
+            }
         } else {
             // do nothing until animation is done
         }
@@ -557,7 +568,8 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     public void toggleArrowSize(View arrowImage) {
         // get the percentage of arrow image needed to fill screen
         LinearLayout overallLayout = (LinearLayout) findViewById(R.id.overall_linear_layout);
-        int widthLayout = overallLayout.getWidth();
+        // Subtract 20 in order to roughly have 5dp on each side of enlarged arrow
+        int widthLayout = overallLayout.getWidth() - 20;
         int widthArrowImage = arrowImage.getWidth();
         float percentArrowToFitLayout = (widthLayout * 1.0f) / (widthArrowImage * 1.0f);
 
