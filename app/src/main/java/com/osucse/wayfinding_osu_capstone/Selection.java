@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.osucse.wayfinding_api.BuildingCollection;
+import com.osucse.wayfinding_api.TourCollection;
 
 
 /**
@@ -62,7 +63,7 @@ public class Selection extends ActionBarActivity {
         loadingListDisplay.setTextSize(20);
         loadingListDisplay.setText("Loading...");
         // Get list with http request then go to next activity after list is retrieved
-        new HttpRequestTask().execute();
+        new BuildingHttpRequestTask().execute();
     }
 
     /**
@@ -70,8 +71,11 @@ public class Selection extends ActionBarActivity {
      * the tour sub-process of the app.
      */
     private void goToTours () {
-        Intent intent = new Intent(this, SelectTour.class);
-        startActivity(intent);
+        TextView loadingListDisplay = (TextView) findViewById(R.id.loading_list_display);
+        loadingListDisplay.setTextSize(20);
+        loadingListDisplay.setText("Loading...");
+        // Get list with http request then go to next activity after list is retrieved
+        new ToursHttpRequestTask().execute();
     }
 
     /**
@@ -86,7 +90,7 @@ public class Selection extends ActionBarActivity {
     /**
      * A private internal class that handles updating the internal class StartUpTasks
      */
-    private class HttpRequestTask extends AsyncTask<Void, Void, BuildingCollection> {
+    private class BuildingHttpRequestTask extends AsyncTask<Void, Void, BuildingCollection> {
         @Override
         protected BuildingCollection doInBackground(Void... params) {
             return StartUpTasks.getBuildingsFromServer();
@@ -100,6 +104,27 @@ public class Selection extends ActionBarActivity {
             loadingListDisplay.setTextSize(20);
             loadingListDisplay.setText("");
             Intent intent = new Intent(Selection.this, SelectSourceLocation.class);
+            startActivity(intent);
+        }
+    }
+
+    /**
+     * A private internal class that handles updating the internal class StartUpTasks
+     */
+    private class ToursHttpRequestTask extends AsyncTask<Void, Void, TourCollection> {
+        @Override
+        protected TourCollection doInBackground(Void... params) {
+            return StartUpTasks.getToursFromServer();
+        }
+
+        @Override
+        protected void onPostExecute(TourCollection tours) {
+            // Clears the "Loading..." message so it is not there when you navigate back to this screen from Map Display
+            // This has never given me a threading error, but it is possible that it could
+            TextView loadingListDisplay = (TextView) Selection.this.findViewById(R.id.loading_list_display);
+            loadingListDisplay.setTextSize(20);
+            loadingListDisplay.setText("");
+            Intent intent = new Intent(Selection.this, SelectTour.class);
             startActivity(intent);
         }
     }
