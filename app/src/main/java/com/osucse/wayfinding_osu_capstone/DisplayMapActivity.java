@@ -7,6 +7,13 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.RotateAnimation;
+import android.view.animation.ScaleAnimation;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.util.Log;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -58,7 +65,6 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     private SensorManager mSensorManager;
     private Sensor mSensor;
 
-    protected TextView textMessageDisplay;
     protected ImageView arrowImage;
     protected TextView distanceTV;
     protected TextView etaTV;
@@ -87,15 +93,18 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     // This might be helpful for running on emulator if we find that the updates cause problems
     protected boolean mRequestingLocationUpdates;
 
+    // Sizes and animation needed for arrow animation
+    protected float lastRotation = 0.0f;
+    protected float newScaleSize = 1.0f;
+    protected float currentScaleSize = 1.0f;
+    protected AnimationSet animationSet;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_map);
         Intent intent = getIntent();
 
-        textMessageDisplay = (TextView) findViewById(R.id.text_message_map_display);
-        textMessageDisplay.setTextSize(20);
-        textMessageDisplay.setText("OSU Wayfinding Application");
         arrowImage = (ImageView) findViewById(R.id.arrow_image);
         distanceTV = (TextView) findViewById(R.id.distanceTextView);
         etaTV = (TextView) findViewById(R.id.etaTextView);
@@ -146,6 +155,23 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
 
         // To bring back saved state if activity is interrupted
         updateValuesFromBundle(savedInstanceState);
+
+
+        // The arrow's default size is set to small; this code checks the visually impaired setting;
+        // If set then arrow should be toggled to large; Must use Global Listener to wait for
+        // entire layout to be loaded before arrow is toggled
+        if (Settings.getVisualSetting()) {
+            final LinearLayout overallLayout = (LinearLayout) findViewById(R.id.overall_linear_layout);
+            ViewTreeObserver treeObserver = overallLayout.getViewTreeObserver();
+            treeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    toggleArrowSize(arrowImage);
+
+                    overallLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                }
+            });
+        }
     }
 
     private class HttpRequestTask extends AsyncTask<Void, Void, Route> implements OnMapReadyCallback {
@@ -415,7 +441,57 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     private void updateUI() {
         // Need to rotate the arrow by the difference of the two bearings
         float arrowRotation = bearingToDestDegrees - currBearing;
-        arrowImage.setRotation(arrowRotation);
+
+        // change duration based on changing size or just rotating
+        int duration;
+        if (currentScaleSize != newScaleSize) {
+            duration = 1000;
+        } else {
+            duration = 1;
+        }
+
+        // null check is needed to short circuit the condition the first time to not get null exception
+        // check to make sure animation has ended
+        if (animationSet == null || animationSet.hasEnded()) {
+            // first param is offset of rotation; last 4 parameters are to set to rotate about middle of arrow
+            RotateAnimation rotateAnimation = new RotateAnimation(lastRotation, arrowRotation, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+            // set to make rotation not start from 0 for next rotation, but where it stopped
+            lastRotation = arrowRotation;
+            rotateAnimation.setDuration(duration);
+            rotateAnimation.setFillAfter(true);
+
+            // often this is just scaled to itself, but when different it enlarges or shrinks based on percentage of
+            // arrow image; last four params tell it to enlarge from upper left corner
+            // new scale size is changed if image is tapped
+            ScaleAnimation scaleAnimation = new ScaleAnimation(currentScaleSize, newScaleSize, currentScaleSize, newScaleSize, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f);
+
+            // booleans to see if arrow was enlarged with this animation
+            boolean enlarged = newScaleSize > currentScaleSize;
+            boolean shrunk = newScaleSize < currentScaleSize;
+
+            // set equal so no scale change is done unless image is touched
+            currentScaleSize = newScaleSize;
+            scaleAnimation.setDuration(duration);
+            scaleAnimation.setFillAfter(true);
+
+            animationSet = new AnimationSet(true);
+            animationSet.addAnimation(rotateAnimation);
+            animationSet.addAnimation(scaleAnimation);
+            animationSet.setFillAfter(true);
+            arrowImage.startAnimation(animationSet);
+
+            // One line of repeated code, but most of the time we won't need to do
+            // either operation so I thought it would be better to keep them separate
+            if (enlarged) {
+                ImageView xIcon = (ImageView) findViewById(R.id.x_icon);
+                xIcon.setVisibility(View.VISIBLE);
+            } else if (shrunk) {
+                ImageView xIcon = (ImageView) findViewById(R.id.x_icon);
+                xIcon.setVisibility(View.INVISIBLE);
+            }
+        } else {
+            // do nothing until animation is done
+        }
     }
 
     // Code used to repopulate necessary fields if the Activity is interrupted
@@ -513,5 +589,23 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         newLocation.setLatitude(point.latitude);
         newLocation.setLongitude(point.longitude);
         return newLocation;
+    }
+
+    public void toggleArrowSize(View arrowImage) {
+        // get the percentage of arrow image needed to fill screen
+        LinearLayout overallLayout = (LinearLayout) findViewById(R.id.overall_linear_layout);
+        // Subtract 20 in order to roughly have 5dp on each side of enlarged arrow
+        int widthLayout = overallLayout.getWidth() - 20;
+        int widthArrowImage = arrowImage.getWidth();
+        float percentArrowToFitLayout = (widthLayout * 1.0f) / (widthArrowImage * 1.0f);
+
+        // Check if should shrink or enlarge arrow
+        if (currentScaleSize == 1.0f) {
+            // If true then arrow is small so need to enlarge
+            newScaleSize = percentArrowToFitLayout;
+        } else {
+            // Arrow should be shrunk
+            newScaleSize = 1.0f;
+        }
     }
 }
