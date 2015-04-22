@@ -18,7 +18,7 @@ import com.osucse.wayfinding_api.TourCollection;
  * Requires files:
  * layout/activity_selection.xml
  */
-public class Selection extends ActionBarActivity {
+public class Selection extends BaseActivity {
 
     /**
      * onCreate - executes the private httpRequestTask()

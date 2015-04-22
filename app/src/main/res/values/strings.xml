@@ -35,4 +35,11 @@
     <string name="title_activity_display_arrow">My Arrow</string>
     <!-- end activity_settings -->
 
+    <string name="menu">Menu</string>
+    <string-array name="menu_items">
+        <item>Directions</item>
+        <item>Tours</item>
+        <item>Settings</item>
+    </string-array>
+
 </resources>

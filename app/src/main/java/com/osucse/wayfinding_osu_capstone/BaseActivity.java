@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -15,26 +15,23 @@ import android.content.res.Configuration;
 /**
  * Created by aritelesman on 4/22/15.
  */
-public class BaseActivity extends Activity
-{
+public class BaseActivity extends Activity {
     public DrawerLayout drawerLayout;
     public ListView drawerList;
     private ActionBarDrawerToggle drawerToggle;
+    private String[] menuItems;
 
-    protected void onCreate(Bundle savedInstanceState)
-    {
+
+    protected void onCreate(Bundle savedInstanceState) {
         // R.id.drawer_layout should be in every activity with exactly the same id.
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-        drawerToggle = new ActionBarDrawerToggle((Activity) this, drawerLayout, R.drawable.ic_drawer, 0, 0)
-        {
-            public void onDrawerClosed(View view)
-            {
+        drawerToggle = new ActionBarDrawerToggle((Activity) this, drawerLayout, R.drawable.ic_drawer, 0, 0) {
+            public void onDrawerClosed(View view) {
                 getActionBar().setTitle(R.string.app_name);
             }
 
-            public void onDrawerOpened(View drawerView)
-            {
+            public void onDrawerOpened(View drawerView) {
                 getActionBar().setTitle(R.string.menu);
             }
         };
@@ -42,10 +39,10 @@ public class BaseActivity extends Activity
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
-
+        menuItems = getResources().getStringArray(R.array.menu_items);
         drawerList = (ListView) findViewById(R.id.left_drawer);
         drawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_activated_1,
-                items)); //Items is an ArrayList or array with the items you want to put in the Navigation Drawer.
+                menuItems)); //Items is an ArrayList or array with the items you want to put in the Navigation Drawer.
 
         drawerList.setOnItemClickListener(new OnItemClickListener() {
             @Override
@@ -77,3 +74,4 @@ public class BaseActivity extends Activity
         super.onConfigurationChanged(newConfig);
         drawerToggle.onConfigurationChanged(newConfig);
     }
+}
