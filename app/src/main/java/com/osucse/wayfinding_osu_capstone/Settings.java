@@ -67,12 +67,13 @@ public class Settings extends ActionBarActivity {
      * @param bool what to set the switch state to
      */
     private static void accessibleSwitchStateChange (Boolean bool) {
+        if (settings != null) {
+            editor = settings.edit();
 
-        editor = settings.edit();
+            editor.putBoolean(ACCESSIBLE_ROUTING, bool);
 
-        editor.putBoolean(ACCESSIBLE_ROUTING, bool);
-
-        editor.commit();
+            editor.commit();
+        }
     }
 
     /**
@@ -80,12 +81,13 @@ public class Settings extends ActionBarActivity {
      * @param bool what to set the switch state to
      */
     private static void visualSwitchStateChange (boolean bool) {
+        if (settings != null) {
+            editor = settings.edit();
 
-        editor = settings.edit();
+            editor.putBoolean(VISUALLY_IMPAIRED, bool);
 
-        editor.putBoolean(VISUALLY_IMPAIRED, bool);
-
-        editor.commit();
+            editor.commit();
+        }
     }
 
 
