@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.osucse.wayfinding_api.BuildingCollection;
 import com.osucse.wayfinding_api.TourCollection;
 
+import android.support.v4.widget.DrawerLayout;
 
 /**
  * This is the starting activity. It provides the user the choice to get directions,
@@ -19,7 +20,7 @@ import com.osucse.wayfinding_api.TourCollection;
  * layout/activity_selection.xml
  */
 public class Selection extends BaseActivity {
-
+    private DrawerLayout drawerLayout;
     /**
      * onCreate - executes the private httpRequestTask()
      * @param savedInstanceState
@@ -28,6 +29,7 @@ public class Selection extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selection);
+        super.onCreateDrawer();
     }
 
     /**

@@ -22,7 +22,7 @@ public class BaseActivity extends Activity {
     private String[] menuItems;
 
 
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreateDrawer() {
         // R.id.drawer_layout should be in every activity with exactly the same id.
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
