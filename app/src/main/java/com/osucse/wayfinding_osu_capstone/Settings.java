@@ -16,15 +16,16 @@ public class Settings extends ActionBarActivity {
      */
     public static final String ACCESSIBLE_ROUTING = "ACCESSIBLE_ROUTING";
     public static final String VISUALLY_IMPAIRED = "VISUALLY_IMPAIRED";
+    public static final String SHOW_MAP_HINTS = "SHOW_MAP_HINTS";
 
-    private static SharedPreferences settings;
-    private static SharedPreferences.Editor editor;
+    protected static SharedPreferences settings;
+    protected static SharedPreferences.Editor editor;
 
     /**
      * Instance variables
      */
-    private Switch                      accessibleSwitch;
-    private Switch                      visualSwitch;
+    private Switch accessibleSwitch;
+    private Switch visualSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,13 +50,15 @@ public class Settings extends ActionBarActivity {
             }
         });
 
-        // connect to preferences file
-        settings = getPreferences(MODE_PRIVATE);
+        // Should never be null if Selection is creating settings
+        if (settings == null) {
+            // connect to preferences file
+            settings = getPreferences(MODE_PRIVATE);
+        }
 
         // load switch states from memory
         this.accessibleSwitch.setChecked(settings.getBoolean(ACCESSIBLE_ROUTING, false));
         this.visualSwitch.setChecked(settings.getBoolean(VISUALLY_IMPAIRED, false));
-
     }
 
 
@@ -86,6 +89,8 @@ public class Settings extends ActionBarActivity {
     }
 
 
+
+
     public static boolean getAccessibleSetting () {
         // Default to false as answer if Settings page has not been visited
         if (settings == null) {
@@ -100,5 +105,23 @@ public class Settings extends ActionBarActivity {
             return false;
         }
         return settings.getBoolean(VISUALLY_IMPAIRED, false);
+    }
+
+    public static boolean getShowMapHintsSetting() {
+        if (settings == null) {
+            return true;
+        }
+
+        return settings.getBoolean(SHOW_MAP_HINTS, true);
+    }
+
+    public static void setShowMapHintsSetting(boolean newSetting) {
+        if (settings != null) {
+            editor = settings.edit();
+
+            editor.putBoolean(SHOW_MAP_HINTS, newSetting);
+
+            editor.commit();
+        }
     }
 }

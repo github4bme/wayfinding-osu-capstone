@@ -178,11 +178,23 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     }
 
     private void showHintsAndTips() {
-        AlertDialog.Builder hintsAndTipsDialog = new AlertDialog.Builder(DisplayMapActivity.this);
-        hintsAndTipsDialog.setTitle("Hints and Tips");
-        hintsAndTipsDialog.setMessage("The arrow works more efficiently if held parallel to the ground like a compass. Click on the arrow to enlarge it.");
-        hintsAndTipsDialog.setPositiveButton("Close", new DialogInterface.OnClickListener(){@Override public void onClick(DialogInterface dialog, int id){}});
-        hintsAndTipsDialog.show();
+        if (Settings.getShowMapHintsSetting()) {
+            AlertDialog.Builder hintsAndTipsDialog = new AlertDialog.Builder(DisplayMapActivity.this);
+            hintsAndTipsDialog.setTitle("Hints and Tips");
+            hintsAndTipsDialog.setMessage("The arrow works more efficiently if held parallel to the ground like a compass. Click on the arrow to enlarge it.");
+            hintsAndTipsDialog.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int id) {
+                }
+            });
+            hintsAndTipsDialog.setPositiveButton("Do Not Show Again", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int id) {
+                    Settings.setShowMapHintsSetting(false);
+                }
+            });
+            hintsAndTipsDialog.show();
+        }
     }
 
     private class HttpRequestTask extends AsyncTask<Void, Void, Route> implements OnMapReadyCallback {
