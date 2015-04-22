@@ -106,6 +106,8 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
         setContentView(R.layout.activity_display_map);
         Intent intent = getIntent();
 
+        showHintsAndTips();
+
         arrowImage = (ImageView) findViewById(R.id.arrow_image);
         distanceTV = (TextView) findViewById(R.id.distanceTextView);
         etaTV = (TextView) findViewById(R.id.etaTextView);
@@ -173,6 +175,14 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
                 }
             });
         }
+    }
+
+    private void showHintsAndTips() {
+        AlertDialog.Builder hintsAndTipsDialog = new AlertDialog.Builder(DisplayMapActivity.this);
+        hintsAndTipsDialog.setTitle("Hints and Tips");
+        hintsAndTipsDialog.setMessage("The arrow works more efficiently if held parallel to the ground like a compass. Click on the arrow to enlarge it.");
+        hintsAndTipsDialog.setPositiveButton("Close", new DialogInterface.OnClickListener(){@Override public void onClick(DialogInterface dialog, int id){}});
+        hintsAndTipsDialog.show();
     }
 
     private class HttpRequestTask extends AsyncTask<Void, Void, Route> implements OnMapReadyCallback {
