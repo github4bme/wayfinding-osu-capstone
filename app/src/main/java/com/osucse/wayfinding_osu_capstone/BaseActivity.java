@@ -21,6 +21,9 @@ import com.osucse.wayfinding_api.TourCollection;
 
 /**
  * Created by aritelesman on 4/22/15.
+ *
+ * This is the navigation drawer activity. It is built to be extended by every other activity we use.
+ *
  */
 public class BaseActivity extends ActionBarActivity {
     public DrawerLayout drawerLayout;
