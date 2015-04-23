@@ -1,9 +1,7 @@
 package com.osucse.wayfinding_osu_capstone;
 
-import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -25,12 +23,15 @@ public class SelectFavoriteBuildings extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_favorite_buildings);
 
+        // attach items to the view
         listView = (ListView) findViewById(R.id.select_favorite_buildings_list);
         saveButton = (Button) findViewById(R.id.select_favorite_buildings_save_button);
 
+        // load the adapted and set it to the ListView
         adapter = new BuildingListAdapter(getApplicationContext(), BuildingListAdapter.cloneBuildingList());
         listView.setAdapter(adapter);
 
+        // add a listener for list items
         listView.setOnItemClickListener( new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -42,6 +43,7 @@ public class SelectFavoriteBuildings extends ActionBarActivity {
             }
         });
 
+        // add a listener for when the save button is pressed
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

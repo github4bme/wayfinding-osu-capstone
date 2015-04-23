@@ -100,6 +100,7 @@ public class BuildingListAdapter extends ArrayAdapter<Building> implements Filte
         return filter;
     }
 
+    // a private filter class to search and change the list
     private class BuildingFilter extends Filter {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
@@ -133,6 +134,7 @@ public class BuildingListAdapter extends ArrayAdapter<Building> implements Filte
             return results;
         }
 
+        // updated the list on changes
         @SuppressWarnings("unchecked")
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
@@ -156,8 +158,9 @@ public class BuildingListAdapter extends ArrayAdapter<Building> implements Filte
     private static ArrayList<Building> BUILDING_LIST = null;
 
     /**
-     *
-     * @return
+     *  Pulls the building collection from the server, then sets the
+     *  internal ArrayList to contain all the Buildings.
+     * @return the BuildingCollection as per the AsyncTask
      */
     public static BuildingCollection getBuildingsFromServer () {
         BuildingCollection buildingCollection = null;
@@ -174,9 +177,10 @@ public class BuildingListAdapter extends ArrayAdapter<Building> implements Filte
     }
 
     /**
-     *
-     * @param bc
-     * @return
+     *  Takes a BuildingCollection and initializes the isFavorite value to false.
+     *  It then loads the marked favorites in memory to the ArrayList<>. It then sorts the items.
+     * @param bc the BuildingCollection that was pulled from the server
+     * @return a sorted and initialized ArrayList of Buildings
      */
     private static ArrayList<Building> makeBuildingList (BuildingCollection bc) {
         ArrayList<Building> buildings = new ArrayList<Building>();
@@ -195,8 +199,10 @@ public class BuildingListAdapter extends ArrayAdapter<Building> implements Filte
     }
 
     /**
-     *
-     * @return
+     *  Creates a new ArrayList of the same objects as BUILDING_LIST
+     *  This is because if you change the order of the copy, or delete
+     *  an item, the original order and object are preserved.
+     * @return An ArrayList of pointers to Buildings
      */
     public static ArrayList<Building> cloneBuildingList () {
         return new ArrayList<Building>(BUILDING_LIST);
@@ -209,6 +215,7 @@ public class BuildingListAdapter extends ArrayAdapter<Building> implements Filte
     private static void sortbuildings (ArrayList<Building> buildings) {
         ArrayList<Building> favoritedBuildings = new ArrayList<>();
 
+        // pulls out all the favorited items
         int i = buildings.size()-1;
         while (i > 0) {
             if (buildings.get(i).isfavorite) {
@@ -217,14 +224,20 @@ public class BuildingListAdapter extends ArrayAdapter<Building> implements Filte
             i--;
         }
 
+        // sorts the remaining items
         Collections.sort(buildings);
 
+        // adds the favorites back to the front of the list
         buildings.addAll(0,favoritedBuildings);
     }
 
+
     private static void markFavoriteBuildings (ArrayList<Building> buildings) {
+
+        // gets the set of favorite items from memory
         Set<String> favoritesFromMemory = Settings.getFavoritesFromSettings();
 
+        // marks them as true in the ArrayList
         //O(n * m) where m is the amount of favorites
         for (String s : favoritesFromMemory){
             for (Building b : buildings) {
