@@ -1,5 +1,7 @@
 package com.osucse.wayfinding_osu_capstone;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
@@ -38,6 +40,10 @@ public class Settings extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        if (settings == null) {
+            initializeSettings(this);
+        }
+
         // connect private members with view members
         this.accessibleSwitch = (Switch) findViewById(R.id.settings_switch_accessible);
         this.visualSwitch = (Switch) findViewById(R.id.settings_switch_visual);
@@ -70,21 +76,21 @@ public class Settings extends ActionBarActivity {
             }
         });
 
-        // connect to preferences file
-        settings = getPreferences(MODE_PRIVATE);
-
         // load switch states from memory
         this.accessibleSwitch.setChecked(settings.getBoolean(ACCESSIBLE_ROUTING, false));
         this.visualSwitch.setChecked(settings.getBoolean(VISUALLY_IMPAIRED, false));
 
     }
 
+    public static void initializeSettings (Activity activity) {
+        settings = activity.getPreferences(MODE_PRIVATE);
+    }
 
     /**
      * Helper method for changing the accessibleSwitch
      * @param bool what to set the switch state to
      */
-    private static void accessibleSwitchStateChange (Boolean bool) {
+    private static void accessibleSwitchStateChange (boolean bool) {
 
         editor = settings.edit();
 
@@ -112,9 +118,6 @@ public class Settings extends ActionBarActivity {
     }
 
     public static boolean getVisualSetting () {
-        if (settings == null) {
-            return false;
-        }
         return settings.getBoolean(VISUALLY_IMPAIRED, false);
     }
 
