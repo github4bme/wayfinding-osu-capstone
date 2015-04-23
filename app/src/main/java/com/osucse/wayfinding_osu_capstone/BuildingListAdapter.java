@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.osucse.wayfinding_api.Building;
@@ -50,7 +51,11 @@ public class BuildingListAdapter extends BaseAdapter implements Filterable {
 
         this.inflater = LayoutInflater.from(activity.getApplicationContext());
 
-        Set<String> favoritesFromMemory = sharedPreferences.getStringSet(SHARED_FAVORITES, new HashSet<String>());
+        Set<String> favoritesFromMemory = new HashSet<>();//sharedPreferences.getStringSet(SHARED_FAVORITES, new HashSet<String>());
+        favoritesFromMemory.add("Hitchcock Hall");
+        favoritesFromMemory.add("Arps Hall");
+        favoritesFromMemory.add("Watts Hall");
+
 
         //O(n * m) where m is the amount of favorites
         for (String s : favoritesFromMemory){
@@ -98,7 +103,7 @@ public class BuildingListAdapter extends BaseAdapter implements Filterable {
 
             holder = new ViewHolder();
             holder.buildingName = (TextView) convertView.findViewById(R.id.buildingName);
-            //holder.favoriteBox = (CheckBox) convertView.findViewById(R.id.favoriteCheckBox);
+            holder.favoriteStar = (ImageView) convertView.findViewById(R.id.favorited);
 
             convertView.setTag(holder);
         } else {
@@ -108,14 +113,17 @@ public class BuildingListAdapter extends BaseAdapter implements Filterable {
         Building b = (Building) getItem(position);
 
         holder.buildingName.setText(b.getName());
-        //holder.favoriteBox.setChecked(b.favorited);
+        if (!b.favorited){
+            holder.favoriteStar.setVisibility(View.GONE);
+        }
+
 
         return convertView;
     }
 
     static class ViewHolder {
         TextView buildingName;
-        //CheckBox favoriteBox;
+        ImageView favoriteStar;
     }
 
     private void changeBuildingState (String name){

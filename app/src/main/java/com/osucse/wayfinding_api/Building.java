@@ -12,7 +12,7 @@ public class Building implements Comparable<Building>{
     private int buildingId;
     private List<Door> doors;
 
-    public boolean favorited;
+    public boolean favorited; // added for favorite on lists
 
     public String getName () { return this.name.trim(); }
 
