@@ -67,8 +67,6 @@ public class SelectDestinationLocation extends ActionBarActivity {
 
                 Building itemClicked = adapter.getItem(position);
 
-                adapter.saveItemToFavorites(itemClicked.getName());
-
                 // get the id of the selected item
                 String selectedItemId = itemClicked.getBuildingId() + "";
 

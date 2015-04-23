@@ -33,9 +33,6 @@ public class BuildingListAdapter extends BaseAdapter implements Filterable {
     private LayoutInflater inflater;
     private ArrayList<Building> buildings;
 
-    private static SharedPreferences sharedPreferences;
-    private static final String SHARED_FAVORITES = "SHARED_FAVORITES";
-
     private ArrayList<Building>filteredData;
     private BuildingFilter mFilter;
 
@@ -47,11 +44,9 @@ public class BuildingListAdapter extends BaseAdapter implements Filterable {
 
         this.buildings = cloneBuildingList();
 
-        this.sharedPreferences = activity.getPreferences(Context.MODE_PRIVATE);
-
         this.inflater = LayoutInflater.from(activity.getApplicationContext());
 
-        Set<String> favoritesFromMemory = new HashSet<>();//sharedPreferences.getStringSet(SHARED_FAVORITES, new HashSet<String>());
+        Set<String> favoritesFromMemory = Settings.getFavoritesFromSettings();
         favoritesFromMemory.add("Hitchcock Hall");
         favoritesFromMemory.add("Arps Hall");
         favoritesFromMemory.add("Watts Hall");
@@ -251,20 +246,4 @@ public class BuildingListAdapter extends BaseAdapter implements Filterable {
         return new ArrayList<Building>(BUILDING_LIST);
     }
 
-    public void saveItemToFavorites(String newItemName) {
-        SharedPreferences.Editor editor = this.sharedPreferences.edit();
-
-        Set<String> set = new HashSet<String>();
-
-        for (Building b : buildings) {
-            if (b.favorited) {
-                set.add(b.getName());
-            }
-        }
-
-        set.add(newItemName);
-
-        editor.putStringSet(SHARED_FAVORITES, set);
-        editor.commit();
-    }
 }

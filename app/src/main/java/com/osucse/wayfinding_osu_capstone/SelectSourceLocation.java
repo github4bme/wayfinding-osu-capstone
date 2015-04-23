@@ -86,8 +86,6 @@ public class SelectSourceLocation extends ActionBarActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Building itemClicked = adapter.getItem(position);
 
-                adapter.saveItemToFavorites(itemClicked.getName());
-
                 // get the id of the selected item
                 String selectedItemId = itemClicked.getBuildingId() + "";
 

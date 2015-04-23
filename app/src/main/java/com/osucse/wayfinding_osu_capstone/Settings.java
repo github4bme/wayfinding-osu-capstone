@@ -8,6 +8,9 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
+import java.util.HashSet;
+import java.util.Set;
+
 
 public class Settings extends ActionBarActivity {
 
@@ -16,6 +19,7 @@ public class Settings extends ActionBarActivity {
      */
     public static final String ACCESSIBLE_ROUTING = "ACCESSIBLE_ROUTING";
     public static final String VISUALLY_IMPAIRED = "VISUALLY_IMPAIRED";
+    public static final String SHARED_FAVORITES = "SHARED_FAVORITES";
 
     private static SharedPreferences settings;
     private static SharedPreferences.Editor editor;
@@ -96,4 +100,17 @@ public class Settings extends ActionBarActivity {
         }
         return settings.getBoolean(VISUALLY_IMPAIRED, false);
     }
+
+    public static Set<String> getFavoritesFromSettings () {
+        return settings.getStringSet(SHARED_FAVORITES, new HashSet<String>());
+    }
+
+    public static void setFavoritesToSettings (Set<String> favorites) {
+        editor = settings.edit();
+
+        editor.putStringSet(SHARED_FAVORITES, favorites);
+
+        editor.commit();
+    }
+
 }
