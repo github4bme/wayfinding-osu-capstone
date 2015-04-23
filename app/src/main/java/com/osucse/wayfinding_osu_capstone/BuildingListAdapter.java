@@ -35,7 +35,7 @@ public class BuildingListAdapter extends ArrayAdapter<Building> implements Filte
        ======================================================== */
 
     public BuildingListAdapter (Context context, ArrayList<Building> buildingList) {
-        super(context, R.layout.listitem, buildingList);
+        super(context, R.layout.list_item_display, buildingList);
         this.originalList = new ArrayList<Building>();
         this.originalList.addAll(buildingList);
         this.buildingList = new ArrayList<Building>();
@@ -57,7 +57,7 @@ public class BuildingListAdapter extends ArrayAdapter<Building> implements Filte
         if (convertView == null) {
             LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-            convertView = vi.inflate(R.layout.listitem, null);
+            convertView = vi.inflate(R.layout.list_item_display, null);
 
             holder = new ViewHolder();
             holder.buildingName = (TextView) convertView.findViewById(R.id.list_item_building_name);

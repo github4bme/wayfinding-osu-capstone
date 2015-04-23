@@ -1,10 +1,12 @@
 package com.osucse.wayfinding_osu_capstone;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
@@ -29,6 +31,7 @@ public class Settings extends ActionBarActivity {
      */
     private Switch                      accessibleSwitch;
     private Switch                      visualSwitch;
+    private Button                      favoritesButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +41,7 @@ public class Settings extends ActionBarActivity {
         // connect private members with view members
         this.accessibleSwitch = (Switch) findViewById(R.id.settings_switch_accessible);
         this.visualSwitch = (Switch) findViewById(R.id.settings_switch_visual);
+        this.favoritesButton = (Button) findViewById(R.id.settings_button_favorites);
 
         // listener for the accessibleSwitch
         this.accessibleSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -50,6 +54,19 @@ public class Settings extends ActionBarActivity {
         this.visualSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Settings.visualSwitchStateChange(isChecked);
+            }
+        });
+
+        // listener for teh favoritesButton
+        this.favoritesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // create an intent
+                Intent intent = new Intent(Settings.this, SelectFavoriteBuildings.class);
+
+                // start the intent
+                startActivity(intent);
             }
         });
 

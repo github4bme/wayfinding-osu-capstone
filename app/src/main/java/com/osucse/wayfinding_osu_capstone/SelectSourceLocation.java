@@ -82,28 +82,26 @@ public class SelectSourceLocation extends ActionBarActivity {
         });
 
         listView.setOnItemClickListener( new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Building itemClicked = adapter.getItem(position);
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Building itemClicked = adapter.getItem(position);
 
 
-                // get the id of the selected item
-                String selectedItemId = itemClicked.getBuildingId() + "";
+            // get the id of the selected item
+            String selectedItemId = itemClicked.getBuildingId() + "";
 
-                Log.e("building source", selectedItemId);
+            // create an intent
+            Intent intent = new Intent(SelectSourceLocation.this, SelectDestinationLocation.class);
 
-                // create an intent
-                Intent intent = new Intent(SelectSourceLocation.this, SelectDestinationLocation.class);
+            // add the selected id to intent
+            intent.putExtra(SOURCE_LOCATION, selectedItemId);
 
-                // add the selected id to intent
-                intent.putExtra(SOURCE_LOCATION, selectedItemId);
+            // start the intent
+            startActivity(intent);
 
-                // start the intent
-                startActivity(intent);
-
-            }
-        });
-    }
+        }
+    });
+}
 
     /**
      * Create and execute an intent with source location set to -1
