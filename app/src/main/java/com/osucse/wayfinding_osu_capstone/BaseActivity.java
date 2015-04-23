@@ -28,9 +28,11 @@ public class BaseActivity extends ActionBarActivity {
     private ActionBarDrawerToggle drawerToggle;
     private String[] menuItems;
     public Toolbar toolbar;
-
+    protected static final int DIRECTIONS = 0;
+    protected static final int TOURS = 1;
+    protected static final int SETTINGS = 2;
     private ProgressDialog progress;
-
+    //creates navigation drawer
     protected void onCreateDrawer() {
         progress = new ProgressDialog(this);
         // R.id.drawer_layout should be in every activity with exactly the same id.
@@ -39,20 +41,20 @@ public class BaseActivity extends ActionBarActivity {
         drawerToggle = new ActionBarDrawerToggle(
                 this,                   /* host Activity */
                 drawerLayout,          /* DrawerLayout object */
-                toolbar,   /* nav drawer image to replace 'Up' caret */
-                0,      /* "open drawer" description for accessibility */
-                0/* "close drawer" description for accessibility */
+                toolbar,
+                0,
+                0
         ) {
             public void onDrawerClosed(View view) {
                 getSupportActionBar().setTitle(R.string.app_name);
                 supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-                //Log("onDrawerClosed()");
+
             }
 
             public void onDrawerOpened(View drawerView) {
                 getSupportActionBar().setTitle(R.string.menu);
                 supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-                //Log("onDrawerOpened()");
+
             }
         };
         drawerLayout.setDrawerListener(drawerToggle);
@@ -62,7 +64,7 @@ public class BaseActivity extends ActionBarActivity {
         menuItems = getResources().getStringArray(R.array.menu_items);
         drawerList = (ListView) findViewById(R.id.left_drawer);
         drawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_activated_1,
-                menuItems)); //Items is an ArrayList or array with the items you want to put in the Navigation Drawer.
+                menuItems)); //menuItems is array of list items defined in strings.xml
 
         drawerList.setOnItemClickListener(new OnItemClickListener() {
             @Override
@@ -95,24 +97,27 @@ public class BaseActivity extends ActionBarActivity {
         drawerToggle.onConfigurationChanged(newConfig);
     }
 
+    /*
+    Chooses which activity to start from the navigation bar.
+     */
     private void goToNavDrawerItem(int item) {
         Intent intent;
         switch (item) {
-            case 0:
+            case DIRECTIONS:
                 progress.setMessage("Loading... ");
                 progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                 progress.setIndeterminate(true);
                 progress.show();
                 new BuildingHttpRequestTask().execute();
                 break;
-            case 1:
+            case TOURS:
                 progress.setMessage("Loading... ");
                 progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                 progress.setIndeterminate(true);
                 progress.show();
                 new ToursHttpRequestTask().execute();
                 break;
-            case 2:
+            case SETTINGS:
                 intent = new Intent(this, Settings.class);
                 startActivity(intent);
                 finish();
