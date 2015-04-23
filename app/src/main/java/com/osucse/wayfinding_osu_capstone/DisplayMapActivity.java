@@ -47,7 +47,7 @@ import com.osucse.utilities.Coordinate;
 import com.osucse.wayfinding_api.*;
 import static com.google.maps.android.SphericalUtil.computeDistanceBetween;
 
-public class DisplayMapActivity extends FragmentActivity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class DisplayMapActivity extends BaseActivity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String URL = "http://54.200.238.22:9000/";
     private static final String CURRENT_LOCATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayMapActivity.currentLocationKey";
     private static final String NEXT_DESTINATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayMapActivity.nextDestinationKey";
@@ -104,6 +104,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_map);
+        super.onCreateDrawer();
         Intent intent = getIntent();
 
         arrowImage = (ImageView) findViewById(R.id.arrow_image);

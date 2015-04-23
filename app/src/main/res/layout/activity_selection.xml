@@ -1,52 +1,77 @@
-<LinearLayout
+<android.support.v4.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <!-- The main content view -->
+    <FrameLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+        <!-- Put what you want as your normal screen in here, you can also choose for a linear layout or any other layout, whatever you prefer -->
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <RelativeLayout
-        android:layout_width="0dip"
-        android:layout_height="fill_parent"
-        android:layout_weight=".15"></RelativeLayout>
+            <RelativeLayout
+                android:layout_width="0dip"
+                android:layout_height="fill_parent"
+                android:layout_weight=".15"></RelativeLayout>
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="0dip"
-        android:layout_height="fill_parent"
-        android:layout_weight=".7"
-        android:gravity="center_horizontal">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="0dip"
+                android:layout_height="fill_parent"
+                android:layout_weight=".7"
+                android:gravity="center_horizontal">
 
-        <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/selection_button_directions"
-            android:id="@+id/directions_button"
-            android:onClick="directionsButtonPressed" />
+                <Button
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/selection_button_directions"
+                    android:id="@+id/directions_button"
+                    android:onClick="directionsButtonPressed" />
 
-        <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/selection_button_tours"
-            android:id="@+id/tour_button"
-            android:onClick="tourButtonPressed" />
+                <Button
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/selection_button_tours"
+                    android:id="@+id/tour_button"
+                    android:onClick="tourButtonPressed" />
 
-        <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/selection_button_settings"
-            android:id="@+id/settings_button"
-            android:onClick="settingsButtonPressed" />
+                <Button
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/selection_button_settings"
+                    android:id="@+id/settings_button"
+                    android:onClick="settingsButtonPressed" />
 
-        <TextView
-            android:id="@+id/loading_list_display"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="" />
+                <TextView
+                    android:id="@+id/loading_list_display"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="" />
 
-    </LinearLayout>
+            </LinearLayout>
 
-    <RelativeLayout
-        android:layout_width="0dip"
-        android:layout_height="fill_parent"
-        android:layout_weight=".15"></RelativeLayout>
-</LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="0dip"
+                android:layout_height="fill_parent"
+                android:layout_weight=".15"></RelativeLayout>
+        </LinearLayout>
+    </FrameLayout>
+    <!-- The navigation drawer -->
+    <ListView android:id="@+id/left_drawer"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:background="#eaebeb"/>
+</android.support.v4.widget.DrawerLayout>
+
+

@@ -9,7 +9,7 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 
 
-public class Settings extends ActionBarActivity {
+public class Settings extends BaseActivity {
 
     /**
      * Names of the setting locations
@@ -30,6 +30,7 @@ public class Settings extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        super.onCreateDrawer();
 
         // connect private members with view members
         this.accessibleSwitch = (Switch) findViewById(R.id.settings_switch_accessible);

@@ -15,7 +15,7 @@ import com.osucse.wayfinding_api.Building;
 
 import java.util.ArrayList;
 
-public class SelectDestinationLocation extends ActionBarActivity {
+public class SelectDestinationLocation extends BaseActivity {
 
     // instance variables
     public ArrayAdapter<Building>   adapter;
@@ -34,7 +34,7 @@ public class SelectDestinationLocation extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_destination_location);
-
+        super.onCreateDrawer();
 
         Intent intent = getIntent();
         incomingSource = intent.getStringExtra(SelectSourceLocation.SOURCE_LOCATION);

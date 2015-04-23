@@ -25,7 +25,7 @@ import java.util.ArrayList;
  * the activity stops and passes that data on to the select
  * destination activity.
  */
-public class SelectSourceLocation extends ActionBarActivity {
+public class SelectSourceLocation extends BaseActivity {
 
     // instance variables
     public ArrayList <Building>      sources;
@@ -55,6 +55,7 @@ public class SelectSourceLocation extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_source_location);
+        super.onCreateDrawer();
 
         // add a broadcast reliever for killing the activity remotely
         registerReceiver(receiver, new IntentFilter(KILL_SELECT_DESTINATION));
