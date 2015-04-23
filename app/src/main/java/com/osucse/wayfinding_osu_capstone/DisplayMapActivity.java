@@ -223,11 +223,18 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
                 if (collection != null) {
                     message = collection.getErrorMsg();
                 } else {
-                    message = "An unknown error has occured.";
+                    message = "An unknown error has occurred.";
                 }
                 AlertDialog.Builder errorDialog = new AlertDialog.Builder(DisplayMapActivity.this);
                 errorDialog.setTitle("Error");
                 errorDialog.setMessage(message);
+                errorDialog.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog, int which){
+                        finish();
+                    }
+                });
+                errorDialog.show();
             }
         }
 
@@ -284,11 +291,18 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
                     message = tourRoute.getErrorMsg();
                 }
                 else {
-                    message = "An unknown error has occured.";
+                    message = "An unknown error has occurred.";
                 }
                 AlertDialog.Builder errorDialog = new AlertDialog.Builder(DisplayMapActivity.this);
                 errorDialog.setTitle("Error");
                 errorDialog.setMessage(message);
+                errorDialog.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog, int which){
+                        finish();
+                    }
+                });
+                errorDialog.show();
             }
         }
 
@@ -382,6 +396,12 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
             AlertDialog.Builder arrived = new AlertDialog.Builder(DisplayMapActivity.this);
             arrived.setTitle("Arrived");
             arrived.setMessage("You Have Arrived!");
+            arrived.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+                @Override
+                public void onClick(DialogInterface dialog, int which){
+                    finish();
+                }
+            });
             arrived.show();
         }
 

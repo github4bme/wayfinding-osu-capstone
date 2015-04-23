@@ -35,6 +35,7 @@ public class BaseActivity extends ActionBarActivity {
     protected static final int TOURS = 1;
     protected static final int SETTINGS = 2;
     private ProgressDialog progress;
+
     //creates navigation drawer
     protected void onCreateDrawer() {
         progress = new ProgressDialog(this);
@@ -121,6 +122,7 @@ public class BaseActivity extends ActionBarActivity {
                 new ToursHttpRequestTask().execute();
                 break;
             case SETTINGS:
+                //loading not needed since this does not communicate with server
                 intent = new Intent(this, Settings.class);
                 startActivity(intent);
                 finish();
@@ -139,11 +141,7 @@ public class BaseActivity extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(BuildingCollection buildings) {
-            // Clears the "Loading..." message so it is not there when you navigate back to this screen from Map Display
-            // This has never given me a threading error, but it is possible that it could
-//            TextView loadingListDisplay = (TextView) BaseActivity.this.findViewById(R.id.loading_list_display);
-//            loadingListDisplay.setTextSize(20);
-//            loadingListDisplay.setText("");
+            //clear loading bar
             progress.hide();
             Intent intent = new Intent(BaseActivity.this, SelectSourceLocation.class);
             startActivity(intent);
@@ -161,11 +159,7 @@ public class BaseActivity extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(TourCollection tours) {
-            // Clears the "Loading..." message so it is not there when you navigate back to this screen from Map Display
-            // This has never given me a threading error, but it is possible that it could
-//            TextView loadingListDisplay = (TextView) BaseActivity.this.findViewById(R.id.loading_list_display);
-//            loadingListDisplay.setTextSize(20);
-//            loadingListDisplay.setText("");
+            //Clear loading bar
             progress.hide();
             Intent intent = new Intent(BaseActivity.this, SelectTour.class);
             startActivity(intent);

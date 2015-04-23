@@ -19,15 +19,13 @@ import android.location.Location;
 import android.location.LocationManager;
 import com.google.android.gms.maps.model.MarkerOptions;
 /**
- * This is the starting activity.
+ * This is the starting activity that consists of the map of the user's current location
  */
 public class InitialActivity extends BaseActivity {
-    /**
-     * onCreate - executes the private httpRequestTask()
-     * @param savedInstanceState
-     */
+
     private GoogleMap googleMap;
     private ProgressDialog progress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,6 +35,9 @@ public class InitialActivity extends BaseActivity {
         showMap();
     }
 
+    /**
+     * This creates a map for the initial screen and sets the map to the user's last known location.
+     */
     private void showMap(){
         if (googleMap == null) {
             googleMap = ((SupportMapFragment) getSupportFragmentManager()
@@ -75,6 +76,10 @@ public class InitialActivity extends BaseActivity {
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
     }
 
+    /**
+     * This is if the big directions button is pushed
+     * @param view
+     */
     public void directionsButtonPressed (View view) {
         progress.setMessage("Loading... ");
         progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -84,6 +89,10 @@ public class InitialActivity extends BaseActivity {
 
     }
 
+    /**
+     * Request task for getting the building list (This class also appears in BaseActivity along with
+     * the associated Tours one, which is not needed from this screen)
+     */
     private class BuildingHttpRequestTask extends AsyncTask<Void, Void, BuildingCollection> {
         @Override
         protected BuildingCollection doInBackground(Void... params) {
@@ -92,8 +101,7 @@ public class InitialActivity extends BaseActivity {
 
         @Override
         protected void onPostExecute(BuildingCollection buildings) {
-            // Clears the "Loading..." message so it is not there when you navigate back to this screen from Map Display
-            // This has never given me a threading error, but it is possible that it could
+            //Clears loading screen
             progress.hide();
             Intent intent = new Intent(InitialActivity.this, SelectSourceLocation.class);
             startActivity(intent);
