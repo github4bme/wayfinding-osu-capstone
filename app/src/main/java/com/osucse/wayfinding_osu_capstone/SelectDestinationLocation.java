@@ -43,7 +43,7 @@ public class SelectDestinationLocation extends ActionBarActivity {
         editText = (EditText) findViewById(R.id.destination_list_search);
 
         // creates adapter and attaches it to the listView
-        adapter = new BuildingListAdapter(this);
+        adapter = new BuildingListAdapter(getApplicationContext(), BuildingListAdapter.cloneBuildingList());
         listView.setAdapter(adapter);
 
         // create listener for the editText and have it filter the list on input changes
