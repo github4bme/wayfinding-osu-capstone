@@ -12,4 +12,6 @@
 
 The server is currently located at: http://54.200.238.22:9000/
 
-A full list of GitHub Emojis can be found at http://www.emoji-cheat-sheet.com/
+The api repo can be found at: [JDSustar/wayfinding-osu-capstone-api](https://github.com/JDSustar/wayfinding-osu-capstone-api)
+
+A full list of GitHub Emojis can be found [here](http://www.emoji-cheat-sheet.com/)
