@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
@@ -25,6 +26,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.location.LocationServices;
@@ -53,6 +55,9 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
     private static final String NEXT_DESTINATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayMapActivity.nextDestinationKey";
     private static final String TOUR_KEY = "com.usecse.wayfinding_osu_capstone.DisplayMapActivity.tourKey";
     private static final float AT_LOCATION_RADIUS = 10.0f;
+    private static final float PATH_GAP_COMPARISON = AT_LOCATION_RADIUS;
+    // this is in meters and is equal to 250ft
+    private static final float FARTHEST_ALLOWED_FROM_PATH = 76.2f;
 
     private GoogleMap ourMap;
     private Marker nextDestMarker;
@@ -250,9 +255,9 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
                 AlertDialog.Builder errorDialog = new AlertDialog.Builder(DisplayMapActivity.this);
                 errorDialog.setTitle("Error");
                 errorDialog.setMessage(message);
-                errorDialog.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+                errorDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which){
+                    public void onClick(DialogInterface dialog, int which) {
                         finish();
                     }
                 });
@@ -271,7 +276,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
             ourMap.getUiSettings().setMapToolbarEnabled(false);
 
             // Set first marker to show the start of the route
-            nextDestMarker = ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
+            adjustMarkerPosition();
         }
     }
 
@@ -318,9 +323,9 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
                 AlertDialog.Builder errorDialog = new AlertDialog.Builder(DisplayMapActivity.this);
                 errorDialog.setTitle("Error");
                 errorDialog.setMessage(message);
-                errorDialog.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+                errorDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which){
+                    public void onClick(DialogInterface dialog, int which) {
                         finish();
                     }
                 });
@@ -339,7 +344,8 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
             ourMap.getUiSettings().setMapToolbarEnabled(false);
 
             // Set first marker to show the start of the route
-            ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
+//            ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
+            adjustMarkerPosition();
         }
     }
 
@@ -355,7 +361,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         // Loop is kept so that we do not start a line at the last point
         for (int i = 0; i < ourRoute.size() - 1; i++){
             ourMap.addPolyline((new PolylineOptions()).add(ourRoute.get(i), ourRoute.get(i + 1))
-                    .width(5).color(Color.BLUE).geodesic(true));
+                    .width(10).color(Color.BLUE).geodesic(true));
         }
     }
 
@@ -452,8 +458,8 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
         double distanceLeftInMiles = distanceLeftInMeters / 1609.344;
 
-        distanceTV.setText(String.format("%.3f", distanceLeftInMiles) + " mi. remaining");
-        etaTV.setText(Math.round(distanceLeftInMiles / 3.1 * 60) + " minutes");
+//        distanceTV.setText(String.format("%.3f", distanceLeftInMiles) + " mi. remaining");
+//        etaTV.setText(Math.round(distanceLeftInMiles / 3.1 * 60) + " minutes");
     }
 
     /**
@@ -464,29 +470,128 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
      * you to the next node as compared to where you currently are
      */
     private void checkNextDestUpdateUI() {
-        LatLng tempDest = mNextDestination;
+//        LatLng tempDest = mNextDestination;
 
-        // Loop checks to see if the user is close to a point on the route
+//        // Loop checks to see if the user is close to a point on the route
+//        for (int i = 0; i < ourRoute.size() - 1; i++) {
+//            float distance = mCurrentLocation.distanceTo(createAndroidLocation(ourRoute.get(i)));
+//            if (distance < AT_LOCATION_RADIUS) {
+//                mNextDestination = ourRoute.get(i + 1);
+//            }
+//        }
+
+        LatLng tempDest = mNextDestination;
+        // Used for deciding if a recalculation is needed; set to max just so always less than this
+        double shortestDistFromPath = Double.MAX_VALUE;
+
+        // Gets which "oval" around the path the user is currently in and changes the mNextDestination accordingly
         for (int i = 0; i < ourRoute.size() - 1; i++) {
-            float distance = mCurrentLocation.distanceTo(createAndroidLocation(ourRoute.get(i)));
-            if (distance < AT_LOCATION_RADIUS) {
+            Location node = createAndroidLocation(ourRoute.get(i));
+            Location nextNode = createAndroidLocation(ourRoute.get(i + 1));
+
+            float routeBearing = node.bearingTo(nextNode);
+            float bearingToUser = node.bearingTo(mCurrentLocation);
+            double angleBetween = (double) (bearingToUser - routeBearing);
+
+
+            // in meters
+            double distanceFromPath = Math.abs(Math.sin(Math.toRadians(angleBetween)) * node.distanceTo(mCurrentLocation));
+
+
+            float distanceBetweenNodes = node.distanceTo(nextNode);
+            float userDistFromNode = node.distanceTo(mCurrentLocation);
+            float userDistFromNextNode = nextNode.distanceTo(mCurrentLocation);
+
+            if (distanceFromPath < PATH_GAP_COMPARISON
+                    && userDistFromNode < distanceBetweenNodes + PATH_GAP_COMPARISON
+                    && userDistFromNextNode < distanceBetweenNodes + PATH_GAP_COMPARISON) {
                 mNextDestination = ourRoute.get(i + 1);
             }
+
+            // Check for seeing if a recalculation is needed
+            if (distanceFromPath < shortestDistFromPath) {
+                shortestDistFromPath = distanceFromPath;
+            }
         }
+
+
+        /**
+         * Just for testing
+         */
+        int nextNodeIndex = ourRoute.indexOf(mNextDestination);
+        int nodeIndex = nextNodeIndex - 1;
+        if (nextNodeIndex == 0) {
+            nodeIndex = 0;
+        }
+        Location node = createAndroidLocation(ourRoute.get(nodeIndex));
+        Location nextNode = createAndroidLocation(ourRoute.get(nextNodeIndex));
+        float routeBearing = node.bearingTo(nextNode);
+        float bearingToUser = node.bearingTo(mCurrentLocation);
+        double angleBetween = (double) (bearingToUser - routeBearing);
+        double distanceFromPath = Math.abs(Math.sin(Math.toRadians(angleBetween)) * node.distanceTo(mCurrentLocation));
+
+        etaTV.setText("Dist. from Path: " + distanceFromPath + "m");
+
+        if (shortestDistFromPath > FARTHEST_ALLOWED_FROM_PATH) {
+            distanceTV.setText("RECALCULATE!!!!!");
+        }
+        /*********/
+
+
+
         if (ourMap != null && nextDestMarker != null && tempDest != mNextDestination) {
-            nextDestMarker.remove();
-            nextDestMarker = ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
+            adjustMarkerPosition();
         }
 
         bearingToDestDegrees = mCurrentLocation.bearingTo(createAndroidLocation(mNextDestination));
         updateUI();
     }
 
+    /**
+     * Method to set our nextDestMarker
+     */
+    private void adjustMarkerPosition() {
+        if (nextDestMarker != null) {
+            nextDestMarker.remove();
+        }
+        nextDestMarker = ourMap.addMarker(new MarkerOptions()
+                .title("Next Destination")
+                .alpha(0.7f)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
+                .position(mNextDestination)
+                .flat(true));
+
+        //.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+
+
+        // for image for marker
+        // .icon(BitmapDescriptorFactory.fromResource(R.drawable.arrow))
+        // flatten .flat(true)
+        //
+        // Rotate around anchor with Marker.setRotation()
+        //.anchor(0.5,0.5)
+        //.rotation(90.0)
+    }
+
     private void updateUI() {
         // Need to rotate the arrow by the difference of the two bearings
         float arrowRotation = bearingToDestDegrees - currBearing;
 
+        // null check is needed to short circuit the condition the first time to not get null exception
+        // check to make sure animation has ended
+        if (animationSet == null || animationSet.hasEnded()) {
+            animateArrow(arrowRotation);
+        } else {
+            // do nothing until animation is done
+        }
+    }
+
+    /**
+     /* Method for animating the direction arrow based upon the incoming arrow and the given state of the arrow
+     */
+    private void animateArrow(float arrowRotation) {
         // change duration based on changing size or just rotating
+        // sizes set in toggleArrowSize()
         int duration;
         if (currentScaleSize != newScaleSize) {
             duration = 1000;
@@ -494,47 +599,42 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
             duration = 1;
         }
 
-        // null check is needed to short circuit the condition the first time to not get null exception
-        // check to make sure animation has ended
-        if (animationSet == null || animationSet.hasEnded()) {
-            // first param is offset of rotation; last 4 parameters are to set to rotate about middle of arrow
-            RotateAnimation rotateAnimation = new RotateAnimation(lastRotation, arrowRotation, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
-            // set to make rotation not start from 0 for next rotation, but where it stopped
-            lastRotation = arrowRotation;
-            rotateAnimation.setDuration(duration);
-            rotateAnimation.setFillAfter(true);
+        // first param is offset of rotation; last 4 parameters are to set to rotate about middle of arrow
+        RotateAnimation rotateAnimation = new RotateAnimation(lastRotation, arrowRotation, RotateAnimation.RELATIVE_TO_SELF, 0.5f, RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+        // set to make rotation not start from 0 for next rotation, but where it stopped
+        lastRotation = arrowRotation;
+        rotateAnimation.setDuration(duration);
+        rotateAnimation.setFillAfter(true);
 
-            // often this is just scaled to itself, but when different it enlarges or shrinks based on percentage of
-            // arrow image; last four params tell it to enlarge from upper left corner
-            // new scale size is changed if image is tapped
-            ScaleAnimation scaleAnimation = new ScaleAnimation(currentScaleSize, newScaleSize, currentScaleSize, newScaleSize, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f);
+        // often this is just scaled to itself, but when different it enlarges or shrinks based on percentage of
+        // arrow image; last four params tell it to enlarge from upper left corner
+        // new scale size is changed if image is tapped
+        ScaleAnimation scaleAnimation = new ScaleAnimation(currentScaleSize, newScaleSize, currentScaleSize, newScaleSize, Animation.RELATIVE_TO_SELF, 1.0f, Animation.RELATIVE_TO_SELF, 1.0f);
 
-            // booleans to see if arrow was enlarged with this animation
-            boolean enlarged = newScaleSize > currentScaleSize;
-            boolean shrunk = newScaleSize < currentScaleSize;
+        // booleans to see if arrow was enlarged with this animation
+        // Often they will be equal - when no size change is needed
+        boolean enlarged = newScaleSize > currentScaleSize;
+        boolean shrunk = newScaleSize < currentScaleSize;
 
-            // set equal so no scale change is done unless image is touched
-            currentScaleSize = newScaleSize;
-            scaleAnimation.setDuration(duration);
-            scaleAnimation.setFillAfter(true);
+        // set equal so no scale change is done unless image is touched
+        currentScaleSize = newScaleSize;
+        scaleAnimation.setDuration(duration);
+        scaleAnimation.setFillAfter(true);
 
-            animationSet = new AnimationSet(true);
-            animationSet.addAnimation(rotateAnimation);
-            animationSet.addAnimation(scaleAnimation);
-            animationSet.setFillAfter(true);
-            arrowImage.startAnimation(animationSet);
+        animationSet = new AnimationSet(true);
+        animationSet.addAnimation(rotateAnimation);
+        animationSet.addAnimation(scaleAnimation);
+        animationSet.setFillAfter(true);
+        arrowImage.startAnimation(animationSet);
 
-            // One line of repeated code, but most of the time we won't need to do
-            // either operation so I thought it would be better to keep them separate
-            if (enlarged) {
-                ImageView xIcon = (ImageView) findViewById(R.id.x_icon);
-                xIcon.setVisibility(View.VISIBLE);
-            } else if (shrunk) {
-                ImageView xIcon = (ImageView) findViewById(R.id.x_icon);
-                xIcon.setVisibility(View.INVISIBLE);
-            }
-        } else {
-            // do nothing until animation is done
+        // One line of repeated code, but most of the time we won't need to do
+        // either operation so I thought it would be better to keep them separate
+        if (enlarged) {
+            ImageView xIcon = (ImageView) findViewById(R.id.x_icon);
+            xIcon.setVisibility(View.VISIBLE);
+        } else if (shrunk) {
+            ImageView xIcon = (ImageView) findViewById(R.id.x_icon);
+            xIcon.setVisibility(View.INVISIBLE);
         }
     }
 
