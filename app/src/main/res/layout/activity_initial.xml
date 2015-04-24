@@ -31,24 +31,30 @@
             android:layout_height="50dp"
             android:text="Get Directions"
             android:id="@+id/search_btn"
-            android:textColor="#ff828283"
-            android:background="#ffffffff"
+            android:textColor="#ffffffff"
+            android:background="@color/scarlet"
             android:onClick="directionsButtonPressed"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="75dp"
-            android:layout_alignBottom="@id/map"/>
+            android:layout_alignBottom="@id/map"
+                    android:alpha=".8"
+                    android:clickable="true"
+                    android:enabled="true" />
 
             <Button
                 android:layout_width="300dp"
                 android:layout_height="50dp"
                 android:text="Take a Tour"
                 android:id="@+id/tours_btn"
-                android:textColor="#ff828283"
-                android:background="#ffffffff"
+                android:textColor="#FFFFFFFF"
+                android:background="@color/scarlet"
                 android:onClick="toursButtonPressed"
                 android:layout_centerHorizontal="true"
                 android:layout_marginBottom="15dp"
-                android:layout_alignBottom="@id/map"/>
+                android:layout_alignBottom="@id/map"
+                android:alpha=".8"
+                android:clickable="true"
+                android:enabled="true" />
 
 </RelativeLayout>
     </FrameLayout>

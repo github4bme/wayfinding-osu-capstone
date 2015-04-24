@@ -19,15 +19,23 @@
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_action_location_found"
                 android:text="@string/select_source_activity_current_location_button"
                 android:id="@+id/select_source_current_location_button"
                 android:layout_gravity="center_horizontal"
-                android:onClick="useCurrentLocation" />
+                android:onClick="useCurrentLocation"
+                android:background="#ff8bd1ff"
+                android:textColor="#ffffffff"
+                android:textStyle="bold"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="10dp" />
 
             <EditText android:id="@+id/source_list_search"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:hint="Search locations.." />
+                android:hint="Search locations.."
+                android:layout_marginTop="10dp" />
 
             <ListView
                 android:layout_width="fill_parent"
