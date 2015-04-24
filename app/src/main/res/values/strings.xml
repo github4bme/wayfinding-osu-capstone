@@ -37,6 +37,7 @@
 
     <string name="menu">Menu</string>
     <string-array name="menu_items">
+        <item>Home</item>
         <item>Directions</item>
         <item>Tours</item>
         <item>Settings</item>

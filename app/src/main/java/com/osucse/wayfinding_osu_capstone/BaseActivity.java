@@ -31,9 +31,10 @@ public class BaseActivity extends ActionBarActivity {
     private ActionBarDrawerToggle drawerToggle;
     private String[] menuItems;
     public Toolbar toolbar;
-    protected static final int DIRECTIONS = 0;
-    protected static final int TOURS = 1;
-    protected static final int SETTINGS = 2;
+    protected static final int HOME = 0;
+    protected static final int DIRECTIONS = 1;
+    protected static final int TOURS = 2;
+    protected static final int SETTINGS = 3;
     private ProgressDialog progress;
 
     //creates navigation drawer
@@ -107,7 +108,17 @@ public class BaseActivity extends ActionBarActivity {
     private void goToNavDrawerItem(int item) {
         Intent intent;
         switch (item) {
+            case HOME:
+                if(this.getClass() == InitialActivity.class)
+                {
+                    drawerLayout.closeDrawers();
+                    break;
+                }
+                intent = new Intent(this, InitialActivity.class);
+                startActivity(intent);
+                break;
             case DIRECTIONS:
+                drawerLayout.closeDrawers();
                 progress.setMessage("Loading... ");
                 progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                 progress.setIndeterminate(true);
@@ -115,6 +126,7 @@ public class BaseActivity extends ActionBarActivity {
                 new BuildingHttpRequestTask().execute();
                 break;
             case TOURS:
+                drawerLayout.closeDrawers();
                 progress.setMessage("Loading... ");
                 progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                 progress.setIndeterminate(true);
@@ -122,6 +134,7 @@ public class BaseActivity extends ActionBarActivity {
                 new ToursHttpRequestTask().execute();
                 break;
             case SETTINGS:
+                drawerLayout.closeDrawers();
                 //loading not needed since this does not communicate with server
                 intent = new Intent(this, Settings.class);
                 startActivity(intent);
