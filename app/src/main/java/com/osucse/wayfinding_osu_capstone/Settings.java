@@ -22,6 +22,7 @@ public class Settings extends BaseActivity {
     public static final String VISUALLY_IMPAIRED = "VISUALLY_IMPAIRED";
     public static final String SHOW_MAP_HINTS = "SHOW_MAP_HINTS";
     public static final String SHARED_FAVORITES = "SHARED_FAVORITES";
+    private static final String APP_SETTINGS = "APP_SETTINGS";
 
     protected static SharedPreferences settings;
     protected static SharedPreferences.Editor editor;
@@ -82,7 +83,7 @@ public class Settings extends BaseActivity {
     }
 
     public static void initializeSettings (Activity activity) {
-        settings = activity.getPreferences(MODE_PRIVATE);
+        settings = activity.getSharedPreferences(APP_SETTINGS, MODE_PRIVATE);
     }
 
     /**

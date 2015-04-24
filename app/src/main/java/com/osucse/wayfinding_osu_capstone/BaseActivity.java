@@ -40,7 +40,7 @@ public class BaseActivity extends ActionBarActivity {
     //creates navigation drawer
     protected void onCreateDrawer() {
 
-        Settings.initializeSettings(this);
+        Settings.initializeSettings(BaseActivity.this);
 
         progress = new ProgressDialog(this);
         // R.id.drawer_layout should be in every activity with exactly the same id.
