@@ -28,6 +28,13 @@ public class Selection extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selection);
+
+        // Should only do this once in order to create the settings for the other
+        // activities to use
+        if (Settings.settings == null) {
+            // connect to preferences file
+            Settings.settings = getPreferences(MODE_PRIVATE);
+        }
     }
 
     /**
