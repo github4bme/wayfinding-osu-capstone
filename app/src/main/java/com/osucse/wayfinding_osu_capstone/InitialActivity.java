@@ -89,6 +89,15 @@ public class InitialActivity extends BaseActivity {
 
     }
 
+    public void toursButtonPressed (View view) {
+        progress.setMessage("Loading... ");
+        progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progress.setIndeterminate(true);
+        progress.show();
+        new ToursHttpRequestTask().execute();
+
+    }
+
     /**
      * Request task for getting the building list (This class also appears in BaseActivity along with
      * the associated Tours one, which is not needed from this screen)
@@ -108,5 +117,21 @@ public class InitialActivity extends BaseActivity {
         }
     }
 
+    /**
+     * A private internal class that handles updating the internal class StartUpTasks
+     */
+    private class ToursHttpRequestTask extends AsyncTask<Void, Void, TourCollection> {
+        @Override
+        protected TourCollection doInBackground(Void... params) {
+            return StartUpTasks.getToursFromServer();
+        }
 
+        @Override
+        protected void onPostExecute(TourCollection tours) {
+            //Clear loading bar
+            progress.hide();
+            Intent intent = new Intent(InitialActivity.this, SelectTour.class);
+            startActivity(intent);
+        }
+    }
 }
