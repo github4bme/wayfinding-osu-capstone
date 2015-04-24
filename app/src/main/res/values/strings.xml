@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">OSU Way-finding</string>
+    <string name="app_name">OSU Wayfinding</string>
 
     <!-- Activity names -->
     <string name="title_activity_display_map">My Map</string>
     <string name="title_activity_select_destination_location">Destination Location</string>
-    <string name="title_activity_selection">OSU Way-finding</string>
+    <string name="title_activity_selection">OSU Wayfinding</string>
     <string name="title_activity_select_source_location">Starting Location</string>
     <string name="title_activity_select_tour">SelectTour</string>
     <string name="title_activity_settings">Settings</string>
