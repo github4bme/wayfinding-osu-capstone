@@ -518,22 +518,24 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         /**
          * Just for testing
          */
-        int nextNodeIndex = ourRoute.indexOf(mNextDestination);
-        int nodeIndex = nextNodeIndex - 1;
-        if (nextNodeIndex == 0) {
-            nodeIndex = 0;
-        }
-        Location node = createAndroidLocation(ourRoute.get(nodeIndex));
-        Location nextNode = createAndroidLocation(ourRoute.get(nextNodeIndex));
-        float routeBearing = node.bearingTo(nextNode);
-        float bearingToUser = node.bearingTo(mCurrentLocation);
-        double angleBetween = (double) (bearingToUser - routeBearing);
-        double distanceFromPath = Math.abs(Math.sin(Math.toRadians(angleBetween)) * node.distanceTo(mCurrentLocation));
+        if (ourRoute.size() > 0) {
+            int nextNodeIndex = ourRoute.indexOf(mNextDestination);
+            int nodeIndex = nextNodeIndex - 1;
+            if (nextNodeIndex == 0) {
+                nodeIndex = 0;
+            }
+            Location node = createAndroidLocation(ourRoute.get(nodeIndex));
+            Location nextNode = createAndroidLocation(ourRoute.get(nextNodeIndex));
+            float routeBearing = node.bearingTo(nextNode);
+            float bearingToUser = node.bearingTo(mCurrentLocation);
+            double angleBetween = (double) (bearingToUser - routeBearing);
+            double distanceFromPath = Math.abs(Math.sin(Math.toRadians(angleBetween)) * node.distanceTo(mCurrentLocation));
 
-        etaTV.setText("Dist. from Path: " + distanceFromPath + "m");
+            etaTV.setText("Dist. from Path: " + distanceFromPath + "m");
 
-        if (shortestDistFromPath > FARTHEST_ALLOWED_FROM_PATH) {
-            distanceTV.setText("RECALCULATE!!!!!");
+            if (shortestDistFromPath > FARTHEST_ALLOWED_FROM_PATH) {
+                distanceTV.setText("RECALCULATE!!!!!");
+            }
         }
         /*********/
 

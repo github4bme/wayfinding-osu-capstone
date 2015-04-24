@@ -63,17 +63,19 @@ public class InitialActivity extends BaseActivity {
         // set map type
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
-        // Get latitude of the current location
-        double latitude = myLocation.getLatitude();
+        if (myLocation != null) {
+            // Get latitude of the current location
+            double latitude = myLocation.getLatitude();
 
-        // Get longitude of the current location
-        double longitude = myLocation.getLongitude();
+            // Get longitude of the current location
+            double longitude = myLocation.getLongitude();
 
-        // Create a LatLng object for the current location
-        LatLng latLng = new LatLng(latitude, longitude);
+            // Create a LatLng object for the current location
+            LatLng latLng = new LatLng(latitude, longitude);
 
-        // Show the current location in Google Map
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
+            // Show the current location in Google Map
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
+        }
     }
 
     /**
