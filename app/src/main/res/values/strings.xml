@@ -33,6 +33,10 @@
     <string name="setting_item_visual">Visually impaired mode</string>
     <string name="setting_item_grail">Holy Grail mode</string>
     <string name="title_activity_display_arrow">My Arrow</string>
+    <string name="title_activity_select_favorite_buildings">Select Favorite Buildings</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
     <!-- end activity_settings -->
 
     <string name="menu">Menu</string>

@@ -36,7 +36,15 @@
                 android:splitTrack="false"
                 android:showText="false" />
 
-        </LinearLayout>
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Pick Building Favorites"
+        android:id="@+id/settings_button_favorites"
+        android:layout_gravity="center_horizontal" />
+
+
+</LinearLayout>
     </FrameLayout>
     <!-- The navigation drawer -->
     <ListView android:id="@+id/left_drawer"

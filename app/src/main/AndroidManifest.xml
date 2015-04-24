@@ -89,6 +89,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.osucse.wayfinding_osu_capstone.SelectSourceLocation" />
         </activity>
+        <activity
+            android:name=".SelectFavoriteBuildings"
+            android:label="@string/title_activity_select_favorite_buildings"
+            android:parentActivityName=".Settings" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.osucse.wayfinding_osu_capstone.Settings" />
+        </activity>
     </application>
 
 </manifest>

@@ -1,0 +1,20 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.osucse.wayfinding_osu_capstone.SelectFavoriteBuildings"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/select_favorite_buildings_save_button"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Save your selected favorites"/>
+
+    <ListView
+        android:id="@+id/select_favorite_buildings_list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+
+</LinearLayout>

@@ -35,7 +35,6 @@
                 android:id="@+id/source_list"
                 android:layout_gravity="center_horizontal"
                 android:smoothScrollbar="true"
-                android:clickable="true"
                 android:choiceMode="singleChoice" />
 
         </LinearLayout>

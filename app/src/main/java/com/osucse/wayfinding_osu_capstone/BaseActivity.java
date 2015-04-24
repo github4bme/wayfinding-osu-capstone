@@ -39,6 +39,9 @@ public class BaseActivity extends ActionBarActivity {
 
     //creates navigation drawer
     protected void onCreateDrawer() {
+
+        Settings.initializeSettings(this);
+
         progress = new ProgressDialog(this);
         // R.id.drawer_layout should be in every activity with exactly the same id.
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -149,7 +152,7 @@ public class BaseActivity extends ActionBarActivity {
     private class BuildingHttpRequestTask extends AsyncTask<Void, Void, BuildingCollection> {
         @Override
         protected BuildingCollection doInBackground(Void... params) {
-            return StartUpTasks.getBuildingsFromServer();
+            return BuildingListAdapter.getBuildingsFromServer();
         }
 
         @Override
@@ -167,7 +170,7 @@ public class BaseActivity extends ActionBarActivity {
     private class ToursHttpRequestTask extends AsyncTask<Void, Void, TourCollection> {
         @Override
         protected TourCollection doInBackground(Void... params) {
-            return StartUpTasks.getToursFromServer();
+            return BuildingListAdapter.getToursFromServer();
         }
 
         @Override

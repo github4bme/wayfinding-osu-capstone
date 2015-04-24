@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -28,8 +29,7 @@ import java.util.ArrayList;
 public class SelectSourceLocation extends BaseActivity {
 
     // instance variables
-    public ArrayList <Building>      sources;
-    public ArrayAdapter<Building>    adapter;
+    public BuildingListAdapter       adapter;
     public ListView                  listView;
     public EditText                  editText;
 
@@ -64,11 +64,8 @@ public class SelectSourceLocation extends BaseActivity {
         listView = (ListView) findViewById(R.id.source_list);
         editText = (EditText) findViewById(R.id.source_list_search);
 
-        // gets copy of ordered list of locations
-        sources = StartUpTasks.cloneBuildingList();
-
         // creates adapter and attaches it to the listView
-        adapter = new ArrayAdapter<Building>(this, android.R.layout.simple_list_item_1, sources);
+        adapter = new BuildingListAdapter(getApplicationContext(), BuildingListAdapter.cloneBuildingList());
         listView.setAdapter(adapter);
 
         // create listener for the editText and have it filter the list on input changes
@@ -85,24 +82,27 @@ public class SelectSourceLocation extends BaseActivity {
             public void afterTextChanged(Editable s) {}
         });
 
-        // create a listener for when an item is selected in the list
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // get the id of the selected item
-                String selectedItem = Integer.toString(((Building) (parent.getItemAtPosition(position))).getBuildingId());
+        listView.setOnItemClickListener( new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Building itemClicked = adapter.getItem(position);
 
-                // create an intent
-                Intent intent = new Intent(SelectSourceLocation.this, SelectDestinationLocation.class);
 
-                // add the selected id to intent
-                intent.putExtra(SOURCE_LOCATION, selectedItem);
+            // get the id of the selected item
+            String selectedItemId = itemClicked.getBuildingId() + "";
 
-                // start the intent
-                startActivity(intent);
-            }
-        });
-    }
+            // create an intent
+            Intent intent = new Intent(SelectSourceLocation.this, SelectDestinationLocation.class);
+
+            // add the selected id to intent
+            intent.putExtra(SOURCE_LOCATION, selectedItemId);
+
+            // start the intent
+            startActivity(intent);
+
+        }
+    });
+}
 
     /**
      * Create and execute an intent with source location set to -1

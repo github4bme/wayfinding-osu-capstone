@@ -18,8 +18,7 @@ import java.util.ArrayList;
 public class SelectDestinationLocation extends BaseActivity {
 
     // instance variables
-    public ArrayAdapter<Building>   adapter;
-    public ArrayList <Building>     destinations;
+    public BuildingListAdapter      adapter;
     public ListView                 listView;
     public EditText                 editText;
     public String                   incomingSource;
@@ -43,11 +42,8 @@ public class SelectDestinationLocation extends BaseActivity {
         listView = (ListView) findViewById(R.id.destination_list);
         editText = (EditText) findViewById(R.id.destination_list_search);
 
-        // creates a clone of the location list
-        destinations = StartUpTasks.cloneBuildingList();
-
         // creates adapter and attaches it to the listView
-        adapter = new ArrayAdapter<Building>(this, android.R.layout.simple_list_item_1, destinations);
+        adapter = new BuildingListAdapter(getApplicationContext(), BuildingListAdapter.cloneBuildingList());
         listView.setAdapter(adapter);
 
         // create listener for the editText and have it filter the list on input changes
@@ -57,7 +53,7 @@ public class SelectDestinationLocation extends BaseActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                SelectDestinationLocation.this.adapter.getFilter().filter(s);
+                SelectDestinationLocation.this.adapter.getFilter().filter(s.toString());
             }
 
             @Override
@@ -69,14 +65,16 @@ public class SelectDestinationLocation extends BaseActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
+                Building itemClicked = adapter.getItem(position);
+
                 // get the id of the selected item
-                String selectedItem = Integer.toString(((Building)(parent.getItemAtPosition(position))).getBuildingId());
+                String selectedItemId = itemClicked.getBuildingId() + "";
 
                 Intent intent = new Intent(SelectDestinationLocation.this, DisplayMapActivity.class);
 
                 // add the selected id to intent
                 intent.putExtra(SOURCE_LOCATION, incomingSource);
-                intent.putExtra(DESTINATION_LOCATION, selectedItem);
+                intent.putExtra(DESTINATION_LOCATION, selectedItemId);
 
                 // start the intent
                 startActivity(intent);

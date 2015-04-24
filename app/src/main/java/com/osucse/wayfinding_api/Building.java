@@ -12,7 +12,9 @@ public class Building implements Comparable<Building>{
     private int buildingId;
     private List<Door> doors;
 
-    public String getName () { return this.name; }
+    public boolean isfavorite; // added for favorite on lists
+
+    public String getName () { return this.name.trim(); }
 
     public List<Door> getDoors () { return this.doors; }
 
@@ -24,12 +26,23 @@ public class Building implements Comparable<Building>{
 
     /**
      * Must have override for my adding of the Comparable<Location> implementation
-     * @param comp the item that this is being compared to
+     * @param o the item that this is being compared to
      * @return an integer value (<(-1) for less than, 0 for equals, and >(1) for greater than)
      */
     @Override
-    public int compareTo(Building comp) {
-        return this.getName().toLowerCase().compareTo(comp.getName().toLowerCase());
+    public int compareTo(Building o) {
+        String o1 = this.getName();
+        String o2 = o.getName();
+
+        if (o1.charAt(0) < 58 && o2.charAt(0) < 58) {
+            return Character.getNumericValue(o1.charAt(0)) - Character.getNumericValue(o2.charAt(0));
+        } else if (o1.charAt(0) < 58 && o2.charAt(0) > 58) {
+            return 100;
+        } else if (o1.charAt(0) > 58 && o2.charAt(0) < 58) {
+            return -100;
+        } else {
+            return o1.toLowerCase().compareTo(o2.toLowerCase());
+        }
     }
 }
 
