@@ -47,7 +47,7 @@ import com.osucse.utilities.Coordinate;
 import com.osucse.wayfinding_api.*;
 import static com.google.maps.android.SphericalUtil.computeDistanceBetween;
 
-public class DisplayMapActivity extends FragmentActivity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class DisplayMapActivity extends BaseActivity implements SensorEventListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final String URL = "http://54.200.238.22:9000/";
     private static final String CURRENT_LOCATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayMapActivity.currentLocationKey";
     private static final String NEXT_DESTINATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayMapActivity.nextDestinationKey";
@@ -104,6 +104,7 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_map);
+        super.onCreateDrawer();
         Intent intent = getIntent();
 
         showHintsAndTips();
@@ -244,11 +245,18 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
                 if (collection != null) {
                     message = collection.getErrorMsg();
                 } else {
-                    message = "An unknown error has occured.";
+                    message = "An unknown error has occurred.";
                 }
                 AlertDialog.Builder errorDialog = new AlertDialog.Builder(DisplayMapActivity.this);
                 errorDialog.setTitle("Error");
                 errorDialog.setMessage(message);
+                errorDialog.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog, int which){
+                        finish();
+                    }
+                });
+                errorDialog.show();
             }
         }
 
@@ -305,11 +313,18 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
                     message = tourRoute.getErrorMsg();
                 }
                 else {
-                    message = "An unknown error has occured.";
+                    message = "An unknown error has occurred.";
                 }
                 AlertDialog.Builder errorDialog = new AlertDialog.Builder(DisplayMapActivity.this);
                 errorDialog.setTitle("Error");
                 errorDialog.setMessage(message);
+                errorDialog.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog, int which){
+                        finish();
+                    }
+                });
+                errorDialog.show();
             }
         }
 
@@ -403,6 +418,12 @@ public class DisplayMapActivity extends FragmentActivity implements SensorEventL
             AlertDialog.Builder arrived = new AlertDialog.Builder(DisplayMapActivity.this);
             arrived.setTitle("Arrived");
             arrived.setMessage("You Have Arrived!");
+            arrived.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+                @Override
+                public void onClick(DialogInterface dialog, int which){
+                    finish();
+                }
+            });
             arrived.show();
         }
 

@@ -22,7 +22,7 @@ import com.osucse.wayfinding_api.Tour;
 import java.util.ArrayList;
 
 
-public class SelectTour extends ActionBarActivity {
+public class SelectTour extends BaseActivity {
 
     // instance variables
     public ArrayList<Tour> tours;
@@ -52,6 +52,7 @@ public class SelectTour extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_tour);
+        super.onCreateDrawer();
 
         // add a broadcast reliever for killing the activity remotely
         registerReceiver(receiver, new IntentFilter(KILL_TOUR));
