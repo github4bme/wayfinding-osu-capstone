@@ -105,7 +105,7 @@ public class InitialActivity extends BaseActivity {
     private class BuildingHttpRequestTask extends AsyncTask<Void, Void, BuildingCollection> {
         @Override
         protected BuildingCollection doInBackground(Void... params) {
-            return StartUpTasks.getBuildingsFromServer();
+            return BuildingListAdapter.getBuildingsFromServer();
         }
 
         @Override
@@ -123,7 +123,7 @@ public class InitialActivity extends BaseActivity {
     private class ToursHttpRequestTask extends AsyncTask<Void, Void, TourCollection> {
         @Override
         protected TourCollection doInBackground(Void... params) {
-            return StartUpTasks.getToursFromServer();
+            return BuildingListAdapter.getToursFromServer();
         }
 
         @Override

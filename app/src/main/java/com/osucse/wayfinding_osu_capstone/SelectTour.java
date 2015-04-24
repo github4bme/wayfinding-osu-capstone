@@ -62,7 +62,7 @@ public class SelectTour extends BaseActivity {
         editText = (EditText) findViewById(R.id.tour_list_search);
 
         // gets copy of ordered list of locations
-        tours = StartUpTasks.cloneTourList();
+        tours = BuildingListAdapter.cloneTourList();
 
         // creates adapter and attaches it to the listView
         adapter = new ArrayAdapter<Tour>(this, android.R.layout.simple_list_item_1, tours);
