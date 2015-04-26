@@ -393,47 +393,17 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
      * you to the next node as compared to where you currently are
      */
     private void checkNextDestUpdateUI() {
-//        LatLng tempDest = nextDestination;
-
-//        // Loop checks to see if the user is close to a point on the route
-//        for (int i = 0; i < ourRoute.size() - 1; i++) {
-//            float distance = currentLocation.distanceTo(createAndroidLocation(ourRoute.get(i)));
-//            if (distance < AT_LOCATION_RADIUS) {
-//                nextDestination = ourRoute.get(i + 1);
-//            }
-//        }
-
-
         // Needed for checking to see if next destination has moved
         LatLng tempDest = nextDestination;
-        // Used for deciding if a recalculation is needed; set to max just to ensure first check is less than this
-        double shortestDistFromPath = Double.MAX_VALUE;
 
         // Gets which "oval" around the path the user is currently in and changes the nextDestination accordingly
         for (int i = 0; i < ourRoute.size() - 1; i++) {
             Location node = createAndroidLocation(ourRoute.get(i));
             Location nextNode = createAndroidLocation(ourRoute.get(i + 1));
 
-            float routeBearing = node.bearingTo(nextNode);
-            float bearingToUser = node.bearingTo(currentLocation);
-            double angleBetween = (double) (bearingToUser - routeBearing);
-
-            // in meters
-            double distanceFromPath = Math.abs(Math.sin(Math.toRadians(angleBetween)) * node.distanceTo(currentLocation));
-
-            float distanceBetweenNodes = node.distanceTo(nextNode);
-            float userDistFromNode = node.distanceTo(currentLocation);
-            float userDistFromNextNode = nextNode.distanceTo(currentLocation);
-
-            if (distanceFromPath < PATH_GAP_COMPARISON
-                    && userDistFromNode < distanceBetweenNodes + PATH_GAP_COMPARISON
-                    && userDistFromNextNode < distanceBetweenNodes + PATH_GAP_COMPARISON) {
+            // Gets the oval the user is currently in which is farthest along the route
+            if (isWithinOval(currentLocation, node, nextNode, PATH_GAP_COMPARISON)) {
                 nextDestination = ourRoute.get(i + 1);
-            }
-
-            // Check for seeing if a recalculation is needed; FARTHEST_ALLOWED_
-            if (distanceFromPath < shortestDistFromPath) {
-                shortestDistFromPath = distanceFromPath;
             }
         }
 
@@ -441,10 +411,10 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
          * IDEA: do the 'oval' check on all ovals - shortest oval is the oval to be in
          */
 
-        // Right now this is shortest from ALL paths - probably not correct
-        if (shortestDistFromPath > FARTHEST_ALLOWED_FROM_PATH) {
-            distanceTV.setText("RECALCULATE!!!!!");
-        }
+//        // Right now this is shortest from ALL paths - probably not correct
+//        if (shortestDistFromPath > FARTHEST_ALLOWED_FROM_PATH) {
+//            distanceTV.setText("RECALCULATE!!!!!");
+//        }
 
 
         /**
@@ -465,41 +435,56 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
                 currentDistFromPath = Math.abs(Math.sin(Math.toRadians(angleBetween)) * node.distanceTo(currentLocation));
 
                 etaTV.setText("Dist. from Path: " + currentDistFromPath + "m");
-
-                if (shortestDistFromPath > FARTHEST_ALLOWED_FROM_PATH) {
-                    distanceTV.setText("RECALCULATE!!!!!");
-                }
             }
         }
         /*********/
 
-        /***************/
-        /** need some methods - isWithinOval() isWithinTightOval()
-         *
-         */
+        Location node = null;
+        Location nextNode = null;
+        LatLng setArrowLocation = null;
+        int nextNodeIndex = ourRoute.indexOf(nextDestination);
+        int nodeIndex = nextNodeIndex - 1;
+        if (nodeIndex > -1) {
+            node = createAndroidLocation(ourRoute.get(nodeIndex));
+            nextNode = createAndroidLocation(ourRoute.get(nextNodeIndex));
 
-        // For now simple comparison
-        boolean isWithinTightOval = currentDistFromPath > 0 && currentDistFromPath < PATH_GAP_COMPARISON;
+
+            float routeBearing = node.bearingTo(nextNode);
+            float bearingToUser = node.bearingTo(currentLocation);
+            double angleBetween = (double) (bearingToUser - routeBearing);
+            double currentDistFromNode = Math.abs(Math.cos(Math.toRadians(angleBetween)) * node.distanceTo(currentLocation));
+            setArrowLocation = getLocBetweenNodes(node, nextNode, currentDistFromNode);
+        }
 
 
-//        // if within 'oval' show arrow; else have current location dot
-//        if (currentDistFromPath > 0 && currentDistFromPath < PATH_GAP_COMPARISON) {
-//            if (ourMap != null) {
-//                ourMap.setMyLocationEnabled(false);
-//                userLocationArrow = ourMap.addMarker(new MarkerOptions()
-//                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_location_arrow))
-//                        .position(nextDestination)
-//                        .flat(true)
-//                        .anchor(0.5,0.5)
-//                        .rotation());
-//            }
-//        } else {
-//            if (ourMap != null) {
-//                ourMap.setMyLocationEnabled(true);
-//            }
-//
-//        }
+        //******* Temporary
+        bearingToDestDegrees = currentLocation.bearingTo(createAndroidLocation(nextDestination));
 
+        // if within 'oval' show arrow; else have current location dot
+        if (setArrowLocation != null && isWithinOval(currentLocation, node, nextNode, 0.0f)) {
+            if (ourMap != null) {
+                ourMap.setMyLocationEnabled(false);
+                float arrowRotation = bearingToDestDegrees - currBearing;
+                if (userLocationArrow == null) {
+                    userLocationArrow = ourMap.addMarker(new MarkerOptions()
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_location_arrow))
+                            .position(setArrowLocation)
+                            .flat(true)
+                            .anchor(0.5f, 0.5f)
+                            .rotation(arrowRotation));
+                } else {
+                    userLocationArrow.setRotation(arrowRotation);
+                    userLocationArrow.setPosition(setArrowLocation);
+                }
+            }
+        } else {
+            if (ourMap != null) {
+                ourMap.setMyLocationEnabled(true);
+                if (userLocationArrow != null) {
+                    userLocationArrow.remove();
+                }
+            }
+        }
 
         // if next destination changed then move marker
         if (ourMap != null && nextDestMarker != null && tempDest != nextDestination) {
@@ -524,18 +509,6 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.block_o))
                 .position(nextDestination)
                 .flat(true));
-
-
-        //.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-
-
-        // for image for marker
-        // .icon(BitmapDescriptorFactory.fromResource(R.drawable.arrow))
-        // flatten .flat(true)
-        //
-        // Rotate around anchor with Marker.setRotation()
-        //.anchor(0.5,0.5)
-        //.rotation(90.0)
     }
 
     private void updateUI() {
@@ -549,6 +522,11 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         } else {
             // do nothing until animation is done
         }
+
+        //************** for user location arrow
+        // Rotate around anchor with Marker.setRotation()
+        //.anchor(0.5,0.5)
+        //.rotation(90.0)
     }
 
     /**
@@ -691,15 +669,6 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         updateUI();
     }
 
-    // Simple helper method for converting from LatLng to an android.location.Location
-    private android.location.Location createAndroidLocation(LatLng point) {
-        // Provider name is unnecessary
-        android.location.Location newLocation = new android.location.Location("");
-        newLocation.setLatitude(point.latitude);
-        newLocation.setLongitude(point.longitude);
-        return newLocation;
-    }
-
     public void toggleArrowSize(View arrowImage) {
         // get the percentage of arrow image needed to fill screen
         LinearLayout overallLayout = (LinearLayout) findViewById(R.id.overall_linear_layout);
@@ -716,6 +685,58 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
             // Arrow should be shrunk
             newScaleSize = 1.0f;
         }
+    }
+
+    /**
+     * Method to see if a location is within the 'oval' geo-fence range created by two
+     * nodes and a limiting distance away from the plotted route between those two nodes
+     */
+    private boolean isWithinOval(Location locationToCheck, Location nodeA, Location nodeB, float allowedDistFromRoute) {
+        float routeBearing = nodeA.bearingTo(nodeB);
+        float bearingToLocToCheck = nodeA.bearingTo(locationToCheck);
+        double angleBetween = (double) (bearingToLocToCheck - routeBearing);
+
+        // in meters
+        double distanceFromRoute = Math.abs(Math.sin(Math.toRadians(angleBetween)) * nodeA.distanceTo(locationToCheck));
+
+        float distanceBetweenNodes = nodeA.distanceTo(nodeB);
+        float locToCheckDistFromNodeA = nodeA.distanceTo(locationToCheck);
+        float locToCheckDistFromNodeB = nodeB.distanceTo(locationToCheck);
+
+        return (distanceFromRoute < allowedDistFromRoute
+                && locToCheckDistFromNodeA < distanceBetweenNodes + allowedDistFromRoute
+                && locToCheckDistFromNodeB < distanceBetweenNodes + allowedDistFromRoute);
+    }
+
+    /**
+     * Method to get a new location based off of a bearing and distance from a
+     * known location
+     */
+    private LatLng getLocBetweenNodes(Location node, Location nextNode, double distanceOfNew) {
+        double diffLat = nextNode.getLatitude() - node.getLatitude();
+        double diffLong = nextNode.getLongitude() - node.getLongitude();
+        double distBetweenNodesInLatLong = Math.sqrt((diffLat * diffLat) + (diffLong * diffLong));
+
+        double smallTriOverBigTri = distanceOfNew / distBetweenNodesInLatLong;
+
+        double newLat = smallTriOverBigTri * diffLat;
+        double newLong = smallTriOverBigTri * diffLong;
+
+//        Location newLoc = new Location(node);
+//        newLoc.reset();
+//        newLoc.setLatitude(newLat);
+//        newLoc.setLongitude(newLong);
+
+        return new LatLng(newLat, newLong);
+    }
+
+    // Simple helper method for converting from LatLng to an android.location.Location
+    private android.location.Location createAndroidLocation(LatLng point) {
+        // Provider name is unnecessary
+        android.location.Location newLocation = new android.location.Location("");
+        newLocation.setLatitude(point.latitude);
+        newLocation.setLongitude(point.longitude);
+        return newLocation;
     }
 
     private String getStartEndRouteURL() {
