@@ -222,10 +222,12 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
             if (collection != null && collection.getErrorMsg() == null) {
                 final List<Coordinate> routePoints = collection.getRoute();
                 // Fills ourRoute with our path's lat/long coordinates
-                for (int i = 0; i < routePoints.size(); i++) {
-                    ourRoute.add(new LatLng(routePoints.get(i).getLatitude(),
-                            routePoints.get(i).getLongitude()));
-                }
+//                for (int i = 0; i < routePoints.size(); i++) {
+//                    ourRoute.add(new LatLng(routePoints.get(i).getLatitude(),
+//                            routePoints.get(i).getLongitude()));
+//                }
+                ourRoute.add(new LatLng(39.913182, -84.174148));
+                ourRoute.add(new LatLng(39.907442, -84.172528));
 
                 // Set first destination to the start of the route
                 nextDestination = ourRoute.get(0);
@@ -402,7 +404,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
             Location nextNode = createAndroidLocation(ourRoute.get(i + 1));
 
             // Gets the oval the user is currently in which is farthest along the route
-            if (isWithinOval(currentLocation, node, nextNode, PATH_GAP_COMPARISON)) {
+            if (isWithinOval(currentLocation, node, nextNode, PATH_GAP_COMPARISON, PATH_GAP_COMPARISON)) {
                 nextDestination = ourRoute.get(i + 1);
             }
         }
@@ -461,7 +463,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         bearingToDestDegrees = currentLocation.bearingTo(createAndroidLocation(nextDestination));
 
         // if within 'oval' show arrow; else have current location dot
-        if (setArrowLocation != null && isWithinOval(currentLocation, node, nextNode, 0.0f)) {
+        if (setArrowLocation != null && isWithinOval(currentLocation, node, nextNode, PATH_GAP_COMPARISON, 0.0f)) {
             if (ourMap != null) {
                 ourMap.setMyLocationEnabled(false);
                 float arrowRotation = bearingToDestDegrees - currBearing;
@@ -691,7 +693,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
      * Method to see if a location is within the 'oval' geo-fence range created by two
      * nodes and a limiting distance away from the plotted route between those two nodes
      */
-    private boolean isWithinOval(Location locationToCheck, Location nodeA, Location nodeB, float allowedDistFromRoute) {
+    private boolean isWithinOval(Location locationToCheck, Location nodeA, Location nodeB, float allowedDistFromRoute, float allowedDistPastNode) {
         float routeBearing = nodeA.bearingTo(nodeB);
         float bearingToLocToCheck = nodeA.bearingTo(locationToCheck);
         double angleBetween = (double) (bearingToLocToCheck - routeBearing);
@@ -704,8 +706,8 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         float locToCheckDistFromNodeB = nodeB.distanceTo(locationToCheck);
 
         return (distanceFromRoute < allowedDistFromRoute
-                && locToCheckDistFromNodeA < distanceBetweenNodes + allowedDistFromRoute
-                && locToCheckDistFromNodeB < distanceBetweenNodes + allowedDistFromRoute);
+                && locToCheckDistFromNodeA < distanceBetweenNodes + allowedDistPastNode
+                && locToCheckDistFromNodeB < distanceBetweenNodes + allowedDistPastNode);
     }
 
     /**
@@ -715,12 +717,13 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
     private LatLng getLocBetweenNodes(Location node, Location nextNode, double distanceOfNew) {
         double diffLat = nextNode.getLatitude() - node.getLatitude();
         double diffLong = nextNode.getLongitude() - node.getLongitude();
-        double distBetweenNodesInLatLong = Math.sqrt((diffLat * diffLat) + (diffLong * diffLong));
+//        double distBetweenNodesInLatLong = Math.sqrt((diffLat * diffLat) + (diffLong * diffLong));
 
-        double smallTriOverBigTri = distanceOfNew / distBetweenNodesInLatLong;
+        double distBetweenNodes = node.distanceTo(nextNode);
+        double smallTriOverBigTri = distanceOfNew / distBetweenNodes;
 
-        double newLat = smallTriOverBigTri * diffLat;
-        double newLong = smallTriOverBigTri * diffLong;
+        double newLat = (smallTriOverBigTri * diffLat) + node.getLatitude();
+        double newLong = (smallTriOverBigTri * diffLong) + node.getLongitude();
 
 //        Location newLoc = new Location(node);
 //        newLoc.reset();
