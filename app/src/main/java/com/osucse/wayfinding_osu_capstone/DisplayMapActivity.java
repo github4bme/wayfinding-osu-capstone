@@ -3,12 +3,10 @@ package com.osucse.wayfinding_osu_capstone;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.AsyncTask;
-import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
@@ -61,15 +59,16 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
     private GoogleMap ourMap;
     private Marker nextDestMarker;
+    private Marker userLocationArrow;
     List<LatLng> ourRoute = new ArrayList<LatLng>();
 
     // Used for location services
-    protected GoogleApiClient mGoogleApiClient;
-    protected LocationRequest mLocationRequest;
+    protected GoogleApiClient googleApiClient;
+    protected LocationRequest locationRequest;
 
     // Used for orientation of the phone
-    private SensorManager mSensorManager;
-    private Sensor mSensor;
+    private SensorManager sensorManager;
+    private Sensor sensor;
 
     protected ImageView arrowImage;
     protected TextView distanceTV;
@@ -83,11 +82,11 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
     protected LatLng finalLocation;
 
-    protected android.location.Location mCurrentLocation;
+    protected android.location.Location currentLocation;
     protected float bearingToDestDegrees;
     protected float currBearing;
     // Set to 0, 0 for rare case of null pointer exception
-    protected LatLng mNextDestination = new LatLng(0.0, 0.0);
+    protected LatLng nextDestination = new LatLng(0.0, 0.0);
 
     /******
      *  Boolean value for running on emulator
@@ -97,7 +96,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
     // Variable that could be used for turning location updates on and off
     // This might be helpful for running on emulator if we find that the updates cause problems
-    protected boolean mRequestingLocationUpdates;
+    protected boolean requestingLocationUpdates;
 
     // Sizes and animation needed for arrow animation
     protected float lastRotation = 0.0f;
@@ -126,8 +125,9 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         // boolean used primarily for using current location for route
         routeNeeded = true;
 
+        // This logic is to decide which http request needs to be made
         if(tourId != null) {
-            new TourRequest().execute();
+            new HttpRequestTask().execute(getTourRouteURL());
             routeGenUsesCurrLoc = false;
         } else {
             // Set boolean for ordering of asynchronous operations
@@ -138,13 +138,13 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
             // if not called here then called in onConnected
             if (!routeGenUsesCurrLoc) {
-                new HttpRequestTask().execute();
+                new HttpRequestTask().execute(getStartEndRouteURL());
             }
         }
 
         // Set to true for all cases because we do not have any reason to turn these updates off
         // E.g. a setting to disable location information
-        mRequestingLocationUpdates =  true;
+        requestingLocationUpdates =  true;
 
         // Creates Location Request with desired parameters
         createLocationRequest();
@@ -154,12 +154,12 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
         // Set from null to stop initial null pointer exception in onSensorChanged() calling updateUI() before API
         // client has connected to set our user's current location
-        mCurrentLocation = createAndroidLocation(new LatLng(0.0, 0.0));
+        currentLocation = createAndroidLocation(new LatLng(0.0, 0.0));
 
         if (!runningOnEmulator) {
             // Used for getting orientation of phone
-            mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-            mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+            sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+            sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         }
 
         // To bring back saved state if activity is interrupted
@@ -203,21 +203,13 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         }
     }
 
-    private class HttpRequestTask extends AsyncTask<Void, Void, Route> implements OnMapReadyCallback {
+    private class HttpRequestTask extends AsyncTask<String, Void, Route> implements OnMapReadyCallback {
         @Override
-        protected Route doInBackground(Void... params) {
+        protected Route doInBackground(String... params) {
             try {
-                String url;
-                if (routeGenUsesCurrLoc) {
-                    url = URL + "generateRouteCurrent?dest=" + endLocation + "&currlat=" +
-                            Double.toString(mCurrentLocation.getLatitude()) + "&currlong=" +
-                            Double.toString(mCurrentLocation.getLongitude());
-                } else {
-                    url = URL + "generateRoute?from=" + startLocation + "&to=" + endLocation;
-                }
                 RestTemplate restTemplate = new RestTemplate();
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-                Route collection = restTemplate.getForObject(url, Route.class);
+                Route collection = restTemplate.getForObject(params[0], Route.class);
                 return collection;
             } catch (Exception e) {
                 Log.e("Route", e.getMessage(), e);
@@ -236,7 +228,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
                 }
 
                 // Set first destination to the start of the route
-                mNextDestination = ourRoute.get(0);
+                nextDestination = ourRoute.get(0);
 
                 int lastIndex = ourRoute.size() - 1;
                 finalLocation = ourRoute.get(lastIndex);
@@ -280,75 +272,6 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         }
     }
 
-    private class TourRequest extends AsyncTask<Void, Void, Route> implements OnMapReadyCallback {
-
-        @Override
-        protected Route doInBackground(Void... params) {
-            String url = URL + "tourRoute?id=" + tourId;
-            RestTemplate restTemplate = new RestTemplate();
-            restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
-            Route tourRoute = restTemplate.getForObject(url, Route.class);
-            return tourRoute;
-        }
-
-        @Override
-        protected void onPostExecute(Route tourRoute)
-        {
-            if (tourRoute != null && tourRoute.getErrorMsg() == null)
-            {
-                final List<Coordinate> routePoints = tourRoute.getRoute();
-
-                // Fills ourRoute with our path's lat/long coordinates
-                for (int i = 0; i < routePoints.size(); i++) {
-                    ourRoute.add(new LatLng(routePoints.get(i).getLatitude(),
-                            routePoints.get(i).getLongitude()));
-                }
-
-                // Set first destination to the start of the route
-                mNextDestination = ourRoute.get(0);
-
-                MapFragment map = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-
-                // Sets up a non-null GoogleMap and calls onMapReady()
-                map.getMapAsync(this);
-            }
-            else {
-                String message;
-                if(tourRoute != null) {
-                    message = tourRoute.getErrorMsg();
-                }
-                else {
-                    message = "An unknown error has occurred.";
-                }
-                AlertDialog.Builder errorDialog = new AlertDialog.Builder(DisplayMapActivity.this);
-                errorDialog.setTitle("Error");
-                errorDialog.setMessage(message);
-                errorDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                });
-                errorDialog.show();
-            }
-        }
-
-        @Override
-        public void onMapReady(GoogleMap googleMap) {
-            // This is called when our getMapAsync() in onCreate() successfully gets a map
-            // Set created googleMap to our global map
-            ourMap = googleMap;
-
-            plotRoute();
-            ourMap.setMyLocationEnabled(true);
-            ourMap.getUiSettings().setMapToolbarEnabled(false);
-
-            // Set first marker to show the start of the route
-//            ourMap.addMarker(new MarkerOptions().title("Next Destination").position(mNextDestination));
-            adjustMarkerPosition();
-        }
-    }
-
     /**
      * Plots the route on the map
      */
@@ -361,26 +284,26 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         // Loop is kept so that we do not start a line at the last point
         for (int i = 0; i < ourRoute.size() - 1; i++){
             ourMap.addPolyline((new PolylineOptions()).add(ourRoute.get(i), ourRoute.get(i + 1))
-                    .width(10).color(Color.BLUE).geodesic(true));
+                    .width(7).color(Color.BLUE).geodesic(true));
         }
     }
 
     // Defines how and when our location updates are made
     protected void createLocationRequest() {
-        mLocationRequest = new LocationRequest();
+        locationRequest = new LocationRequest();
         // Original settings for later comparison
-//        mLocationRequest.setInterval(10000);
-//        mLocationRequest.setFastestInterval(5000);
+//        locationRequest.setInterval(10000);
+//        locationRequest.setFastestInterval(5000);
         
         // Set update rate to as fast as possible
-        mLocationRequest.setInterval(0);
-        mLocationRequest.setFastestInterval(0);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(0);
+        locationRequest.setFastestInterval(0);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
     protected synchronized void buildGoogleApiClient() {
         // Build API Client, add callbacks as needed
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
+        googleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
@@ -390,20 +313,20 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
     @Override
     protected void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
+        googleApiClient.connect();
     }
 
     @Override
     protected void onStop() {
-        if (mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
+        if (googleApiClient.isConnected()) {
+            googleApiClient.disconnect();
         }
         super.onStop();
     }
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        if (mRequestingLocationUpdates) {
+        if (requestingLocationUpdates) {
             startLocationUpdates();
         }
     }
@@ -411,16 +334,16 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
     protected void startLocationUpdates() {
         // Adds location listener "this" to our Api Client
         LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, mLocationRequest, this);
+                googleApiClient, locationRequest, this);
     }
 
     @Override
     public void onLocationChanged(android.location.Location currentLocation) {
         // This is called anytime the location is detected as changed
-        mCurrentLocation = currentLocation;
+        this.currentLocation = currentLocation;
 
         // null check needed if http request has yet to set finalLocation
-        if(finalLocation != null && mCurrentLocation.distanceTo(createAndroidLocation(finalLocation)) < AT_LOCATION_RADIUS){
+        if(finalLocation != null && this.currentLocation.distanceTo(createAndroidLocation(finalLocation)) < AT_LOCATION_RADIUS){
             AlertDialog.Builder arrived = new AlertDialog.Builder(DisplayMapActivity.this);
             arrived.setTitle("Arrived");
             arrived.setMessage("You Have Arrived!");
@@ -435,7 +358,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
         // if route gen uses current location then current location must be found first
         if (routeNeeded && routeGenUsesCurrLoc) {
-            new HttpRequestTask().execute();
+            new HttpRequestTask().execute(getCurrLocRouteURL());
             // set so do not make http request again
             routeNeeded = false;
         }
@@ -448,10 +371,10 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
     private void recalculateDistanceAndETA() {
         double distanceLeftInMeters = 0;
 
-        distanceLeftInMeters = computeDistanceBetween(new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), mNextDestination);
+        distanceLeftInMeters = computeDistanceBetween(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), nextDestination);
 
         // Loops from index of nextDestination in route to the end adding up distances
-        for(int i = ourRoute.indexOf(mNextDestination); i < ourRoute.size() - 1; i++)
+        for(int i = ourRoute.indexOf(nextDestination); i < ourRoute.size() - 1; i++)
         {
             distanceLeftInMeters += computeDistanceBetween(ourRoute.get(i), ourRoute.get(i + 1));
         }
@@ -464,104 +387,144 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
     /**
      * Method that checks to see if user is within AT_LOCATION_RADIUS distance from any point
-     * on route; if the user is, then method sets mNextDestination to next point on route
+     * on route; if the user is, then method sets nextDestination to next point on route
      *
      * NOTE: It is possible to go backwards on the route - this method will always try to point
      * you to the next node as compared to where you currently are
      */
     private void checkNextDestUpdateUI() {
-//        LatLng tempDest = mNextDestination;
+//        LatLng tempDest = nextDestination;
 
 //        // Loop checks to see if the user is close to a point on the route
 //        for (int i = 0; i < ourRoute.size() - 1; i++) {
-//            float distance = mCurrentLocation.distanceTo(createAndroidLocation(ourRoute.get(i)));
+//            float distance = currentLocation.distanceTo(createAndroidLocation(ourRoute.get(i)));
 //            if (distance < AT_LOCATION_RADIUS) {
-//                mNextDestination = ourRoute.get(i + 1);
+//                nextDestination = ourRoute.get(i + 1);
 //            }
 //        }
 
-        LatLng tempDest = mNextDestination;
-        // Used for deciding if a recalculation is needed; set to max just so always less than this
+
+        // Needed for checking to see if next destination has moved
+        LatLng tempDest = nextDestination;
+        // Used for deciding if a recalculation is needed; set to max just to ensure first check is less than this
         double shortestDistFromPath = Double.MAX_VALUE;
 
-        // Gets which "oval" around the path the user is currently in and changes the mNextDestination accordingly
+        // Gets which "oval" around the path the user is currently in and changes the nextDestination accordingly
         for (int i = 0; i < ourRoute.size() - 1; i++) {
             Location node = createAndroidLocation(ourRoute.get(i));
             Location nextNode = createAndroidLocation(ourRoute.get(i + 1));
 
             float routeBearing = node.bearingTo(nextNode);
-            float bearingToUser = node.bearingTo(mCurrentLocation);
+            float bearingToUser = node.bearingTo(currentLocation);
             double angleBetween = (double) (bearingToUser - routeBearing);
 
-
             // in meters
-            double distanceFromPath = Math.abs(Math.sin(Math.toRadians(angleBetween)) * node.distanceTo(mCurrentLocation));
-
+            double distanceFromPath = Math.abs(Math.sin(Math.toRadians(angleBetween)) * node.distanceTo(currentLocation));
 
             float distanceBetweenNodes = node.distanceTo(nextNode);
-            float userDistFromNode = node.distanceTo(mCurrentLocation);
-            float userDistFromNextNode = nextNode.distanceTo(mCurrentLocation);
+            float userDistFromNode = node.distanceTo(currentLocation);
+            float userDistFromNextNode = nextNode.distanceTo(currentLocation);
 
             if (distanceFromPath < PATH_GAP_COMPARISON
                     && userDistFromNode < distanceBetweenNodes + PATH_GAP_COMPARISON
                     && userDistFromNextNode < distanceBetweenNodes + PATH_GAP_COMPARISON) {
-                mNextDestination = ourRoute.get(i + 1);
+                nextDestination = ourRoute.get(i + 1);
             }
 
-            // Check for seeing if a recalculation is needed
+            // Check for seeing if a recalculation is needed; FARTHEST_ALLOWED_
             if (distanceFromPath < shortestDistFromPath) {
                 shortestDistFromPath = distanceFromPath;
             }
+        }
+
+        /**
+         * IDEA: do the 'oval' check on all ovals - shortest oval is the oval to be in
+         */
+
+        // Right now this is shortest from ALL paths - probably not correct
+        if (shortestDistFromPath > FARTHEST_ALLOWED_FROM_PATH) {
+            distanceTV.setText("RECALCULATE!!!!!");
         }
 
 
         /**
          * Just for testing
          */
+        // set to negative distance for definite wrong distance
+        double currentDistFromPath = -1.0;
+
         if (ourRoute.size() > 0) {
-            int nextNodeIndex = ourRoute.indexOf(mNextDestination);
+            int nextNodeIndex = ourRoute.indexOf(nextDestination);
             int nodeIndex = nextNodeIndex - 1;
-            if (nextNodeIndex == 0) {
-                nodeIndex = 0;
-            }
-            Location node = createAndroidLocation(ourRoute.get(nodeIndex));
-            Location nextNode = createAndroidLocation(ourRoute.get(nextNodeIndex));
-            float routeBearing = node.bearingTo(nextNode);
-            float bearingToUser = node.bearingTo(mCurrentLocation);
-            double angleBetween = (double) (bearingToUser - routeBearing);
-            double distanceFromPath = Math.abs(Math.sin(Math.toRadians(angleBetween)) * node.distanceTo(mCurrentLocation));
+            if (nodeIndex > -1) {
+                Location node = createAndroidLocation(ourRoute.get(nodeIndex));
+                Location nextNode = createAndroidLocation(ourRoute.get(nextNodeIndex));
+                float routeBearing = node.bearingTo(nextNode);
+                float bearingToUser = node.bearingTo(currentLocation);
+                double angleBetween = (double) (bearingToUser - routeBearing);
+                currentDistFromPath = Math.abs(Math.sin(Math.toRadians(angleBetween)) * node.distanceTo(currentLocation));
 
-            etaTV.setText("Dist. from Path: " + distanceFromPath + "m");
+                etaTV.setText("Dist. from Path: " + currentDistFromPath + "m");
 
-            if (shortestDistFromPath > FARTHEST_ALLOWED_FROM_PATH) {
-                distanceTV.setText("RECALCULATE!!!!!");
+                if (shortestDistFromPath > FARTHEST_ALLOWED_FROM_PATH) {
+                    distanceTV.setText("RECALCULATE!!!!!");
+                }
             }
         }
         /*********/
 
+        /***************/
+        /** need some methods - isWithinOval() isWithinTightOval()
+         *
+         */
+
+        // For now simple comparison
+        boolean isWithinTightOval = currentDistFromPath > 0 && currentDistFromPath < PATH_GAP_COMPARISON;
 
 
-        if (ourMap != null && nextDestMarker != null && tempDest != mNextDestination) {
+//        // if within 'oval' show arrow; else have current location dot
+//        if (currentDistFromPath > 0 && currentDistFromPath < PATH_GAP_COMPARISON) {
+//            if (ourMap != null) {
+//                ourMap.setMyLocationEnabled(false);
+//                userLocationArrow = ourMap.addMarker(new MarkerOptions()
+//                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_location_arrow))
+//                        .position(nextDestination)
+//                        .flat(true)
+//                        .anchor(0.5,0.5)
+//                        .rotation());
+//            }
+//        } else {
+//            if (ourMap != null) {
+//                ourMap.setMyLocationEnabled(true);
+//            }
+//
+//        }
+
+
+        // if next destination changed then move marker
+        if (ourMap != null && nextDestMarker != null && tempDest != nextDestination) {
             adjustMarkerPosition();
         }
 
-        bearingToDestDegrees = mCurrentLocation.bearingTo(createAndroidLocation(mNextDestination));
+        bearingToDestDegrees = currentLocation.bearingTo(createAndroidLocation(nextDestination));
         updateUI();
     }
 
     /**
      * Method to set our nextDestMarker
+     * Prereqs: ourMap is not null
      */
     private void adjustMarkerPosition() {
         if (nextDestMarker != null) {
             nextDestMarker.remove();
         }
+
         nextDestMarker = ourMap.addMarker(new MarkerOptions()
                 .title("Next Destination")
-                .alpha(0.7f)
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
-                .position(mNextDestination)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.block_o))
+                .position(nextDestination)
                 .flat(true));
+
 
         //.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
 
@@ -643,18 +606,18 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
     // Code used to repopulate necessary fields if the Activity is interrupted
     private void updateValuesFromBundle(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
-            // Update the value of mCurrentLocation from the Bundle
+            // Update the value of currentLocation from the Bundle
             if (savedInstanceState.keySet().contains(CURRENT_LOCATION_KEY)) {
                 // Since LOCATION_KEY was found in the Bundle, we can be sure that
                 // mCurrentLocationis not null.
-                mCurrentLocation = savedInstanceState.getParcelable(CURRENT_LOCATION_KEY);
+                currentLocation = savedInstanceState.getParcelable(CURRENT_LOCATION_KEY);
             }
 
-            // Update the value of mNextDestination from the Bundle
+            // Update the value of nextDestination from the Bundle
             if (savedInstanceState.keySet().contains(NEXT_DESTINATION_KEY)) {
-                mNextDestination = savedInstanceState.getParcelable(NEXT_DESTINATION_KEY);
+                nextDestination = savedInstanceState.getParcelable(NEXT_DESTINATION_KEY);
             }
-            bearingToDestDegrees = mCurrentLocation.bearingTo(createAndroidLocation(mNextDestination));
+            bearingToDestDegrees = currentLocation.bearingTo(createAndroidLocation(nextDestination));
             updateUI();
         }
     }
@@ -662,8 +625,8 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         // Saves all of the pertinent information if Activity is interrupted
-        savedInstanceState.putParcelable(CURRENT_LOCATION_KEY, mCurrentLocation);
-        savedInstanceState.putParcelable(NEXT_DESTINATION_KEY, mNextDestination);
+        savedInstanceState.putParcelable(CURRENT_LOCATION_KEY, currentLocation);
+        savedInstanceState.putParcelable(NEXT_DESTINATION_KEY, nextDestination);
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -674,26 +637,26 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         stopLocationUpdates();
 
         if (!runningOnEmulator) {
-            mSensorManager.unregisterListener(this);
+            sensorManager.unregisterListener(this);
         }
     }
 
     protected void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(
-                mGoogleApiClient, this);
+                googleApiClient, this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        // I am unclear as to why we use 'not' mRequestingLocationUpdates, but I am following Google's
+        // I am unclear as to why we use 'not' requestingLocationUpdates, but I am following Google's
         // tutorial here
-        if (mGoogleApiClient.isConnected() && !mRequestingLocationUpdates) {
+        if (googleApiClient.isConnected() && !requestingLocationUpdates) {
             startLocationUpdates();
         }
 
         if (!runningOnEmulator) {
-            mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
         }
     }
 
@@ -707,7 +670,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         // The connection to Google Play services was lost for some reason. We call connect() to
         // attempt to re-establish the connection.
         Log.i("Error:", "Connection suspended");
-        mGoogleApiClient.connect();
+        googleApiClient.connect();
     }
 
     @Override
@@ -753,5 +716,19 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
             // Arrow should be shrunk
             newScaleSize = 1.0f;
         }
+    }
+
+    private String getStartEndRouteURL() {
+        return URL + "generateRoute?from=" + startLocation + "&to=" + endLocation;
+    }
+
+    private String getCurrLocRouteURL() {
+        return URL + "generateRouteCurrent?dest=" + endLocation + "&currlat=" +
+                Double.toString(currentLocation.getLatitude()) + "&currlong=" +
+                Double.toString(currentLocation.getLongitude());
+    }
+
+    private String getTourRouteURL() {
+        return URL + "tourRoute?id=" + tourId;
     }
 }

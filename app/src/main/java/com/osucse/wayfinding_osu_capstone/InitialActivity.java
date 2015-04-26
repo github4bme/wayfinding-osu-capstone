@@ -43,7 +43,6 @@ public class InitialActivity extends BaseActivity {
             googleMap = ((SupportMapFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.map)).getMap();
         }
-        googleMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker").snippet("Snippet"));
 
         // Enable MyLocation Layer of Google Map
         googleMap.setMyLocationEnabled(true);
