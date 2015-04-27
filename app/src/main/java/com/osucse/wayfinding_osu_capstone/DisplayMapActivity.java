@@ -221,13 +221,11 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         protected void onPostExecute(Route collection) {
             if (collection != null && collection.getErrorMsg() == null) {
                 final List<Coordinate> routePoints = collection.getRoute();
-                // Fills ourRoute with our path's lat/long coordinates
-//                for (int i = 0; i < routePoints.size(); i++) {
-//                    ourRoute.add(new LatLng(routePoints.get(i).getLatitude(),
-//                            routePoints.get(i).getLongitude()));
-//                }
-                ourRoute.add(new LatLng(39.913182, -84.174148));
-                ourRoute.add(new LatLng(39.907442, -84.172528));
+//                Fills ourRoute with our path's lat/long coordinates
+                for (int i = 0; i < routePoints.size(); i++) {
+                    ourRoute.add(new LatLng(routePoints.get(i).getLatitude(),
+                            routePoints.get(i).getLongitude()));
+                }
 
                 // Set first destination to the start of the route
                 nextDestination = ourRoute.get(0);
@@ -465,25 +463,38 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         // if within 'oval' show arrow; else have current location dot
         if (setArrowLocation != null && isWithinOval(currentLocation, node, nextNode, PATH_GAP_COMPARISON, 0.0f)) {
             if (ourMap != null) {
-                ourMap.setMyLocationEnabled(false);
-                float arrowRotation = bearingToDestDegrees - currBearing;
+//                ourMap.setMyLocationEnabled(false);
                 if (userLocationArrow == null) {
                     userLocationArrow = ourMap.addMarker(new MarkerOptions()
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_location_arrow))
                             .position(setArrowLocation)
                             .flat(true)
                             .anchor(0.5f, 0.5f)
-                            .rotation(arrowRotation));
+                            .rotation(currBearing));
                 } else {
-                    userLocationArrow.setRotation(arrowRotation);
+                    userLocationArrow.setRotation(currBearing);
                     userLocationArrow.setPosition(setArrowLocation);
                 }
+            }
+        } else if (setArrowLocation != null && node.distanceTo(currentLocation) < PATH_GAP_COMPARISON) {
+            // put marker at node
+            if (userLocationArrow == null) {
+                userLocationArrow = ourMap.addMarker(new MarkerOptions()
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_location_arrow))
+                        .position(new LatLng(node.getLatitude(), node.getLongitude()))
+                        .flat(true)
+                        .anchor(0.5f, 0.5f)
+                        .rotation(currBearing));
+            } else {
+                userLocationArrow.setRotation(currBearing);
+                userLocationArrow.setPosition(new LatLng(node.getLatitude(), node.getLongitude()));
             }
         } else {
             if (ourMap != null) {
                 ourMap.setMyLocationEnabled(true);
                 if (userLocationArrow != null) {
                     userLocationArrow.remove();
+                    userLocationArrow = null;
                 }
             }
         }
@@ -508,7 +519,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
         nextDestMarker = ourMap.addMarker(new MarkerOptions()
                 .title("Next Destination")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.block_o))
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
                 .position(nextDestination)
                 .flat(true));
     }
