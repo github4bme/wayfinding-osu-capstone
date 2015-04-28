@@ -37,6 +37,7 @@ import android.hardware.SensorEvent;
 import android.widget.ImageView;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.*;
@@ -61,6 +62,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
     private GoogleMap ourMap;
     private Marker nextDestMarker;
     private Marker userLocationArrow;
+    private List<Polyline> polylineList = new ArrayList<Polyline>();
     List<LatLng> ourRoute = new ArrayList<LatLng>();
 
     // Used for location services
@@ -283,8 +285,9 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         // Loop puts a line between all points in ourRoute
         // Loop is kept so that we do not start a line at the last point
         for (int i = 0; i < ourRoute.size() - 1; i++){
-            ourMap.addPolyline((new PolylineOptions()).add(ourRoute.get(i), ourRoute.get(i + 1))
+            Polyline segment = ourMap.addPolyline((new PolylineOptions()).add(ourRoute.get(i), ourRoute.get(i + 1))
                     .width(7).color(Color.BLUE).geodesic(true));
+            polylineList.add(segment);
         }
     }
 
@@ -385,7 +388,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         double distanceLeftInMiles = distanceLeftInMeters / 1609.344;
 
         distanceTV.setText(String.format("%.3f", distanceLeftInMiles) + " mi. remaining");
-        etaTV.setText(Math.round(distanceLeftInMiles / 3.1 * 60) + " minutes");
+//        etaTV.setText(Math.round(distanceLeftInMiles / 3.1 * 60) + " minutes");
     }
 
     /**
@@ -412,28 +415,6 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
         // Checks to see if user is too far from current route segment
         checkMaxDistForRecalcuation();
-
-//        /**
-//         * Just for testing
-//         */
-//        // set to negative distance for definite wrong distance
-//        double currentDistFromPath = -1.0;
-//
-//        if (ourRoute.size() > 0) {
-//            int nextNodeIndex = ourRoute.indexOf(nextDestination);
-//            int nodeIndex = nextNodeIndex - 1;
-//            if (nodeIndex > -1) {
-//                Location node = createAndroidLocation(ourRoute.get(nodeIndex));
-//                Location nextNode = createAndroidLocation(ourRoute.get(nextNodeIndex));
-//                float routeBearing = node.bearingTo(nextNode);
-//                float bearingToUser = node.bearingTo(currentLocation);
-//                double angleBetween = (double) (bearingToUser - routeBearing);
-//                currentDistFromPath = Math.abs(Math.sin(Math.toRadians(angleBetween)) * node.distanceTo(currentLocation));
-//
-//                etaTV.setText("Dist. from Path: " + currentDistFromPath + "m");
-//            }
-//        }
-//        /*********/
 
         // if next destination changed then move marker
         if (ourMap != null && nextDestMarker != null && tempDest != nextDestination) {
@@ -760,26 +741,100 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
      * if more than FARTHEST_ALLOWED_FROM_PATH then recalculate route based on user's current location
      */
     private void checkMaxDistForRecalcuation() {
-        Location node = null;
-        Location nextNode = null;
-        if (hasReachedRouteStart()) {
-            // if user has reached route start then none of these values will be out of bounds
-            int nextNodeIndex = ourRoute.indexOf(nextDestination);
-            int nodeIndex = nextNodeIndex - 1;
-            node = createAndroidLocation(ourRoute.get(nodeIndex));
-            nextNode = createAndroidLocation(ourRoute.get(nextNodeIndex));
+        double userDistanceFromSegment = getUserDistFromCurrentSegment();
+
+        if (userDistanceFromSegment > FARTHEST_ALLOWED_FROM_PATH) {
+            // recalculation is needed
+            // calculate a new route based upon the user's current location
+            // in essence this is done by resetting the map and making a new request
+            // these variables are used to tell onLocationChanged to make a new request
+            // with the user's current location
+
+            // remove all path segments from map
+            for (int i = 0; i < polylineList.size(); i++) {
+                polylineList.get(i).remove();
+            }
+
+            // remove nextDestinationMarker if it exists
+            if (nextDestMarker != null) {
+                nextDestMarker.remove();
+                // set to null to fully remove for logic reasons - remove() does not remove fully and make null
+                nextDestMarker = null;
+            }
+
+            // clear ourRoute
+            ourRoute = new ArrayList<LatLng>();
+
+
+            // set variables for onLocationChanged to make new request
+            routeNeeded = true;
+            routeGenUsesCurrLoc = true;
         }
 
-        /**
-         *
-         *
-         *
-         * NEED TO DO
-         *
-         *
-         */
+        etaTV.setText("Dist. from Seg.: " + userDistanceFromSegment + "m");
     }
 
+    /**
+     * Method to get the shortest distance of the user to the current line segment
+     */
+    private double getUserDistFromCurrentSegment() {
+        // nodeA pairs with start of segment
+        Location nodeA = null;
+        // nodeB pairs with end of segment/nextDestination
+        Location nodeB = null;
+        // user must have reached first node in order for a segment to exist
+        if (hasReachedRouteStart()) {
+            // if user has reached route start then none of these values will be out of bounds
+            int nodeBIndex = ourRoute.indexOf(nextDestination);
+            int nodeAIndex = nodeBIndex - 1;
+            nodeA = createAndroidLocation(ourRoute.get(nodeAIndex));
+            nodeB = createAndroidLocation(ourRoute.get(nodeBIndex));
+
+            float distanceAtoB = nodeA.distanceTo(nodeB);
+            float distanceAtoUser = nodeA.distanceTo(currentLocation);
+            float distanceBtoUser = nodeB.distanceTo(currentLocation);
+
+            float angleAtoB = nodeA.bearingTo(nodeB);
+            float angleBtoA = nodeB.bearingTo(nodeA);
+            float angleAtoUser = nodeA.bearingTo(currentLocation);
+            float angleBtoUser = nodeB.bearingTo(currentLocation);
+
+            // These are the angles to be used for the projections of the user upon the segment's lines;
+            // They are used with the triangles created by the node, the user, and the point perpendicular from the
+            // segment's line to the user
+            double angleA = Math.toRadians((double) (angleAtoUser - angleAtoB));
+            double angleB = Math.toRadians((double) (angleBtoUser - angleBtoA));
+
+            // These are the distances from each node to the projected point of the user along the segment's line
+            double projectionLengthFromA = Math.abs(Math.cos(angleA) * (double) distanceAtoUser);
+            double projectionLengthFromB = Math.abs(Math.cos(angleB) * (double) distanceBtoUser);
+
+            // Three cases exist:
+            // 1) the user's projection onto the segment is on the line
+            // 2) the user's closest point to the segment is nodeA
+            // 3) the user's closest point to the segment is nodeB
+
+            double userDistanceFromSegment = 0.0;
+            // Check for case 1
+            if (projectionLengthFromA <= distanceAtoB && projectionLengthFromB <= distanceAtoB) {
+                // the user's projected location is on the line segment so need the perpendicular distance
+                // from the line segment
+                userDistanceFromSegment = Math.abs(Math.sin(angleA) * (double) distanceAtoUser);
+            }
+            // Check for case 2
+            else if (distanceAtoUser < distanceBtoUser) {
+                userDistanceFromSegment = (double) distanceAtoUser;
+            }
+            // Case 3
+            else {
+                userDistanceFromSegment = (double) distanceBtoUser;
+            }
+
+            return userDistanceFromSegment;
+        }
+        // if user has not gotten to the start of the route then simply return a default 0 response
+        return 0.0;
+    }
 
     /**
      * Method to filter incoming route to connect short segments together and
