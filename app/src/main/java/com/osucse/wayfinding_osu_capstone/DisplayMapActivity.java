@@ -745,28 +745,13 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
         if (userDistanceFromSegment > FARTHEST_ALLOWED_FROM_PATH) {
             // recalculation is needed
-            // calculate a new route based upon the user's current location
-            // in essence this is done by resetting the map and making a new request
+            // calculate a new route based upon the user's current location;
+            // in essence this is done by clearing the map and making a new request
+
+            clearMapAndRoute();
+
             // these variables are used to tell onLocationChanged to make a new request
             // with the user's current location
-
-            // remove all path segments from map
-            for (int i = 0; i < polylineList.size(); i++) {
-                polylineList.get(i).remove();
-            }
-
-            // remove nextDestinationMarker if it exists
-            if (nextDestMarker != null) {
-                nextDestMarker.remove();
-                // set to null to fully remove for logic reasons - remove() does not remove fully and make null
-                nextDestMarker = null;
-            }
-
-            // clear ourRoute
-            ourRoute = new ArrayList<LatLng>();
-
-
-            // set variables for onLocationChanged to make new request
             routeNeeded = true;
             routeGenUsesCurrLoc = true;
         }
@@ -832,6 +817,26 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         }
         // if user has not gotten to the start of the route then simply return a default 0 response
         return 0.0;
+    }
+
+    /**
+     * Method to clear our current map and route
+     */
+    private void clearMapAndRoute() {
+        // remove all path segments from map
+        for (int i = 0; i < polylineList.size(); i++) {
+            polylineList.get(i).remove();
+        }
+
+        // remove nextDestinationMarker if it exists
+        if (nextDestMarker != null) {
+            nextDestMarker.remove();
+            // set to null to fully remove for logic reasons - remove() does not remove fully and make null
+            nextDestMarker = null;
+        }
+
+        // clear ourRoute
+        ourRoute = new ArrayList<LatLng>();
     }
 
     /**
