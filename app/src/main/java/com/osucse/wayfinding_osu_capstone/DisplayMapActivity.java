@@ -223,11 +223,8 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         protected void onPostExecute(Route collection) {
             if (collection != null && collection.getErrorMsg() == null) {
                 final List<Coordinate> routePoints = collection.getRoute();
-//                Fills ourRoute with our path's lat/long coordinates
-                for (int i = 0; i < routePoints.size(); i++) {
-                    ourRoute.add(new LatLng(routePoints.get(i).getLatitude(),
-                            routePoints.get(i).getLongitude()));
-                }
+                // Filters and fills ourRoute with our path's lat/long coordinates
+                filterAndPopulateRoute(routePoints);
 
                 // Set first destination to the start of the route
                 nextDestination = ourRoute.get(0);
@@ -488,9 +485,10 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         LatLng setArrowLocation = null;
         // This logic is to set the nodes making sure to not have index out of bounds errors
         int nextNodeIndex = ourRoute.indexOf(nextDestination);
-        int nodeIndex = nextNodeIndex - 1;
-        // nodeIndex must at least be the first node in the route list
-        if (nodeIndex > -1) {
+        // nextNodeIndex must not be for the first node in the route; user must have reached first node
+        boolean hasReachedRouteStart = nextNodeIndex > 0;
+        if (hasReachedRouteStart) {
+            int nodeIndex = nextNodeIndex - 1;
             node = createAndroidLocation(ourRoute.get(nodeIndex));
             nextNode = createAndroidLocation(ourRoute.get(nextNodeIndex));
 
@@ -503,9 +501,9 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
             setArrowLocation = getLocBetweenNodes(node, nextNode, currentDistFromNode);
         }
 
-        // setArrowLocation is in essence checking all for null;
+        // hasReachedStart being true would mean all variables are not null
         // if within 'oval' show arrow along path
-        if (setArrowLocation != null && isWithinOval(currentLocation, node, nextNode, PATH_GAP_COMPARISON, 0.0f)) {
+        if (hasReachedRouteStart && isWithinOval(currentLocation, node, nextNode, PATH_GAP_COMPARISON, 0.0f)) {
             // put marker at the projected location
             placeUserLocationMarker(setArrowLocation);
         }
@@ -768,9 +766,10 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         Location nextNode = null;
         // This logic is to set the nodes making sure to not have index out of bounds errors
         int nextNodeIndex = ourRoute.indexOf(nextDestination);
-        int nodeIndex = nextNodeIndex - 1;
-        // nodeIndex must at least be the first node in the route list
-        if (nodeIndex > -1) {
+        // nextNodeIndex must not be for the first node in the route; user must have reached first node
+        boolean hasReachedRouteStart = nextNodeIndex > 0;
+        if (hasReachedRouteStart) {
+            int nodeIndex = nextNodeIndex - 1;
             node = createAndroidLocation(ourRoute.get(nodeIndex));
             nextNode = createAndroidLocation(ourRoute.get(nextNodeIndex));
         }
@@ -783,6 +782,59 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
          *
          *
          */
+    }
+
+
+    /**
+     * Method to filter incoming route to connect short segments together and
+     * populate ourRoute
+     */
+    private void filterAndPopulateRoute(List<Coordinate> inputRoute) {
+        // loop looks at next two points so do not loop to last or second to last in list
+        // loop looks at groups of three nodes to compare
+        // Note: counting variable, i, can be changed in loop to skip already checked/added nodes
+        for (int i = 0; i < inputRoute.size() - 2; i++) {
+            // add first node as start of segment
+            ourRoute.add(new LatLng(inputRoute.get(i).getLatitude(),
+                    inputRoute.get(i).getLongitude()));
+
+            // logic to see which segment should be added next as last segment in straight line
+
+            Location startNode = createAndroidLocation(new LatLng(inputRoute.get(i).getLatitude(),
+                    inputRoute.get(i).getLongitude()));
+
+
+            int offsetFromStart = 1;
+            int nextNodeIndex = i + offsetFromStart;
+
+            Location nextNode = createAndroidLocation(new LatLng(inputRoute.get(nextNodeIndex).getLatitude(),
+                    inputRoute.get(nextNodeIndex).getLongitude()));
+
+            float bearingOfFirstSegment = startNode.bearingTo(nextNode);
+
+
+            offsetFromStart++;
+            int lastNodeIndex = i + offsetFromStart;
+
+            Location lastNode = createAndroidLocation(new LatLng(inputRoute.get(lastNodeIndex).getLatitude(),
+                    inputRoute.get(lastNodeIndex).getLongitude()));
+
+            float bearingOfLastSegment = nextNode.bearingTo(lastNode);
+
+
+
+
+            //
+            while ()
+
+
+
+
+        }
+
+
+
+
     }
 
     // Simple helper method for converting from LatLng to an android.location.Location
