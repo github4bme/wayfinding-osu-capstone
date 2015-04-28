@@ -388,7 +388,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         double distanceLeftInMiles = distanceLeftInMeters / 1609.344;
 
         distanceTV.setText(String.format("%.3f", distanceLeftInMiles) + " mi. remaining");
-//        etaTV.setText(Math.round(distanceLeftInMiles / 3.1 * 60) + " minutes");
+        etaTV.setText(Math.round(distanceLeftInMiles / 3.1 * 60) + " minutes");
     }
 
     /**
@@ -770,8 +770,6 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
             routeNeeded = true;
             routeGenUsesCurrLoc = true;
         }
-
-        etaTV.setText("Dist. from Seg.: " + userDistanceFromSegment + "m");
     }
 
     /**
