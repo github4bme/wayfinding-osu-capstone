@@ -483,11 +483,9 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         Location node = null;
         Location nextNode = null;
         LatLng setArrowLocation = null;
-        // This logic is to set the nodes making sure to not have index out of bounds errors
-        int nextNodeIndex = ourRoute.indexOf(nextDestination);
-        // nextNodeIndex must not be for the first node in the route; user must have reached first node
-        boolean hasReachedRouteStart = nextNodeIndex > 0;
-        if (hasReachedRouteStart) {
+        if (hasReachedRouteStart()) {
+            // if user has reached route start then none of these values will be out of bounds
+            int nextNodeIndex = ourRoute.indexOf(nextDestination);
             int nodeIndex = nextNodeIndex - 1;
             node = createAndroidLocation(ourRoute.get(nodeIndex));
             nextNode = createAndroidLocation(ourRoute.get(nextNodeIndex));
@@ -501,9 +499,9 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
             setArrowLocation = getLocBetweenNodes(node, nextNode, currentDistFromNode);
         }
 
-        // hasReachedStart being true would mean all variables are not null
+        // hasReachedStart() being true would mean all variables are not null
         // if within 'oval' show arrow along path
-        if (hasReachedRouteStart && isWithinOval(currentLocation, node, nextNode, PATH_GAP_COMPARISON, 0.0f)) {
+        if (hasReachedRouteStart() && isWithinOval(currentLocation, node, nextNode, PATH_GAP_COMPARISON, 0.0f)) {
             // put marker at the projected location
             placeUserLocationMarker(setArrowLocation);
         }
@@ -764,11 +762,9 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
     private void checkMaxDistForRecalcuation() {
         Location node = null;
         Location nextNode = null;
-        // This logic is to set the nodes making sure to not have index out of bounds errors
-        int nextNodeIndex = ourRoute.indexOf(nextDestination);
-        // nextNodeIndex must not be for the first node in the route; user must have reached first node
-        boolean hasReachedRouteStart = nextNodeIndex > 0;
-        if (hasReachedRouteStart) {
+        if (hasReachedRouteStart()) {
+            // if user has reached route start then none of these values will be out of bounds
+            int nextNodeIndex = ourRoute.indexOf(nextDestination);
             int nodeIndex = nextNodeIndex - 1;
             node = createAndroidLocation(ourRoute.get(nodeIndex));
             nextNode = createAndroidLocation(ourRoute.get(nextNodeIndex));
@@ -822,19 +818,86 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
             float bearingOfLastSegment = nextNode.bearingTo(lastNode);
 
 
+            bearingOfFirstSegment = makeBearingZeroTo360(bearingOfFirstSegment);
+            bearingOfLastSegment = makeBearingZeroTo360(bearingOfLastSegment);
+            float angleDifference = getAcuteAngleDifference(bearingOfFirstSegment, bearingOfLastSegment);
 
+            // compared to 1 degree of difference
+            while (angleDifference < 1.0f && lastNodeIndex < inputRoute.size() - 1) {
+                nextNode = lastNode;
 
-            //
-            while ()
+                offsetFromStart++;
+                lastNodeIndex = i + offsetFromStart;
+                lastNode = createAndroidLocation(new LatLng(inputRoute.get(lastNodeIndex).getLatitude(),
+                        inputRoute.get(lastNodeIndex).getLongitude()));
+                bearingOfLastSegment = nextNode.bearingTo(lastNode);
+                bearingOfLastSegment = makeBearingZeroTo360(bearingOfLastSegment);
+                angleDifference = getAcuteAngleDifference(bearingOfFirstSegment, bearingOfLastSegment);
+            }
 
+            // segment from nextNode to lastNode either failed or it got to the end of the route
+            // case for reaching end of route with lastNodeIndex and last segment in line
+            if (lastNodeIndex == inputRoute.size() - 1 && angleDifference < 1.0f) {
+                // last node should be last node added to list
+                ourRoute.add(new LatLng(inputRoute.get(lastNodeIndex).getLatitude(),
+                        inputRoute.get(lastNodeIndex).getLongitude()));
+                // reached end of route so no more nodes to be checked; exit loop
+                break;
+            }
+            // case for reaching end of route with lastNodeIndex but last segment not in line
+            else if (lastNodeIndex == inputRoute.size() - 1 && angleDifference >= 1.0f) {
+                // should add nextNode and lastNode to list
+                int nextNodeIndexToAdd = lastNodeIndex - 1;
+                ourRoute.add(new LatLng(inputRoute.get(nextNodeIndexToAdd).getLatitude(),
+                        inputRoute.get(nextNodeIndexToAdd).getLongitude()));
+                ourRoute.add(new LatLng(inputRoute.get(lastNodeIndex).getLatitude(),
+                        inputRoute.get(lastNodeIndex).getLongitude()));
+                // reached end of route so no more nodes to be checked; exit loop
+                break;
+            }
+            // case where did not reach end, but rather segment from nextNode to lastNode failed to be in line
+            else {
+                // need to add the start of that segment as last node that was in line
+                // this addition comes at the beginning of the next loop
+                int nextNodeIndexToAdd = lastNodeIndex - 1;
+                // Subtract 1 because loop will increment i
+                i = nextNodeIndexToAdd - 1;
+            }
+        }
+    }
 
+    /**
+     * Method to get acute angle difference between two bearings
+     */
+    private float getAcuteAngleDifference(float bearingA, float bearingB) {
+        float difference = Math.abs(bearingA - bearingB);
 
-
+        if (difference > 180.0f) {
+            difference = 360.0f - difference;
         }
 
+        return difference;
+    }
 
+    /**
+     * Method to make a bearing that goes from -180 to 180 go from 0 to 360
+     */
+    private float makeBearingZeroTo360(float bearing) {
+        // if negative then convert
+        if (bearing < 0) {
+            return 360.0f + bearing;
+        }
+        // if positive then change is not needed
+        return bearing;
+    }
 
-
+    /**
+     * Method to check if nextDestination is set as the first node of the route
+     */
+    private boolean hasReachedRouteStart() {
+        int nextNodeIndex = ourRoute.indexOf(nextDestination);
+        // decides if nextNodeIndex is for the first node in the route; decides if user has reached first node
+        return nextNodeIndex > 0;
     }
 
     // Simple helper method for converting from LatLng to an android.location.Location
