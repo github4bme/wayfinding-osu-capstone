@@ -56,6 +56,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
     private static final float  PATH_GAP_COMPARISON = AT_LOCATION_RADIUS;
     // this is in meters and is equal to 250ft
     private static final float FARTHEST_ALLOWED_FROM_PATH = 76.2f;
+    private static final float STRAIGHT_ALLOWED_ANGLE_DIFF = 10.0f;
 
     private GoogleMap ourMap;
     private Marker nextDestMarker;
@@ -455,8 +456,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         nextDestMarker = ourMap.addMarker(new MarkerOptions()
                 .title("Next Destination")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-                .position(nextDestination)
-                .flat(true));
+                .position(nextDestination));
     }
 
     private void updateUI() {
@@ -822,8 +822,8 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
             bearingOfLastSegment = makeBearingZeroTo360(bearingOfLastSegment);
             float angleDifference = getAcuteAngleDifference(bearingOfFirstSegment, bearingOfLastSegment);
 
-            // compared to 1 degree of difference
-            while (angleDifference < 1.0f && lastNodeIndex < inputRoute.size() - 1) {
+            // compared to max allowed degree difference and checks lastNodeIndex is not at end of route
+            while (angleDifference < STRAIGHT_ALLOWED_ANGLE_DIFF && lastNodeIndex < inputRoute.size() - 1) {
                 nextNode = lastNode;
 
                 offsetFromStart++;
@@ -837,7 +837,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
             // segment from nextNode to lastNode either failed or it got to the end of the route
             // case for reaching end of route with lastNodeIndex and last segment in line
-            if (lastNodeIndex == inputRoute.size() - 1 && angleDifference < 1.0f) {
+            if (lastNodeIndex == inputRoute.size() - 1 && angleDifference < STRAIGHT_ALLOWED_ANGLE_DIFF) {
                 // last node should be last node added to list
                 ourRoute.add(new LatLng(inputRoute.get(lastNodeIndex).getLatitude(),
                         inputRoute.get(lastNodeIndex).getLongitude()));
@@ -845,7 +845,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
                 break;
             }
             // case for reaching end of route with lastNodeIndex but last segment not in line
-            else if (lastNodeIndex == inputRoute.size() - 1 && angleDifference >= 1.0f) {
+            else if (lastNodeIndex == inputRoute.size() - 1 && angleDifference >= STRAIGHT_ALLOWED_ANGLE_DIFF) {
                 // should add nextNode and lastNode to list
                 int nextNodeIndexToAdd = lastNodeIndex - 1;
                 ourRoute.add(new LatLng(inputRoute.get(nextNodeIndexToAdd).getLatitude(),
