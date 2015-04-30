@@ -122,9 +122,16 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         super.onCreateDrawer();
         Intent intent = getIntent();
 
-        showHintsAndTips();
         // builds for loading message when requesting route
         loadingMessage = new ProgressDialog(this);
+        // message is started on create because any sort of request (e.g. tours, A to B route, current location
+        // route) will be making a request from the start or waiting for a location change which should still have
+        // the "Calculating Route... " message
+        showProgressionMessage(CALCULATING_MESSAGE);
+
+        // Ordered such that Hints and Tips is placed overtop of the "Calculating Route... " message
+        showHintsAndTips();
+
 
         arrowImage = (ImageView) findViewById(R.id.arrow_image);
         distanceTV = (TextView) findViewById(R.id.distanceTextView);
@@ -139,7 +146,6 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
         // This logic is to decide which http request needs to be made
         if(tourId != null) {
-            showProgressionMessage(CALCULATING_MESSAGE);
             new HttpRequestTask().execute(getTourRouteURL());
             routeGenUsesCurrLoc = false;
         } else {
@@ -151,7 +157,6 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
             // if not called here then called in onConnected
             if (!routeGenUsesCurrLoc) {
-                showProgressionMessage(CALCULATING_MESSAGE);
                 new HttpRequestTask().execute(getStartEndRouteURL());
             }
         }
@@ -391,7 +396,6 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
         // if route gen uses current location then current location must be found first
         if (routeNeeded && routeGenUsesCurrLoc) {
-            showProgressionMessage(CALCULATING_MESSAGE);
             new HttpRequestTask().execute(getCurrLocRouteURL());
             // set so do not make http request again
             routeNeeded = false;
@@ -442,7 +446,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         }
 
         // Checks to see if user is too far from current route segment
-        checkMaxDistForRecalcuation();
+        checkMaxDistForRecalculation();
 
         // if next destination changed then move marker
         if (ourMap != null && nextDestMarker != null && tempDest != nextDestination) {
@@ -768,13 +772,16 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
      * Method to check the user's current distance from the current route segment
      * if more than FARTHEST_ALLOWED_FROM_PATH then recalculate route based on user's current location
      */
-    private void checkMaxDistForRecalcuation() {
+    private void checkMaxDistForRecalculation() {
         double userDistanceFromSegment = getUserDistFromCurrentSegment();
 
         if (userDistanceFromSegment > FARTHEST_ALLOWED_FROM_PATH) {
             // recalculation is needed
             // calculate a new route based upon the user's current location;
             // in essence this is done by clearing the map and making a new request
+
+            // Start "Calculating Message... " while waiting for the onLocationChanged to get new route
+            showProgressionMessage(CALCULATING_MESSAGE);
 
             clearMapAndRoute();
 
