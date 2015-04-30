@@ -54,6 +54,9 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
     private static final String NEXT_DESTINATION_KEY = "com.osucse.wayfinding_osu_capstone.DisplayMapActivity.nextDestinationKey";
     private static final String TOUR_KEY = "com.usecse.wayfinding_osu_capstone.DisplayMapActivity.tourKey";
     private static final float AT_LOCATION_RADIUS = 10.0f;
+    // user has arrived radius has a 5 meter buffer because being close to the building tends to
+    // make the phone lose the user's location right before the user has arrived message appears
+    private static final float USER_HAS_ARRIVED_RADIUS = AT_LOCATION_RADIUS + 5.0f;
     private static final float  PATH_GAP_COMPARISON = AT_LOCATION_RADIUS;
     // this is in meters and is equal to 250ft
     private static final float FARTHEST_ALLOWED_FROM_PATH = 76.2f;
@@ -349,7 +352,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         // finalLocation null check needed if http request has yet to set finalLocation
         if(hasArrivedMessage == null
                 && finalLocation != null
-                && this.currentLocation.distanceTo(createAndroidLocation(finalLocation)) < AT_LOCATION_RADIUS) {
+                && this.currentLocation.distanceTo(createAndroidLocation(finalLocation)) < USER_HAS_ARRIVED_RADIUS) {
             hasArrivedMessage = new AlertDialog.Builder(DisplayMapActivity.this);
             hasArrivedMessage.setTitle("Arrived");
             hasArrivedMessage.setMessage("You Have Arrived!");
