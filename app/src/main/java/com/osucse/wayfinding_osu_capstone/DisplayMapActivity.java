@@ -62,7 +62,8 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
     // this is in meters and is equal to 250ft
     private static final float FARTHEST_ALLOWED_FROM_PATH = 76.2f;
     private static final float STRAIGHT_ALLOWED_ANGLE_DIFF = 10.0f;
-    private static final String CALCULATING_MESSAGE = "Calculating Route... ";
+    private static final String CALCULATING_ROUTE_MESSAGE = "Calculating Route... ";
+    private static final String RECALCULATING_ROUTE_MESSAGE = "Recalculating Route... ";
 
     private GoogleMap ourMap;
     private Marker nextDestMarker;
@@ -127,7 +128,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         // message is started on create because any sort of request (e.g. tours, A to B route, current location
         // route) will be making a request from the start or waiting for a location change which should still have
         // the "Calculating Route... " message
-        showProgressionMessage(CALCULATING_MESSAGE);
+        showProgressionMessage(CALCULATING_ROUTE_MESSAGE);
 
         // Ordered such that Hints and Tips is placed over top of the "Calculating Route... " message
         showHintsAndTips();
@@ -781,7 +782,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
             // in essence this is done by clearing the map and making a new request
 
             // Start "Calculating Message... " while waiting for the onLocationChanged to get new route
-            showProgressionMessage(CALCULATING_MESSAGE);
+            showProgressionMessage(RECALCULATING_ROUTE_MESSAGE);
 
             clearMapAndRoute();
 
