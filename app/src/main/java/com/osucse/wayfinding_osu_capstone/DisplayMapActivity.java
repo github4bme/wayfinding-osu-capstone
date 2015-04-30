@@ -1,6 +1,7 @@
 package com.osucse.wayfinding_osu_capstone;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -111,6 +112,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
     protected AnimationSet animationSet;
 
     protected AlertDialog.Builder hasArrivedMessage = null;
+    protected ProgressDialog loadingMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,11 +122,12 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         Intent intent = getIntent();
 
         showHintsAndTips();
+        // builds for loading message when requesting route
+        loadingMessage = new ProgressDialog(this);
 
         arrowImage = (ImageView) findViewById(R.id.arrow_image);
         distanceTV = (TextView) findViewById(R.id.distanceTextView);
         etaTV = (TextView) findViewById(R.id.etaTextView);
-
 
         startLocation = intent.getStringExtra(SelectDestinationLocation.SOURCE_LOCATION);
         endLocation = intent.getStringExtra(SelectDestinationLocation.DESTINATION_LOCATION);
@@ -215,8 +218,16 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         @Override
         protected Route doInBackground(String... params) {
             try {
+                // Starts loading message
+                if (loadingMessage != null) {
+                    loadingMessage.setMessage("Loading... ");
+                    loadingMessage.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    loadingMessage.setIndeterminate(true);
+                    loadingMessage.show();
+                }
                 RestTemplate restTemplate = new RestTemplate();
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
+                // makes request with input url string
                 Route collection = restTemplate.getForObject(params[0], Route.class);
                 return collection;
             } catch (Exception e) {
@@ -227,6 +238,10 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
         @Override
         protected void onPostExecute(Route collection) {
+            // takes away loading message before showing route or error message
+            if (loadingMessage != null) {
+                loadingMessage.hide();
+            }
             if (collection != null && collection.getErrorMsg() == null) {
                 final List<Coordinate> routePoints = collection.getRoute();
                 // Filters and fills ourRoute with our path's lat/long coordinates
