@@ -62,6 +62,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
     // this is in meters and is equal to 250ft
     private static final float FARTHEST_ALLOWED_FROM_PATH = 76.2f;
     private static final float STRAIGHT_ALLOWED_ANGLE_DIFF = 10.0f;
+    private static final String CALCULATING_MESSAGE = "Calculating Route... ";
 
     private GoogleMap ourMap;
     private Marker nextDestMarker;
@@ -138,6 +139,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
         // This logic is to decide which http request needs to be made
         if(tourId != null) {
+            showProgressionMessage(CALCULATING_MESSAGE);
             new HttpRequestTask().execute(getTourRouteURL());
             routeGenUsesCurrLoc = false;
         } else {
@@ -149,6 +151,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
             // if not called here then called in onConnected
             if (!routeGenUsesCurrLoc) {
+                showProgressionMessage(CALCULATING_MESSAGE);
                 new HttpRequestTask().execute(getStartEndRouteURL());
             }
         }
@@ -194,6 +197,19 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         }
     }
 
+    /**
+     * Method to start showing the progression message with the spinning wheel
+     */
+    private void showProgressionMessage(String message) {
+        // Starts loading message
+        if (loadingMessage != null) {
+            loadingMessage.setMessage(message);
+            loadingMessage.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            loadingMessage.setIndeterminate(true);
+            loadingMessage.show();
+        }
+    }
+
     private void showHintsAndTips() {
         if (Settings.getShowMapHintsSetting()) {
             AlertDialog.Builder hintsAndTipsDialog = new AlertDialog.Builder(DisplayMapActivity.this);
@@ -218,13 +234,6 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         @Override
         protected Route doInBackground(String... params) {
             try {
-                // Starts loading message
-                if (loadingMessage != null) {
-                    loadingMessage.setMessage("Loading... ");
-                    loadingMessage.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    loadingMessage.setIndeterminate(true);
-                    loadingMessage.show();
-                }
                 RestTemplate restTemplate = new RestTemplate();
                 restTemplate.getMessageConverters().add(new MappingJackson2HttpMessageConverter());
                 // makes request with input url string
@@ -382,6 +391,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
 
         // if route gen uses current location then current location must be found first
         if (routeNeeded && routeGenUsesCurrLoc) {
+            showProgressionMessage(CALCULATING_MESSAGE);
             new HttpRequestTask().execute(getCurrLocRouteURL());
             // set so do not make http request again
             routeNeeded = false;
