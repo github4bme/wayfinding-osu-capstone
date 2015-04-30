@@ -129,7 +129,7 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
         // the "Calculating Route... " message
         showProgressionMessage(CALCULATING_MESSAGE);
 
-        // Ordered such that Hints and Tips is placed overtop of the "Calculating Route... " message
+        // Ordered such that Hints and Tips is placed over top of the "Calculating Route... " message
         showHintsAndTips();
 
 
