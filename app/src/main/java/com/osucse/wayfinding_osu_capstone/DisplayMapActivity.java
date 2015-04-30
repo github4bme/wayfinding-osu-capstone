@@ -835,6 +835,18 @@ public class DisplayMapActivity extends BaseActivity implements SensorEventListe
             nextDestMarker = null;
         }
 
+        // remove user's location arrow if it exists
+        if (userLocationArrow != null) {
+            userLocationArrow.remove();
+            // set to null to fully remove for logic reasons - remove() does not remove fully and make null
+            userLocationArrow = null;
+        }
+
+        // Make it so the user's location is shown as a blue dot
+        if (ourMap != null) {
+            ourMap.setMyLocationEnabled(true);
+        }
+
         // clear ourRoute
         ourRoute = new ArrayList<LatLng>();
     }
