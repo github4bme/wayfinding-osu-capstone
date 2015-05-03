@@ -38,14 +38,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DisplayArrowActivity"
-            android:label="@string/title_activity_display_arrow"
-            android:parentActivityName=".InitialActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.osucse.wayfinding_osu_capstone.InitialActivity" />
-        </activity>
-        <activity
             android:name=".DisplayMapActivity"
             android:label="@string/title_activity_display_map"
             android:parentActivityName=".InitialActivity"
