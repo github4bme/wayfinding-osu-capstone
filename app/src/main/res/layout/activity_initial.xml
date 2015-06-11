@@ -16,30 +16,30 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
 
-                <fragment android:id="@+id/map"
-                    xmlns:map="http://schemas.android.com/apk/res-auto"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:name="com.google.android.gms.maps.SupportMapFragment"
-                    map:cameraTargetLat="39.9999276"
-                    map:cameraTargetLng="-83.01393"
-                    map:cameraZoom="13">
-                </fragment>
+            <fragment android:id="@+id/map"
+                xmlns:map="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:name="com.google.android.gms.maps.MapFragment"
+                map:cameraTargetLat="39.9999276"
+                map:cameraTargetLng="-83.01393"
+                map:cameraZoom="13"
+                />
 
-                <Button
-            android:layout_width="300dp"
-            android:layout_height="50dp"
-            android:text="Get Directions"
-            android:id="@+id/search_btn"
-            android:textColor="#ffffffff"
-            android:background="@color/scarlet"
-            android:onClick="directionsButtonPressed"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="75dp"
-            android:layout_alignBottom="@id/map"
-                    android:alpha=".8"
-                    android:clickable="true"
-                    android:enabled="true" />
+            <Button
+                android:layout_width="300dp"
+                android:layout_height="50dp"
+                android:text="Get Directions"
+                android:id="@+id/search_btn"
+                android:textColor="#ffffffff"
+                android:background="@color/scarlet"
+                android:onClick="directionsButtonPressed"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="75dp"
+                android:layout_alignBottom="@id/map"
+                android:alpha=".8"
+                android:clickable="true"
+                android:enabled="true" />
 
             <Button
                 android:layout_width="300dp"
@@ -56,7 +56,7 @@
                 android:clickable="true"
                 android:enabled="true" />
 
-</RelativeLayout>
+        </RelativeLayout>
     </FrameLayout>
     <!-- The navigation drawer -->
     <ListView android:id="@+id/left_drawer"

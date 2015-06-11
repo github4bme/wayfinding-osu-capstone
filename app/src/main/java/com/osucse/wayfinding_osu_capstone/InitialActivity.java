@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.osucse.wayfinding_api.BuildingCollection;
 import com.osucse.wayfinding_api.TourCollection;
 import com.google.android.gms.maps.GoogleMap;
@@ -21,9 +23,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 /**
  * This is the starting activity that consists of the map of the user's current location
  */
-public class InitialActivity extends BaseActivity {
+public class InitialActivity extends BaseActivity implements OnMapReadyCallback {
 
-    private GoogleMap googleMap;
+    private GoogleMap ourMap;
     private ProgressDialog progress;
 
     @Override
@@ -39,16 +41,23 @@ public class InitialActivity extends BaseActivity {
      * This creates a map for the initial screen and sets the map to the user's last known location.
      */
     private void showMap(){
-        if (googleMap == null) {
-            googleMap = ((SupportMapFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.map)).getMap();
-        }
+        MapFragment mapFrag = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+
+        // Sets up a non-null GoogleMap and calls onMapReady()
+        mapFrag.getMapAsync(this);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        // This is called when our getMapAsync() in showMap() successfully gets a map
+        // Set created googleMap to our global map
+        ourMap = googleMap;
 
         // Enable MyLocation Layer of Google Map
-        googleMap.setMyLocationEnabled(true);
+        ourMap.setMyLocationEnabled(true);
 
-        // set map type
-        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        // Turns off Google toolbar if a marker is selected
+        ourMap.getUiSettings().setMapToolbarEnabled(false);
     }
 
     /**
