@@ -45,7 +45,6 @@ public class InitialActivity extends BaseActivity implements OnMapReadyCallback 
 
         // Sets up a non-null GoogleMap and calls onMapReady()
         mapFrag.getMapAsync(this);
-
     }
 
     @Override
